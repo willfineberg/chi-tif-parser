@@ -27,8 +27,6 @@ def stof(toClean):
         float: The numerical value as a float.
     """
 
-    # Set Locale for use of atoi() when parsing data
-    locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
     # Handle zeroes (which are represented as dashes)
     if '-' in toClean:
         return 0.0
@@ -254,6 +252,9 @@ def csvDataToDict(df, id, name, year):
 #   SCRIPT USES FUNCTIONS ABOVE   #  
 #                                 #
 #                                 #
+
+# Set Locale for use of atoi() when parsing data (utilized in stof() function)
+locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
 
 # MODIFY THIS: Filepath to write finalDict data to for each url
 csvFp = r'c:\sc\out.csv'
