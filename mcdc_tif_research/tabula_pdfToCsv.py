@@ -27,13 +27,22 @@ def stof(toClean):
         float: The numerical value as a float.
     """
 
+    # Set Locale for use of atoi() when parsing data
+    locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
     # Handle zeroes (which are represented as dashes)
-    toClean = toClean.replace('-', '0')
-    # Handle bad characters that may or may not occur
-    for badChar in ['$','(',')']:
-        toClean = toClean.replace(badChar, '')
-    # Return the cleaned string as a Float
-    return locale.atof(toClean)
+    if '-' in toClean:
+        return 0.0
+    # Remove stray dollar signs to prepare for locale.atof() parsing
+    toClean = toClean.replace('$', '').strip()
+    # If enclosed in parenthesis, number is negative. So we try to Regex a value out of ()...
+    negPattern = r'\((.+)\)'
+    match = re.match(negPattern, toClean)
+    if match:
+        # Number is negative, so we update the Float return value appropriately
+        return -1 * locale.atof(match.group(1))
+    else:
+        # Number is positive, so return the cleaned string as a Float
+        return locale.atof(toClean)
 
 def urlList(url):
     """
@@ -169,8 +178,6 @@ def csvDataToDict(df, id, name, year):
         dict: The output dictionary.
     """
 
-    # Set Locale for use of atoi() when parsing data
-    locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
     # Create a Dictionary to store our desired values
     outDict = {
         'tif_year': year,
