@@ -91,7 +91,7 @@ def getPageNumFromText(url, target_text):
     # Return None if the target text is not found in any page
     return None
 
-def getNameYear_p6(url):
+def getNameYear_sec31(url):
     """
     Obtains the Name and Year of a TIF from a PDF URL.
     
@@ -106,7 +106,7 @@ def getNameYear_p6(url):
     # Makes a Dataframe out of the top part of Page 6
     df = tabula.read_pdf(
         input_path=url,
-        pages="6", 
+        pages=6, 
         area=[65, 0, 105, 600], # [topY, leftX, bottomY, rightX]
         pandas_options={'header': None},
     )
@@ -116,7 +116,7 @@ def getNameYear_p6(url):
     # Return name, year
     return tifName, tifYear
 
-def getData_p6(url, outDir):
+def getData_sec31(url, outDir):
     """
     Converts the first data table from the report (page 6) into a CSV using Tabula.
     
@@ -145,7 +145,7 @@ def getData_p6(url, outDir):
     tabula.convert_into(
         input_path=url,
         output_path=outFp,  # modify this for batch processing
-        pages="6", 
+        pages=6, 
         area=[130, 45, 595, 585], # [topY, leftX, bottomY, rightX]
         # columns=[45, 362.43, 453.04, 528.64],
     )
@@ -162,18 +162,44 @@ def getData_adminCosts(url):
     Returns:
         float: The value for Administration Costs
     """
-    pageNum = getPageNumFromText(url, "SCHEDULE OF EXPENDITURES BY STATUTORY CODE")
-    # Bug here -- pages not found
-	# Retrieve the Admin Costs value
-    df = tabula.read_pdf(
-        input_path=url,
-        pages=pageNum, 
-        area=[190, 450, 240, 600], # [topY, leftX, bottomY, rightX]
-	    pandas_options={'header': None},
-    )[0]
-    # Isolate the value from the DataFrame and return it
-    return stof(str(df.iloc[0, df.shape[1]-1])) 
-
+    # pageNum = getPageNumFromText(url, "SCHEDULE OF EXPENDITURES BY STATUTORY CODE")
+    # # Bug here -- pages not found
+	# # Retrieve the Admin Costs value
+    # if pageNum != None:
+    #     df = tabula.read_pdf(
+    #         input_path=url,
+    #         pages=pageNum, 
+    #         area=[190, 450, 240, 600], # [topY, leftX, bottomY, rightX]
+    #         pandas_options={'header': None},
+    #     )[0]
+    #     # Isolate the value from the DataFrame and return it
+    #     return stof(str(df.iloc[0, df.shape[1]-1])) 
+    # else:
+    # SCHEDULE OF EXPENDITURES BY STATUTORY CODE was not found
+    # scrapped above approach, not all DARs have this section. ITEMIZED LIST approach below performs better.
+    pageNum = getPageNumFromText(url, "ITEMIZED LIST OF ALL EXPENDITURES FROM THE SPECIAL TAX ALLOCATION FUND")
+    if pageNum != None:
+        # Grab the value with Tabula
+        df = tabula.read_pdf(
+            input_path=url,
+            pages=pageNum,
+        )[0]
+        # Drop some rows and fill in categories
+        df = df.dropna(how='all')
+        df = df.rename(columns={df.columns[0]: "Category"})
+        df['Category'].fillna(method='ffill', inplace=True)
+        # Condense data by grouping
+        grouped = df.groupby("Category", as_index=False).agg({'Amounts': 'sum', 'Reporting Fiscal Year': 'first'})
+        grouped['Category'] = grouped['Category'].str.replace('\r',' ')
+        desiredCategory = "1. Cost of studies, surveys, development of plans, and specifications. Implementation and administration of the redevelopment plan, staff and professional service cost."
+        # Obtain desired value and return it as a Float
+        adminCosts = grouped.loc[grouped["Category"] == desiredCategory, "Reporting Fiscal Year"].iloc[0]
+        return stof(adminCosts)
+    else:
+        # Unable to find Admin Costs, set them to zero
+        # Could possibly try summing Admin entries from Section 3.2 B?
+        return "ADMIN COSTS NOT PARSED PROPERLY"
+        
 def getData_sec32b(url):
     """
     Obtains the Administration and Financing costs from Page 11 of a TIF DAR PDF URL
@@ -266,7 +292,7 @@ def csvDataToDict(df, id, name, year, adminCosts, financeCosts, bankName=''):
 
     # Create a Dictionary to store our desired values
     outDict = {
-        'tif_year': year,
+        #'tif_year': year,
         'tif_name': name,
         'tif_number': '',
         f'{year}_property_tax_extrction': '',
@@ -345,7 +371,7 @@ def csvDataToDict(df, id, name, year, adminCosts, financeCosts, bankName=''):
 locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
 
 # MODIFY THIS: Filepath to write finalDict data to for each url
-csvFp = r'c:\sc\out.csv'
+csvFp = r'c:\sc\2021_out.csv'
 
 # DAR URLs to Parse
 url2021 = "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2021-.html"
@@ -357,11 +383,11 @@ dictList = []
 # Create a Temporary Directory to store the temporary CSV files
 with tempfile.TemporaryDirectory() as tempDir:
     # Iterate each TIF DAR URL
-    for url in urlList(url2020):
+    for url in urlList(url2021):
         # Get the TIF ID and the Filepath to the extracted CSV (for Page 6 TABLE)
-        id, fp = getData_p6(url, tempDir)
+        id, fp = getData_sec31(url, tempDir)
         # Get the TIF Name and Year (from Page 6)
-        name, year = getNameYear_p6(url)
+        name, year = getNameYear_sec31(url)
         # Get the Administration Costs
         adminCosts = getData_adminCosts(url)
         # Get Finance Data and Bank Name(s)
@@ -386,4 +412,5 @@ with open(csvFp, 'w', newline='') as csvfile:
     # Write the data rows (each dict in dictList is one TIF)
     for dict in dictList:
         writer.writerow(dict)
+    print("CSV File saved to: " + csvFp)
     
