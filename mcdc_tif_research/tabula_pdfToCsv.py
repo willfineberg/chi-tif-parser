@@ -2,6 +2,7 @@
 
 # tabula-py Documentation: https://tabula-py.readthedocs.io/en/latest/tabula.html#tabula.io.convert_into
 import tabula, csv  # For PDF parsing to CSV
+import PyPDF2, io  # For finding the right page number to point Tabula to
 import pandas as pd  # For working with data obtained from Tabula
 import locale  # For using C-style atoi() function
 import json  # For printing the Dictionary as Structured JSON
@@ -58,6 +59,37 @@ def urlList(url):
     # Return a List of PDF links
     pdf_links = ["https://www.chicago.gov" + link['href'] for link in soup.find_all(href=lambda href: href and href.endswith('.pdf'))]
     return pdf_links
+
+def getPageNumFromText(url, target_text):
+    """
+    Get the page number containing the specified text in a PDF document.
+
+    Args:
+        url (str): The URL of the PDF document.
+        target_text (str): The text to search for in the PDF document.
+
+    Returns:
+        int or None: The page number (1-indexed) where the target text is found, or None if not found.
+    """
+    
+    # Get the PDF bytes
+    response = requests.get(url)
+    file = io.BytesIO(response.content)
+
+    # Read the PDF bytes into PyPDF2
+    reader = PyPDF2.PdfReader(file)
+    
+    # Iterate each page and search for the target_text
+    num_pages = len(reader.pages)
+    for page_num in range(num_pages):
+        page = reader.pages[page_num]
+        page_text = page.extract_text()
+
+        if target_text in page_text:
+            return page_num + 1  # Add 1 to convert from 0-indexed to 1-indexed page number
+
+    # Return None if the target text is not found in any page
+    return None
 
 def getNameYear_p6(url):
     """
@@ -120,6 +152,59 @@ def getData_p6(url, outDir):
     # Return the URL ID Integer and CSV Filepath String
     return idNum, outFp
 
+def getData_adminCosts(url):
+    """
+    Obtains the Administration costs from a TIF DAR
+    
+    Args:
+        url (str): The URL of the PDF.
+    
+    Returns:
+        float: The value for Administration Costs
+    """
+    pageNum = getPageNumFromText(url, "SCHEDULE OF EXPENDITURES BY STATUTORY CODE")
+    # Bug here -- pages not found
+	# Retrieve the Admin Costs value
+    df = tabula.read_pdf(
+        input_path=url,
+        pages=pageNum, 
+        area=[190, 450, 240, 600], # [topY, leftX, bottomY, rightX]
+	    pandas_options={'header': None},
+    )[0]
+    # Isolate the value from the DataFrame and return it
+    return stof(str(df.iloc[0, df.shape[1]-1])) 
+
+def getData_sec32b(url):
+    """
+    Obtains the Administration and Financing costs from Page 11 of a TIF DAR PDF URL
+    
+    Args:
+        url (str): The URL of the PDF.
+    
+    Returns:
+        float: The sum of all costs where 'Service' == 'Administration'
+        float: The sum of all costs where 'Service' == 'Financing'
+        str: If applicable, the Name(s) of the Bank(s) listed for 'Financing'
+    """
+    
+    # Use PyPDF2 to determine the right Page Number for Section 3.2 B
+    pageNum_sec32b = getPageNumFromText(url, "Section 3.2 B")
+
+    # Retrieve the Page 11 Table using Tabula
+    df = tabula.read_pdf(
+        input_path=url,
+        pages=pageNum_sec32b, 
+        area=[145, 0, 645, 600], # [topY, leftX, bottomY, rightX]
+	    lattice=True
+    )[0]
+    # Apply stof() to each Finance Cost Amount and sum them
+    financeCosts = df[df['Service'] == 'Financing']['Amount'].apply(stof).sum()
+    # Obtain the Bank Name(s)
+    bankNameList = df[df['Service'] == 'Financing']['Name'].drop_duplicates().tolist()
+    bankNames = ', '.join(bankNameList)
+    # Return adminCosts and financeCosts
+    return financeCosts, bankNames
+
 def cleanCsv(csvFp):
     """
     Cleans the CSV, overwrites it, and loads it back into a Pandas DataFrame.
@@ -162,7 +247,7 @@ def cleanCsv(csvFp):
     # Return the DataFrame
     return df
 
-def csvDataToDict(df, id, name, year):
+def csvDataToDict(df, id, name, year, adminCosts, financeCosts, bankName=''):
     """
     Sets dictionary values by parsing the CSV.
     
@@ -171,6 +256,9 @@ def csvDataToDict(df, id, name, year):
         id (int): The TIF ID number.
         name (str): The name of the TIF.
         year (str): The year of the TIF.
+        adminCosts (float): The total Administration Costs from Page 11.
+        finanaceCosts (float): The total Finanace Costs from Page 11.
+        bankName (str): If financeCosts != 0, bankName is provided from Page 11.
     
     Returns:
         dict: The output dictionary.
@@ -189,9 +277,9 @@ def csvDataToDict(df, id, name, year):
         f'fund_balance_end_{year}': '',
         f'{year}_transfers_out': '',
         f'{year}_distribution': '',
-        'admin_costs': '',
-        'finance_costs': '',
-        'bank': ''
+        'admin_costs': adminCosts,
+        'finance_costs': financeCosts,
+        'bank': bankName
     }
     
     # Set the ID number in the Output Dictionary
@@ -274,10 +362,14 @@ with tempfile.TemporaryDirectory() as tempDir:
         id, fp = getData_p6(url, tempDir)
         # Get the TIF Name and Year (from Page 6)
         name, year = getNameYear_p6(url)
+        # Get the Administration Costs
+        adminCosts = getData_adminCosts(url)
+        # Get Finance Data and Bank Name(s)
+        financeCosts, bankName = getData_sec32b(url)
         # Pass Filepath to cleanCsv()
         df = cleanCsv(fp)
         # Parse the Data and retrieve the Dictionary of desired values
-        curDict = csvDataToDict(df, id, name, year)
+        curDict = csvDataToDict(df, id, name, year, adminCosts, financeCosts, bankName)
         # Print structured output to console
         dictList.append(curDict)
         print(json.dumps(curDict, indent=4))
