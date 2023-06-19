@@ -1,4 +1,4 @@
-# Dependencies: tabula, bs4 (install with pip)
+# Dependencies: tabula-py, bs4, PyPDF2 (install with `pip install -r requirements.txt`)
 
 # tabula-py Documentation: https://tabula-py.readthedocs.io/en/latest/tabula.html#tabula.io.convert_into
 import tabula, csv  # For PDF parsing to CSV
