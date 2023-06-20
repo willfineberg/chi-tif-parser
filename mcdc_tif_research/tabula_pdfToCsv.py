@@ -106,13 +106,13 @@ def getNameYear_sec31(url):
     # Makes a Dataframe out of the top part of Page 6
     df = tabula.read_pdf(
         input_path=url,
-        pages=6, 
+        pages=getPageNumFromText(url, "SECTION 3.1"), 
         area=[65, 0, 105, 600], # [topY, leftX, bottomY, rightX]
         pandas_options={'header': None},
-    )
+    )[0]
     # Obtains the Name and Year by table location
-    tifName = df[0].iloc[1,1].replace(" Redevelopment Project Area", "")
-    tifYear = df[0].iloc[0,0].split()[-1]
+    tifName = str(df.iloc[1,1]).replace(" Redevelopment Project Area", "")
+    tifYear = str(df.iloc[0,0]).split()[-1]
     # Return name, year
     return tifName, tifYear
 
@@ -375,11 +375,13 @@ def csvDataToDict(df, id, name, year, adminCosts, financeCosts, bankName=''):
 locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
 
 # MODIFY THIS: Filepath to write finalDict data to for each url
-csvFp = r'c:\sc\2021_out.csv'
+csvFp = r'c:\sc\2010_out.csv'
 
 # DAR URLs to Parse
 url2021 = "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2021-.html"
 url2020 = "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2020-.html"
+url2010 = 'https://www.chicago.gov/city/en/depts/dcd/supp_info/district_annual_reports2010.html'
+url2013 = 'https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2013-.html'
 
 # Create a list to store the dictionaries for each TIF
 dictList = []
@@ -387,7 +389,7 @@ dictList = []
 # Create a Temporary Directory to store the temporary CSV files
 with tempfile.TemporaryDirectory() as tempDir:
     # Iterate each TIF DAR URL
-    for url in urlList(url2021):
+    for url in urlList(url2013):
         # Get the TIF ID and the Filepath to the extracted CSV (for Page 6 TABLE)
         id, fp = getData_sec31(url, tempDir)
         # Get the TIF Name and Year (from Page 6)
@@ -397,6 +399,8 @@ with tempfile.TemporaryDirectory() as tempDir:
         adminCosts_32a = getData_sec32a_adminCosts(url)
         # Get Finance Data and Bank Name(s)
         adminCosts_32b, financeCosts, bankName = getData_sec32b(url)
+
+        # REVISIT: Parse Finance from Sec 3.2 A too? compare it?
 
         # For debugging; remove these prints
         print(adminCosts_32a)

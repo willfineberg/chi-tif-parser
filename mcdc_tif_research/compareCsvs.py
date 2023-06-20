@@ -1,10 +1,10 @@
 import pandas as pd
 
 # Experiential (from tabula script)
-df1 = pd.read_csv(r'c:\sc\out.csv')
+df1 = pd.read_csv(r'C:\Users\will\clonedGitRepos\chicago2022TIF\mcdc_tif_research\csvs\2021_real.csv')
 
 # Real (from Anthony Moser Google Sheet)
-df2 = pd.read_csv(r'c:\sc\toCompare.csv')
+df2 = pd.read_csv(r'c:\sc\2021_out.csv')
 
 # Iterate df1 and df2 and print out differences
 for index, row in df1.iterrows():
