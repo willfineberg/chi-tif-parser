@@ -152,7 +152,7 @@ def getData_sec31(url, outDir):
     # Return the URL ID Integer and CSV Filepath String
     return idNum, outFp
 
-def getData_adminCosts(url):
+def getData_sec32a_adminCosts(url):
     """
     Obtains the Administration costs from a TIF DAR
     
@@ -160,7 +160,7 @@ def getData_adminCosts(url):
         url (str): The URL of the PDF.
     
     Returns:
-        float: The value for Administration Costs
+        float: The value for Administration Costs from Section 3.2 A
     """
     # pageNum = getPageNumFromText(url, "SCHEDULE OF EXPENDITURES BY STATUTORY CODE")
     # # Bug here -- pages not found
@@ -173,7 +173,7 @@ def getData_adminCosts(url):
     #         pandas_options={'header': None},
     #     )[0]
     #     # Isolate the value from the DataFrame and return it
-    #     return stof(str(df.iloc[0, df.shape[1]-1])) 
+    #     return stof(str(df.iloc[0, df.shape[1]-1]))  # this is bad, we cannot rely on ordering
     # else:
     # SCHEDULE OF EXPENDITURES BY STATUTORY CODE was not found
     # scrapped above approach, not all DARs have this section. ITEMIZED LIST approach below performs better.
@@ -193,8 +193,8 @@ def getData_adminCosts(url):
         grouped['Category'] = grouped['Category'].str.replace('\r',' ')
         desiredCategory = "1. Cost of studies, surveys, development of plans, and specifications. Implementation and administration of the redevelopment plan, staff and professional service cost."
         # Obtain desired value and return it as a Float
-        adminCosts = grouped.loc[grouped["Category"] == desiredCategory, "Reporting Fiscal Year"].iloc[0]
-        return stof(adminCosts)
+        adminCosts_32a = stof(grouped.loc[grouped["Category"] == desiredCategory, "Reporting Fiscal Year"].iloc[0])
+        return adminCosts_32a
     else:
         # Unable to find Admin Costs, set them to zero
         # Could possibly try summing Admin entries from Section 3.2 B?
@@ -223,13 +223,17 @@ def getData_sec32b(url):
         area=[145, 0, 645, 600], # [topY, leftX, bottomY, rightX]
 	    lattice=True
     )[0]
-    # Apply stof() to each Finance Cost Amount and sum them
+
+    # Parse each Admin Cost and sum them
+    adminCosts_32b = df[df['Service'] == 'Administration']['Amount'].apply(stof).sum()
+
+    # Parse each Finance Cost Amount and sum them
     financeCosts = df[df['Service'] == 'Financing']['Amount'].apply(stof).sum()
     # Obtain the Bank Name(s)
     bankNameList = df[df['Service'] == 'Financing']['Name'].drop_duplicates().tolist()
     bankNames = ', '.join(bankNameList)
     # Return adminCosts and financeCosts
-    return financeCosts, bankNames
+    return adminCosts_32b, financeCosts, bankNames
 
 def cleanCsv(csvFp):
     """
@@ -388,10 +392,21 @@ with tempfile.TemporaryDirectory() as tempDir:
         id, fp = getData_sec31(url, tempDir)
         # Get the TIF Name and Year (from Page 6)
         name, year = getNameYear_sec31(url)
-        # Get the Administration Costs
-        adminCosts = getData_adminCosts(url)
+
+        # Get the Administration Costs (modify this to get a 2nd financing cost value too???)
+        adminCosts_32a = getData_sec32a_adminCosts(url)
         # Get Finance Data and Bank Name(s)
-        financeCosts, bankName = getData_sec32b(url)
+        adminCosts_32b, financeCosts, bankName = getData_sec32b(url)
+
+        # For debugging; remove these prints
+        print(adminCosts_32a)
+        print(adminCosts_32b)
+        # Decide which Admin Cost we want to use
+        if adminCosts_32b >= adminCosts_32a:
+            adminCosts = adminCosts_32b
+        else:
+            adminCosts = adminCosts_32a
+
         # Pass Filepath to cleanCsv()
         df = cleanCsv(fp)
         # Parse the Data and retrieve the Dictionary of desired values
