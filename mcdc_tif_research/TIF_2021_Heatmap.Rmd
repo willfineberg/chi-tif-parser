@@ -1,0 +1,179 @@
+---
+title: "TIF_2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Libraries
+```{r}
+library(ggplot2)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(rgdal)
+library(sf)
+library(tidyverse)
+library(rgeos)
+library(rstudioapi)
+library(tidyr)
+library(broom)
+library(RSocrata)
+library(mapproj)
+library(readxl)
+```
+
+Reading in TIF 2021 data
+```{r}
+X2021_TIF_Report <- read_excel("2021 TIF Report.xlsx", 
+    col_types = c("text", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "text"))
+```
+
+Reading in Shapefile
+```{r}
+TIF_2021_df <- readOGR( 
+  dsn= "/Users/andresmeza/Desktop/TIF_Boundaries/" , 
+  layer="TIF_Boundaries")
+```
+
+Making Shapefile into dataframe
+```{r}
+TIF_districts <- spTransform(TIF_2021_df, CRS("+proj=longlat +datum=WGS84"))
+TIF_districts.f = TIF_districts %>% fortify(region = 'name')
+ChiTIFs  = merge(TIF_districts.f, TIF_districts@data, by.x = 'id', by.y = 'name')
+TIFs = ChiTIFs %>% select(id) %>% distinct()
+values = data.frame(id = c(TIFs),
+                      value = c(runif(TIFs %>% count() %>% unlist(),5.0, 25.0)))
+TIFfinal = merge(ChiTIFs, values, by.x='id')
+TIFfinal %>% group_by(id) %>% do(head(., 1)) %>% head(10)
+```
+
+Making dataframe with 2021 data that matches shapefiles (dataframe) format
+```{r}
+TIFfinal2 <- read_csv("TIFfinal2.csv", col_types = cols(long = col_number(), 
+    lat = col_number(), order = col_integer(), 
+    piece = col_factor(levels = c("1", "2", 
+        "3", "4", "5")), group = col_factor(levels = c("105th Street and Vincennes Avenue.1", 
+        "107th/Halsted.1", "111th Street/Kedzie Avenue Business District.1", 
+        "116th/Avenue O.1", "119th and Halsted.1", 
+        "119th Street/I-57.1", "119th Street/I-57.2", 
+        "24th/Michigan.1", "26th & King Drive.1", 
+        "35th & Wallace.1", "35th/Halsted.1", 
+        "35th/Halsted.2", "35th/State.1", 
+        "43rd Street/Cottage Grove Avenue.1", 
+        "47th and King Drive.1", "47th/Ashland.1", 
+        "47th/Ashland.2", "47th/Ashland.3", 
+        "47th/Halsted.1", "47th/State.1", 
+        "47th/State.1", "51st/Archer.1", 
+        "51st/Archer.2", "53rd Street.1", 
+        "63rd/Ashland.1", "63rd/Pulaski.1", 
+        "67th and Wentworth.1", "67th/Cicero.1", 
+        "71st & Stony Island.1", "71st & Stony Island.2", 
+        "73rd/University.1", "79th and Cicero.1", 
+        "79th Street Corridor.1", "79th Street/Southwest Highway.1", 
+        "79th/Vincennes.1", "83rd/Stewart.1", 
+        "87th/Cottage Grove.1", "95th & Western.1", 
+        "Addison South.1", "Archer Courts.1", 
+        "Archer/Central.1", "Archer/Western.1", 
+        "Armitage Pulaski.1", "Austin Commercial.1", 
+        "Avalon Park/South Shore.1", "Avondale.1", 
+        "Belmont/Central.1", "Belmont/Cicero.1", 
+        "Bronzeville.1", "Bryn Mawr/Broadway.1", 
+        "Canal/Congress.1", "Central West.1", 
+        "Central West.2", "Chicago/Central Park.1", 
+        "Chicago/Kingsbury.1", "Cicero/Archer.1", 
+        "Cicero/Stevenson.1", "Clark Street & Ridge Avenue.1", 
+        "Clark/Montrose.1", "Commercial Avenue.1", 
+        "Cortland and Chicago River.1", "Devon & Western.1", 
+        "Devon/Sheridan.1", "Diversey/Chicago River.1", 
+        "Diversey/Narragansett.1", "Division/Homan.1", 
+        "Edgewater/Ashland.1", "Elston/Armstrong Industrial Corridor.1", 
+        "Englewood Mall Area.1", "Englewood Neighborhood.1", 
+        "Englewood Neighborhood.2", "Ewing Avenue.1", 
+        "Foster and California.1", "Foster/Edens.1", 
+        "Fullerton/Milwaukee.1", "Galewood/Armitage Industrial.1", 
+        "Goose Island.1", "Greater Southwest Industrial (East).1", 
+        "Greater Southwest Industrial (West).1", 
+        "Greater Southwest Industrial (West).2", 
+        "Harrison/Central.1", "Hollywood/Sheridan.1", 
+        "Hollywood/Sheridan.1", "Homan-Arthington.1", 
+        "Humboldt Park Commercial.1", "Jefferson Park Business District.1", 
+        "Jefferson/Roosevelt.1", "Kennedy/Kimball.1", 
+        "Kinzie Industrial Conservation Area.1", 
+        "Lake Calumet Area Industrial.1", 
+        "Lakefront.1", "LaSalle Central.1", 
+        "Lawrence/Broadway.1", "Lawrence/Kedzie.1", 
+        "Lawrence/Pulaski.1", "Lincoln Avenue.1", 
+        "Lincoln Avenue.2", "Little Village East.1", 
+        "Little Village Industrial Corridor.1", 
+        "Madden/Wells.1", "Madison/Austin Corridor.1", 
+        "Michigan/Cermak.1", "Midway Industrial Corridor.1", 
+        "Midwest.1", "Midwest.2", "Montclare.1", 
+        "Montrose/Clarendon.1", "Near North.1", 
+        "Near North.2", "North Branch (South).1", 
+        "North Pullman.1", "Northwest Industrial Corridor.1", 
+        "Northwest Industrial Corridor.2", 
+        "Northwest Industrial Corridor.3", 
+        "Ogden/Pulaski.1", "Ohio/Wabash.1", 
+        "Peterson/Cicero.1", "Peterson/Pulaski.1", 
+        "Pilsen.1", "Portage Park.1", "Pratt/Ridge Industrial Park Conservation Area.1", 
+        "Pulaski Corridor.1", "Pulaski Corridor.2", 
+        "Randolph/Wells.1", "Red and Purple Modernization Phase One Project.1", 
+        "Red and Purple Modernization Phase One Project.2", 
+        "Red and Purple Modernization Phase One Project.3", 
+        "Red and Purple Modernization Phase One Project.4", 
+        "Red and Purple Modernization Phase One Project.5", 
+        "River West.1", "Roosevelt/Cicero.1", 
+        "Roosevelt/Clark.1", "Roosevelt/Clark.2", 
+        "Roosevelt/Racine.1", "Roosevelt/Union.1", 
+        "Roseland/Michigan Avenue.1", "Sanitary Drainage and Ship Canal.1", 
+        "South Chicago.1", "Stevenson/Brighton.1", 
+        "Stockyards Southeast Quadrant Industrial.1", 
+        "Stony Island Avenue Commercial and Burnside Industrial Corridors.1", 
+        "Touhy/Western.1", "Washington Park.1", 
+        "West Irving Park.1", "West Woodlawn.1", 
+        "Western Avenue North.1", "Western Avenue South.1", 
+        "Western Avenue South.2", "Western Avenue/Rock Island.1", 
+        "Western/Ogden.1", "Wilson Yard.1", 
+        "Woodlawn.1")), comm_area = col_character(), 
+    objectid = col_number(), objectid_1 = col_number(), 
+    objectid_2 = col_number(), objectid_3 = col_number(), 
+    ref = col_number(), repealed_d = col_character(), 
+    shape_area = col_number(), shape_le_1 = col_number(), 
+    shape_le_2 = col_number(), shape_leng = col_number(), 
+    show = col_number(), wards = col_character(), 
+    value = col_number(), `2021_property_tax_extraction` = col_number(), 
+    ...31 = col_skip()))
+```
+
+Merging last column (property tax extraction) with shapefile for heat map
+and renaming column
+```{r}
+TIFfinal3 <- cbind(TIFfinal, TIFfinal2[,30, drop=FALSE])
+colnames(TIFfinal3) [29] = "Propertytaxextraction"
+```
+
+Making chicago map for overlay
+```{r}
+Chimap = map = get_map(location = 'Chicago', zoom = 11)
+```
+
+
+Making heat map with property tax extraction value (in dollars)
+```{r}
+ggmap(Chimap) +
+    geom_polygon(aes(fill = Propertytaxextraction, x = long, y = lat, group = group),
+                 data = TIFfinal3,
+                 alpha = 0.8,
+                 color = "black",
+                 size = 0.2)
+```
+
