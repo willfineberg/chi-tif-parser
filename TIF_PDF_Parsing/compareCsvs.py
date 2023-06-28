@@ -1,21 +1,23 @@
 import pandas as pd
 
 # Experiential (from tabula script)
-df1 = pd.read_csv(r'C:\Users\will\clonedGitRepos\chicago2022TIF\mcdc_tif_research\csvs\2021_real.csv')
+exp = pd.read_csv(r'C:\sc\old_2020_out.csv')
 
 # Real (from Anthony Moser Google Sheet)
-df2 = pd.read_csv(r'c:\sc\2021_out.csv')
+real = pd.read_csv(r'C:\Users\will\clonedGitRepos\chicago2022TIF\TIF_PDF_Parsing\csvs\2020_real.csv')
 
 # Iterate df1 and df2 and print out differences
-for index, row in df1.iterrows():
+for index, row in exp.iterrows():
     tif_name = row['tif_name']
-    for column in df1.columns:
+    for column in exp.columns:
+        if column in ['admin_costs', 'bank', 'tif_name']:
+            continue
         value1 = row[column]
-        value2 = df2.at[index, column]
+        value2 = real.at[index, column]
 
-        # Compare the cell values
+        # Compare the cell values IF NOT STRING
         if value1 != value2:
             print(f"Difference found in TIF '{tif_name}', column '{column}':")
-            print(f"   - Value in df1: {value1}")
-            print(f"   - Value in df2: {value2}")
+            print(f"   - Value in exp: {value1}")
+            print(f"   - Value in real: {value2}")
             print("--------------------")
