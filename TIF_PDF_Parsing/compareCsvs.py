@@ -1,7 +1,7 @@
 import pandas as pd
 
 # Experiential (from tabula script)
-exp = pd.read_csv(r'C:\sc\old_2020_out.csv')
+exp = pd.read_csv(r'C:\sc\2020_out.csv')
 
 # Real (from Anthony Moser Google Sheet)
 real = pd.read_csv(r'C:\Users\will\clonedGitRepos\chicago2022TIF\TIF_PDF_Parsing\csvs\2020_real.csv')

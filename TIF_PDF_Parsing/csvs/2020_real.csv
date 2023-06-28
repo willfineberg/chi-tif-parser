@@ -1,4 +1,4 @@
-﻿tif_name,tif_number,2020_property_tax_extrction,cumulative_property_tax_extraction,2020_transfers_in,cumulative_transfers_in,2020_expenses,fund_balance_end_2020,2020_transfers_out,2020_distribution,admin_costs,finance_costs,bank
+﻿tif_name,tif_number,property_tax_extraction,cumulative_property_tax_extraction,transfers_in,cumulative_transfers_in,expenses,fund_balance_end,transfers_out,distribution,admin_costs,finance_costs,bank
 105th/Vincennes,111,759998,7527617,0,2320284,18832,3513385,0,0,118321,0,
 107th/Halsted,176,290089,2257741,0,1000000,62438,3130985,0,0,18658,0,
 111th/Kedzie,73,917466,10451172,0,0,455422,1801200,0,0,27343,0,

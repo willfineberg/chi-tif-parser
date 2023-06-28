@@ -167,7 +167,7 @@ class PDFParse:
         propTaxIncCur = propTaxIncRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
         propTaxIncCum = propTaxIncRow['Cumulative Totals of Revenue/Cash Receipts for life of TIF'].values[0]
         # Use the user-defined Tools.stof() to clean the Strings to Integers for storage in self.outDict
-        self.outDict['property_tax_extrction'] = Tools.stof(propTaxIncCur)
+        self.outDict['property_tax_extraction'] = Tools.stof(propTaxIncCur)
         self.outDict['cumulative_property_tax_extraction'] = Tools.stof(propTaxIncCum)
 
         # Obtain the Pandas series for the 'Transfers from Municipal Sources' Row
