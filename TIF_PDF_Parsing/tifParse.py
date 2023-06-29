@@ -73,11 +73,12 @@ class Tools:
 
 class YearParse:
     """An Object that obtains and stores one year's worth of DAR Objects"""
-    def __init__(self, yearUrl):
-        self.year = None
+    def __init__(self, year, yearUrl, outDir):
+        self.year = year
         self.yearUrl = yearUrl
+        self.outDir = outDir
         self.urlList = Tools.urlList(yearUrl)
-        self.termTable = None
+        self.termTable = self.parseTermTable_sec1(self.urlList[0], outDir)
         self.darList = []
         self.dictList = []
 
@@ -100,60 +101,10 @@ class YearParse:
         else:
             print('Unable to save CSV: No data found in dictList')
     
-    def run(self, outDir):
-        startTime = time.time()
-        # Iterate each TIF DAR URL in the specified year
-        isFirst = True
-        if isFirst:
-            # Obtain Year and Termination Table if this is the first url
-            isFirst = False
-            dar = DAR(self.urlList[0])
-            self.year = dar.outDict['tif_year']
-            self.termTable = dar.parseTermTable_sec1(outDir)
-            # Append to dictList and print structured output to console
-            self.darList.append(dar)
-            self.dictList.append(dar.outDict) 
-            print(json.dumps(dar.outDict, indent=4))
-        # Iterate each TIF DAR URL except the first one
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            future_to_dar = {executor.submit(DAR, url): url for url in self.urlList[1:]}
-            # Iterate the completed futures to obtain the DAR object data
-            for future in concurrent.futures.as_completed(future_to_dar):
-                # url = future_to_dar[future]
-                dar = future.result()
-                self.darList.append(dar)
-                self.dictList.append(dar.outDict)
-                print(json.dumps(dar.outDict, indent=4))
-        # After one year is parsed, store output in a CSV
-        self.buildCsvFromDicts(os.path.join(outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
-        # Print the runtime in minutes:seconds format
-        endTime = time.time()
-        runtime_seconds = endTime - startTime
-        runtime_minutes = runtime_seconds // 60
-        runtime_seconds %= 60
-        print(f"Program runtime: {int(runtime_minutes)} minutes {int(runtime_seconds)} seconds")
-
-class DAR:
-    """Parses and stores data from a single TIF DAR PDF."""
-
-    def __init__(self, url):
-        """Initializes a DAR object."""
-
-        self.pdfUrl = url
-        self.pdf = io.BytesIO(requests.get(url).content)
-        self.sec31 = Tools.getPageNumFromText(self.pdf, 'SECTION 3.1')
-        self.sec32a = Tools.getPageNumFromText(self.pdf, 'ITEMIZED LIST OF ALL EXPENDITURES FROM THE SPECIAL TAX ALLOCATION FUND')
-        self.sec32b = Tools.getPageNumFromText(self.pdf, "Section 3.2 B")
-        self.outDict = {}
-        # Populate the outDict dictionary using methods.
-        self.parseNameAndYear_sec31() 
-        self.sec31_df = self.parseIdAndData_sec31()
-        self.sec32b_df = self.parseAdminFinanceBank_sec32b()
-
-    def parseTermTable_sec1(self, outDir):
+    def parseTermTable_sec1(self, firstUrl, outDir):
         """Saves the Termination Table CSV to outDir"""
         dfs = tabula.read_pdf(
-            input_path=self.pdf,
+            input_path=firstUrl,
             pages='1-4', # adjust dynamically based on year?
             pandas_options={'header': None},
         )
@@ -165,9 +116,72 @@ class DAR:
         # Fix the header and indicies
         df = Tools.fixHeader(df, 1, 3)
         # Save the DataFrame to a CSV in outDir
-        df.to_csv(os.path.join(outDir, f"{self.outDict['tif_year']}_termTable.csv"))
+        df.to_csv(os.path.join(outDir, f"{self.year}_termTable.csv"))
         # Return the DataFrame
         return df
+
+    def run(self):
+        startTime = time.time()
+        # Iterate each TIF DAR URL in the specified year
+        # isFirst = True
+        # if isFirst:
+        #     # Obtain Year and Termination Table if this is the first url
+        #     isFirst = False
+        #     dar = DAR(self.urlList[0])
+        #     self.year = dar.outDict['tif_year']
+        #     self.termTable = dar.parseTermTable_sec1(self.outDir)
+        #     # Append to dictList and print structured output to console
+        #     self.darList.append(dar)
+        #     self.dictList.append(dar.outDict) 
+        #     print(json.dumps(dar.outDict, indent=4))
+        # Iterate each TIF DAR URL except the first one
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_dar = {executor.submit(DAR, url, self.termTable): url for url in self.urlList}
+            # Iterate the completed futures to obtain the DAR object data
+            for future in concurrent.futures.as_completed(future_to_dar):
+                # url = future_to_dar[future]
+                dar = future.result()
+                self.darList.append(dar)
+                self.dictList.append(dar.outDict)
+                print(json.dumps(dar.outDict, indent=4))
+        # After one year is parsed, store output in a CSV
+        self.buildCsvFromDicts(os.path.join(self.outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
+        # Print the runtime in minutes:seconds format
+        endTime = time.time()
+        runtime_seconds = endTime - startTime
+        runtime_minutes = runtime_seconds // 60
+        runtime_seconds %= 60
+        print(f"Program runtime: {int(runtime_minutes)} minutes {int(runtime_seconds)} seconds")
+
+class DAR:
+    """Parses and stores data from a single TIF DAR PDF."""
+
+    def __init__(self, url, termTable_df):
+        """Initializes a DAR object."""
+
+        self.pdfUrl = url
+        self.pdf = io.BytesIO(requests.get(url).content)
+        self.sec31 = Tools.getPageNumFromText(self.pdf, 'SECTION 3.1')
+        self.sec32a = Tools.getPageNumFromText(self.pdf, 'ITEMIZED LIST OF ALL EXPENDITURES FROM THE SPECIAL TAX ALLOCATION FUND')
+        self.sec32b = Tools.getPageNumFromText(self.pdf, "Section 3.2 B")
+        self.outDict = {}
+        # Populate the outDict dictionary using methods.
+        self.parseNameAndYear_sec31() 
+        self.setStartEndDates(termTable_df)
+        self.sec31_df = self.parseIdAndData_sec31()
+        self.sec32b_df = self.parseAdminFinanceBank_sec32b()
+
+    def setStartEndDates(self, df):
+        """Sets outDict start and end years from the Term Table DataFrame"""
+        # Obtain the appropriate years from the DataFrame
+        tifName = self.outDict['tif_name']
+        startYear = df[df['Name of Redevelopment Project Area'] == tifName]['Date Designated MM/DD/YYYY'].values[0].split('/')[2]
+        endYear = df[df['Name of Redevelopment Project Area'] == tifName]['Date Terminated MM/DD/YYYY'].values[0].split('/')[2]
+        # Set the Dictionary Values
+        # print(startYear)
+        # print(endYear)
+        self.outDict['start_year'] = startYear
+        self.outDict['end_year'] = endYear
 
     def parseNameAndYear_sec31(self):
         """Obtains the name and year of a TIF from a PDF."""
@@ -183,8 +197,8 @@ class DAR:
         tifName = str(df.iloc[1,1]).replace(" Redevelopment Project Area", "")
         tifYear = str(df.iloc[0,0]).split()[-1]
         # Set the TIF name and year
-        self.outDict['tif_name'] = tifName
-        self.outDict['tif_year'] = tifYear
+        self.outDict['tif_name'] = tifName.strip()
+        self.outDict['tif_year'] = tifYear.strip()
 
     def parseIdAndData_sec31(self):
         """Converts TIF Section 3.1 into a CSV and parses the values; returns ID number or None"""
@@ -342,8 +356,8 @@ def main():
         "2023": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2023-.html"
     }
     # ! Confirm this works properly
-    yp = YearParse(darYearsUrls[year])
-    yp.run(outDir)
+    yp = YearParse(year, darYearsUrls[year], outDir)
+    yp.run()
 
 if __name__ == "__main__":
     main()
