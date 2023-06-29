@@ -10,6 +10,7 @@ import requests  # For getting an HTML Response to parse with BeautifulSoup
 import sys, os  # For arg parsing and filepath management
 import time  # For reporting program runtime
 import pandas as pd  # For data cleaning
+import concurrent.futures  # For threading
 from bs4 import BeautifulSoup  # For HTML parsing the DAR URLs
 
 class Tools:
@@ -103,18 +104,26 @@ class YearParse:
         startTime = time.time()
         # Iterate each TIF DAR URL in the specified year
         isFirst = True
-        for url in self.urlList:
-            # Make a DAR object for each incoming url
-            dar = DAR(url)
+        if isFirst:
             # Obtain Year and Termination Table if this is the first url
-            if isFirst:
-                self.year = dar.outDict['tif_year']
-                self.termTable = dar.parseTermTable_sec1(outDir)
-                isFirst = False
+            isFirst = False
+            dar = DAR(self.urlList[0])
+            self.year = dar.outDict['tif_year']
+            self.termTable = dar.parseTermTable_sec1(outDir)
             # Append to dictList and print structured output to console
-            self.darList.append(dar) # TODO: store the section 3.2 B dataframe for vendors in DAR as well, that makes darList useful
+            self.darList.append(dar)
             self.dictList.append(dar.outDict) 
             print(json.dumps(dar.outDict, indent=4))
+        # Iterate each TIF DAR URL except the first one
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            future_to_dar = {executor.submit(DAR, url): url for url in self.urlList[1:]}
+            # Iterate the completed futures to obtain the DAR object data
+            for future in concurrent.futures.as_completed(future_to_dar):
+                # url = future_to_dar[future]
+                dar = future.result()
+                self.darList.append(dar)
+                self.dictList.append(dar.outDict)
+                print(json.dumps(dar.outDict, indent=4))
         # After one year is parsed, store output in a CSV
         self.buildCsvFromDicts(os.path.join(outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
         # Print the runtime in minutes:seconds format
@@ -187,8 +196,6 @@ class DAR:
         if match:
             idNum = int(match.group(1))
             self.outDict['tif_number'] = idNum
-            print("File Name: ", filename)
-            print("ID Number: ", idNum)
         else:
             print("ID number not found.")
             return None
