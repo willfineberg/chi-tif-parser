@@ -316,8 +316,14 @@ class DAR:
             area=[145, 0, 645, 600], # [topY, leftX, bottomY, rightX]
             lattice=True
         )[0]
-        # Parse each Admin Cost and sum them
-        adminCosts = df[df['Service'] == 'Administration']['Amount'].apply(Tools.stof).sum()
+        # Parse each Admin Cost and sum them; assume larger value is more accurate
+        adminCosts_service = df[df['Service'] == 'Administration']['Amount'].apply(Tools.stof).sum()
+        adminCosts_byName = df[df['Name'].astype(str).str.contains('City Program Management Costs|City Staff Costs', case=False, na=False)]['Amount'].apply(Tools.stof).sum()
+        adminCosts = max(adminCosts_service, adminCosts_byName)
+        if adminCosts_service != adminCosts_byName:
+            print("\nAdmin Cost Discrepancy! Larger value chosen.")
+            print(f"Chosen Admin Value for TIF #{self.outDict['tif_number']}: {adminCosts}\n")
+        # TODO: rely on the names, not service administration
         # Parse each Finance Cost Amount and sum them
         financeCosts = df[df['Service'] == 'Financing']['Amount'].apply(Tools.stof).sum()
         # Obtain the Bank Name(s)
