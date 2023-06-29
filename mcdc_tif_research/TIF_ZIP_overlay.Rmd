@@ -1,0 +1,163 @@
+---
+title: "TIF Zip overlay"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading the Libraries
+```{r}
+library(ggplot2)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(rgdal)
+library(sf)
+library(tidyverse)
+library(rgeos)
+library(rstudioapi)
+library(tidyr)
+library(broom)
+library(RSocrata)
+library(mapproj)
+library(readxl)
+library(scales)
+```
+
+Setting up the Chicago google map
+```{r}
+register_google(key = "AIzaSyDYu3ooTegFHilgtg0SnM8Iw2ggry1-kQI")
+Chimap = map = get_map(location = 'Chicago', zoom = 11)
+ggmap(Chimap)
+```
+
+
+Reading in shapefile for median income by zip
+```{r}
+chi_median_zip <- readOGR( 
+  dsn= "/Users/andresmeza/Desktop/Boundaries_Zipcodes/" , 
+  layer="income_zip")
+names(chi_median_zip)
+chi_median_zip$zip
+```
+
+Making shapefile into dataframe
+```{r}
+chi_zip_df <- spTransform(chi_median_zip, CRS("+proj=longlat +datum=WGS84"))
+chi_zip_df.f = chi_zip_df %>% fortify(region = 'zip')
+Chizips  = merge(chi_zip_df.f, chi_zip_df@data, by.x = 'id', by.y = 'zip')
+Zips = Chizips %>% select(id) %>% distinct()
+values = data.frame(id = c(Zips),
+                      value = c(runif(Zips %>% count() %>% unlist(),5.0, 25.0)))
+CHIzipfinal = merge(Chizips, values, by.x='id')
+CHIzipfinal %>% group_by(id) %>% do(head(., 1)) %>% head(10)
+```
+
+Exporting shapefile dataframe as csv
+```{r}
+write.csv(CHIzipfinal, "/Users/andresmeza/Desktop/Boundaries_Zipcodes.csv")
+```
+
+Importing shapefile dataframe with associated median incomes
+```{r}
+names(Zips_income)
+Zip_final <- cbind(CHIzipfinal, Zips_income[,13, drop=FALSE])
+view(Zip_final)
+```
+
+Basic map of shapefile for zipcodes
+```{r}
+ggplot(CHIzipfinal, aes(long, lat, group = group)) +
+    geom_polygon(aes(fill = value))
+```
+
+Basic Heatmap of zipcode shapefile with associated incomes
+```{r}
+ggplot(Zip_final, aes(long, lat, group = group)) +
+    geom_polygon(aes(fill = medianincome))
+```
+
+Heatmap of income with google overlay
+```{r}
+ggmap(Chimap) +
+    geom_polygon(aes(fill = medianincome, x = long, y = lat, group = group),
+                 data = Zip_final,
+                 alpha = 0.8,
+                 color = "black",
+                 size = 0.2)+labs(fill="Median Income")
+```
+
+Important TIF shapefile
+```{r}
+X2021_TIF_Report <- read_excel("2021 TIF Report.xlsx", 
+    col_types = c("text", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "text"))
+TIF_2021_df <- readOGR( 
+  dsn= "/Users/andresmeza/Desktop/TIF_Boundaries/" , 
+  layer="TIF_Boundaries")
+TIF_districts <- spTransform(TIF_2021_df, CRS("+proj=longlat +datum=WGS84"))
+TIF_districts.f = TIF_districts %>% fortify(region = 'name')
+ChiTIFs  = merge(TIF_districts.f, TIF_districts@data, by.x = 'id', by.y = 'name')
+TIFs = ChiTIFs %>% select(id) %>% distinct()
+values = data.frame(id = c(TIFs),
+                      value = c(runif(TIFs %>% count() %>% unlist(),5.0, 25.0)))
+TIFfinal = merge(ChiTIFs, values, by.x='id')
+TIFfinal %>% group_by(id) %>% do(head(., 1)) %>% head(10)
+TIFfinal3 <- cbind(TIFfinal, TIFfinal2[,30, drop=FALSE])
+colnames(TIFfinal3) [29] = "Propertytaxextraction"
+```
+
+Using TIF property extraction as size class in points
+```{r}
+ggplot(data = TIFfinal3) + 
+geom_point(data=TIFfinal3, aes(long, lat, size="Propertytaxextraction"), inherit.aes = FALSE, alpha = 0.5, size = 0.5,color="red") + coord_equal()
+```
+
+Shapefile of TIF districts with associated proptaxextraction
+```{r}
+ggmap(Chimap) +
+    geom_polygon(aes(fill = Propertytaxextraction, x = long, y = lat, group = group),
+                 data = TIFfinal3,
+                 alpha = 0.8,
+                 size = 0.2) +
+scale_fill_gradient(low = "blue", high = "red", name = "Property Tax Extraction", labels = comma) + 
+  ggtitle("TIF Districts 2022") 
+```
+Side by side heatmaps of Proper tax extraction and median income
+```{r}
+ggmap(Chimap) +
+    geom_polygon(aes(fill = Propertytaxextraction, x = long, y = lat, group = group),
+                 data = TIFfinal3,
+                 alpha = 0.8,
+                 size = 0.2) +
+scale_fill_gradient(low = "blue", high = "red", name = "Property Tax Extraction ($)", labels = comma) + 
+  ggtitle("TIF Districts 2022") 
+ggmap(Chimap) +
+    geom_polygon(aes(fill = medianincome, x = long, y = lat, group = group),
+                 data = Zip_final,
+                 alpha = 0.8,
+                 size = 0.2)+labs(fill="Median Income") +
+scale_fill_gradient(low = "blue", high = "red", name = "Median Income ($)", labels = comma) + 
+  ggtitle("TIF Districts 2022")
+```
+
+
+Attempt to overlay final maps
+```{r}
+ggmap(Chimap) +
+    geom_polygon(aes(fill = medianincome, x = long, y = lat, group = group),
+                 data = Zip_final,
+                 alpha = 0.8,
+                 color = "black",
+                 size = 0.2) +
+geom_point(data=TIFfinal3, aes(long, lat, size="Propertytaxextraction"), inherit.aes = FALSE, alpha = 0.1, size = 0.5,color="red") + coord_equal()+
+  labs(fill="Median Income")
+```
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
