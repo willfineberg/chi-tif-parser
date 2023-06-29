@@ -73,6 +73,7 @@ class Tools:
 
 class YearParse:
     """An Object that obtains and stores one year's worth of DAR Objects"""
+    
     def __init__(self, year, yearUrl, outDir):
         self.year = year
         self.yearUrl = yearUrl
