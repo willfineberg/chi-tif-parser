@@ -7,32 +7,14 @@ import locale  # For using C-style atoi() function
 import json  # For printing the Dictionary as Structured JSON
 import re  # For regexing the TIF ID number from URL
 import requests  # For getting an HTML Response to parse with BeautifulSoup
-import sys  # For arg parsing
-import time # For reporting program runtime
+import sys, os  # For arg parsing and filepath management
+import time  # For reporting program runtime
+import pandas as pd  # For data cleaning
 from bs4 import BeautifulSoup  # For HTML parsing the DAR URLs
 
 class Tools:
     """A collection of utility functions for TIF data parsing and processing."""
 
-    def buildCsvFromDicts(dictList, csvFp):
-        """Create a CSV file from a list of Dictionaries. Each row is one Dictionary."""
-
-        # Get the list of keys from the first dictionary in the list
-        if len(dictList) > 0 :
-            fieldnames = list(dictList[0].keys())
-            # Write the data to the CSV file
-            with open(csvFp, 'w', newline='') as csvfile:
-                # Open the CSV and pass the fieldnames
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                # Write the header row (uses fieldnames)
-                writer.writeheader()
-                # Write the data rows (each dict in dictList is one TIF)
-                for dict in dictList:
-                    writer.writerow(dict)
-            print("CSV File saved to: " + csvFp)
-        else:
-            print('Unable to save CSV: No data found in dictList')
-    
     def stof(toClean):
         """Converts a string to a float."""
 
@@ -67,7 +49,7 @@ class Tools:
         """Get the page number containing the specified text in a PDF document; return an int or None."""   
 
         # Read the PDF bytes into PyPDF2
-        reader = PyPDF2.PdfReader(pdf.content)
+        reader = PyPDF2.PdfReader(pdf)
         # Iterate each page and search for the target_text
         num_pages = len(reader.pages)
         for page_num in range(num_pages):
@@ -78,38 +60,112 @@ class Tools:
         # Return None if the target text is not found in any page
         return None
 
-class PDF:
-    """A static object to hold the url, response, and content from a single url input."""
+    def fixHeader(df, startRow, endRow):
+        """Gets the header row by concatenating multiple rows; returns a list of column headers"""
+        header_row = df.iloc[startRow:endRow].fillna('').apply(lambda x: ' '.join(x.str.strip()), axis=0).tolist()
+        header_row = [header.strip() for header in header_row]
+        header_row = [header for header in header_row if header]
+        # Omit the first rows and add the merged header back in
+        df = df.iloc[endRow:].reset_index(drop=True)
+        df.columns = header_row
+        return df
+
+class YearParse:
+    """An Object that obtains and stores one year's worth of DAR Objects"""
+    def __init__(self, yearUrl):
+        self.year = None
+        self.yearUrl = yearUrl
+        self.urlList = Tools.urlList(yearUrl)
+        self.termTable = None
+        self.darList = []
+        self.dictList = []
+
+    def buildCsvFromDicts(self, csvFp):
+        """Create a CSV file from a list of Dictionaries. Each row is one Dictionary."""
+
+        # Get the list of keys from the first dictionary in the list
+        if len(self.dictList) > 0 :
+            fieldnames = list(self.dictList[0].keys())
+            # Write the data to the CSV file
+            with open(csvFp, 'w', newline='') as csvfile:
+                # Open the CSV and pass the fieldnames
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                # Write the header row (uses fieldnames)
+                writer.writeheader()
+                # Write the data rows (each dict in dictList is one TIF)
+                for dict in self.dictList:
+                    writer.writerow(dict)
+            print("CSV File saved to: " + csvFp)
+        else:
+            print('Unable to save CSV: No data found in dictList')
     
+    def run(self, outDir):
+        startTime = time.time()
+        # Iterate each TIF DAR URL in the specified year
+        isFirst = True
+        for url in self.urlList:
+            # Make a DAR object for each incoming url
+            dar = DAR(url)
+            # Obtain Year and Termination Table if this is the first url
+            if isFirst:
+                self.year = dar.outDict['tif_year']
+                self.termTable = dar.parseTermTable_sec1(outDir)
+                isFirst = False
+            # Append to dictList and print structured output to console
+            self.darList.append(dar) # TODO: store the section 3.2 B dataframe for vendors in DAR as well, that makes darList useful
+            self.dictList.append(dar.outDict) 
+            print(json.dumps(dar.outDict, indent=4))
+        # After one year is parsed, store output in a CSV
+        self.buildCsvFromDicts(os.path.join(outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
+        # Print the runtime in minutes:seconds format
+        endTime = time.time()
+        runtime_seconds = endTime - startTime
+        runtime_minutes = runtime_seconds // 60
+        runtime_seconds %= 60
+        print(f"Program runtime: {int(runtime_minutes)} minutes {int(runtime_seconds)} seconds")
+
+class DAR:
+    """Parses and stores data from a single TIF DAR PDF."""
+
     def __init__(self, url):
-        """Initializes the PDF object."""
+        """Initializes a DAR object."""
 
-        self.url = url
-        self.response = requests.get(url)
-        self.content = io.BytesIO(self.response.content)
-
-class PDFParse:
-    """Parses and stores data from a TIF DAR PDF."""
-
-    def __init__(self, url):
-        """Initializes a PDFParse object."""
-
-        self.pdf = PDF(url)
+        self.pdfUrl = url
+        self.pdf = io.BytesIO(requests.get(url).content)
         self.sec31 = Tools.getPageNumFromText(self.pdf, 'SECTION 3.1')
         self.sec32a = Tools.getPageNumFromText(self.pdf, 'ITEMIZED LIST OF ALL EXPENDITURES FROM THE SPECIAL TAX ALLOCATION FUND')
         self.sec32b = Tools.getPageNumFromText(self.pdf, "Section 3.2 B")
         self.outDict = {}
         # Populate the outDict dictionary using methods.
         self.parseNameAndYear_sec31() 
-        self.parseIdAndData_sec31()
-        self.parseAdminFinanceBank_sec32b()
+        self.sec31_df = self.parseIdAndData_sec31()
+        self.sec32b_df = self.parseAdminFinanceBank_sec32b()
+
+    def parseTermTable_sec1(self, outDir):
+        """Saves the Termination Table CSV to outDir"""
+        dfs = tabula.read_pdf(
+            input_path=self.pdf,
+            pages='1-4', # adjust dynamically based on year?
+            pandas_options={'header': None},
+        )
+        # Drop first column from first page of the table (it is empty)
+        dfs[0] = dfs[0].drop(0, axis=1)
+        dfs[0].columns = [0,1,2]
+        # Combine all the DataFrames into one
+        df = pd.concat(dfs, ignore_index=True)
+        # Fix the header and indicies
+        df = Tools.fixHeader(df, 1, 3)
+        # Save the DataFrame to a CSV in outDir
+        df.to_csv(os.path.join(outDir, f"{self.outDict['tif_year']}_termTable.csv"))
+        # Return the DataFrame
+        return df
 
     def parseNameAndYear_sec31(self):
         """Obtains the name and year of a TIF from a PDF."""
 
         # Makes a Dataframe out of Section 3.1 (usually Page 6)
         df = tabula.read_pdf(
-            input_path=self.pdf.content,
+            input_path=self.pdf,
             pages=self.sec31, 
             area=[65, 0, 105, 600], # [topY, leftX, bottomY, rightX]
             pandas_options={'header': None},
@@ -125,7 +181,7 @@ class PDFParse:
         """Converts TIF Section 3.1 into a CSV and parses the values; returns ID number or None"""
 
         # Obtain ID from URL
-        filename = self.pdf.url.split("/")[-1]
+        filename = self.pdfUrl.split("/")[-1]
         pattern = r"T_(\d+)_"
         match = re.search(pattern, filename)
         if match:
@@ -138,7 +194,7 @@ class PDFParse:
             return None
         # *STEP 1: READ PDF INTO DATAFRAME
         df = tabula.read_pdf(
-            input_path=self.pdf.content,
+            input_path=self.pdf,
             pages=self.sec31, 
             area=[130, 45, 595, 585], # [topY, leftX, bottomY, rightX]
             # ! area above works only for 2019-onward. 
@@ -146,26 +202,17 @@ class PDFParse:
             # columns=[45, 362.43, 453.04, 528.64],
         )[0]
         # *STEP 2: CLEAN DATAFRAME HEADER
-        # Merge the first 5 rows to fix the header
-        header_row = df.iloc[:4].fillna('').apply(lambda x: ' '.join(x.str.strip()), axis=0).tolist()
-        header_row = [header.strip() for header in header_row]
-        header_row = [header for header in header_row if header]
-        # Omit the first 5 rows and add the merged header back in
-        df = df.iloc[4:].reset_index(drop=True)
         # Remove unnamed column full of dollar signs
         df = df.drop('Unnamed: 1', axis=1) # ? is this bad? does dollar sign always get its own column?
-        # Grab "Cumulative" from the current headers before we overwrite them with header_row
-        for i, column in enumerate(df.columns):
-            if 'Unnamed' not in column:
-                header_row[i] = f'{column} {header_row[i]}'
-        df.columns = header_row
+        # Merge the first 5 rows to fix the header
+        df = Tools.fixHeader(df, 0, 4)
         #df.drop(df.columns[df.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
         # *STEP 3: PARSE CLEANED DATAFRAME INTO DICTIONARY
         # Obtain the Pandas series for the 'Property Tax Increment' Row
         propTaxIncRow = df[df['SOURCE of Revenue/Cash Receipts:'] == 'Property Tax Increment']
         # Obtain the Current and Cumulative Strings out of the propTaxIncRow series
         propTaxIncCur = propTaxIncRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
-        propTaxIncCum = propTaxIncRow['Cumulative Totals of Revenue/Cash Receipts for life of TIF'].values[0]
+        propTaxIncCum = propTaxIncRow['Totals of Revenue/Cash Receipts for life of TIF'].values[0]
         # Use the user-defined Tools.stof() to clean the Strings to Integers for storage in self.outDict
         self.outDict['property_tax_extraction'] = Tools.stof(propTaxIncCur)
         self.outDict['cumulative_property_tax_extraction'] = Tools.stof(propTaxIncCum)
@@ -174,7 +221,7 @@ class PDFParse:
         transFromMunRow = df[df['SOURCE of Revenue/Cash Receipts:'] == 'Transfers from Municipal Sources']
         # Obtain the Current and Cumulative Strings out of the propTaxIncRow series
         transFromMunCur = transFromMunRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
-        transFromMunCum = transFromMunRow['Cumulative Totals of Revenue/Cash Receipts for life of TIF'].values[0]
+        transFromMunCum = transFromMunRow['Totals of Revenue/Cash Receipts for life of TIF'].values[0]
         # Use the user-defined Tools.stof() to clean the Strings to Integers for storage in self.outDict
         self.outDict['transfers_in'] = Tools.stof(transFromMunCur)
         self.outDict['cumulative_transfers_in'] = Tools.stof(transFromMunCum)
@@ -207,15 +254,18 @@ class PDFParse:
         # Use the user-defined Tools.stof() to clean the String to an Integer for storage in self.outDict
         self.outDict['distribution'] = Tools.stof(distSurp)
 
+        # Return Section 3.1 DataFrame for Storage
+        return df
+
     # * SECTION 3.2 A PARSING -- repurpose this for finance parsing from sec32a?
     # TODO: REVISIT: Parse Finance from Sec 3.2 A too? compare it?
-    #def getAdmin_sec32a(self, pdf, pageNum):
+    # def getAdmin_sec32a(self, pdf, pageNum):
         """Obtains the Administration costs from a TIF DAR."""
 
         # if pageNum != None:
         #     # Grab the value with Tabula
         #     df = tabula.read_pdf(
-        #         input_path=pdf.content,
+        #         input_path=self.pdf,
         #         pages=pageNum,
         #     )[0]
         #     # Drop some rows and fill in categories
@@ -240,7 +290,7 @@ class PDFParse:
 
         # Retrieve the Page 11 Table using Tabula
         df = tabula.read_pdf(
-            input_path=self.pdf.content,
+            input_path=self.pdf,
             pages=self.sec32b, 
             area=[145, 0, 645, 600], # [topY, leftX, bottomY, rightX]
             lattice=True
@@ -256,16 +306,17 @@ class PDFParse:
         self.outDict['admin_costs'] = adminCosts
         self.outDict['finance_costs'] = financeCosts
         self.outDict['bank'] = bankNames
+        # Return the DataFrame for storage
+        return df
 
 def main():
-    startTime = time.time()
     # Use cmd line arg for year
     if len(sys.argv) < 2:
         print('BAD USAGE\nUsage: py tifParse.py [year]')
         return
     year = sys.argv[1]
     # * MODIFY THIS: Filepath to write finalDict data to for each url
-    csvFp = f'c:\\sc\\{year}_out.csv'
+    outDir = r'c:\sc'
     # Set Locale for use of atoi() when parsing data (utilized in Tools.stof() function)
     locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
     # DAR URLs to Parse
@@ -283,25 +334,9 @@ def main():
         "2022": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2022-.html",
         "2023": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2023-.html"
     }
-    # Create a list to store the dictionaries for each TIF
-    dictList = []
-    # Iterate each TIF DAR URL in the specified year
-    for url in Tools.urlList(darYearsUrls[year]):
-        print(url) # for debugging
-        # Make a PDFParse object for each incoming url
-        pdfParse = PDFParse(url)
-        # Append to dictList and print structured output to console
-        dictList.append(pdfParse.outDict) # TODO: Could modify dictList to be a pdfParseList if we store even more data in the objects (section 3.2 B dataframe for vendors?)
-        print(json.dumps(pdfParse.outDict, indent=4))
-    # After one year is parsed, store output in a CSV
-    Tools.buildCsvFromDicts(dictList, csvFp) # TODO: command line arg for output directory?
-    endTime = time.time()
-    runtime_seconds = endTime - startTime
-    runtime_minutes = runtime_seconds // 60
-    runtime_seconds %= 60
-
-    # Print the runtime in minutes:seconds format
-    print(f"Program runtime: {int(runtime_minutes)} minutes {int(runtime_seconds)} seconds")
+    # ! Confirm this works properly
+    yp = YearParse(darYearsUrls[year])
+    yp.run(outDir)
 
 if __name__ == "__main__":
     main()
