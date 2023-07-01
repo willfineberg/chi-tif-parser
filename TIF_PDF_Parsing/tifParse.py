@@ -12,6 +12,7 @@ import time  # For reporting program runtime
 import pandas as pd  # For data cleaning
 import multiprocessing, concurrent.futures  # For threading
 from bs4 import BeautifulSoup  # For HTML parsing the DAR URLs
+from math import isnan  # For checking if parsed values are NaN or not
 
 class Tools:
     """A collection of utility functions for TIF data parsing and processing."""
@@ -19,21 +20,29 @@ class Tools:
     def stof(toClean):
         """Converts a string to a float."""
 
-        if '-' in toClean:
-            # Handle zeroes (which are represented as dashes)
-            return 0.0
-        # Remove stray dollar signs to prepare for locale.atof() parsing
-        toClean = toClean.replace('$', '').strip()
-        # If enclosed in parenthesis, number is negative. So we try to Regex a value out of ()...
-        negPattern = r'\((.+)\)'
-        match = re.match(negPattern, toClean)
-        if match:
-            # Number is negative, so we update the Float return value appropriately
-            return -1 * locale.atof(match.group(1))
-        else:
-            # Number is positive, so return the cleaned string as a Float
-            return locale.atof(toClean)
-    
+        if isinstance(toClean, str):
+            # toClean is a String
+            if '-' in toClean:
+                # Handle zeroes (which are represented as dashes)
+                return 0.0
+            # Remove stray dollar signs to prepare for locale.atof() parsing
+            toClean = toClean.replace('$', '').strip()
+            # If enclosed in parenthesis, number is negative. So we try to Regex a value out of ()...
+            negPattern = r'\((.+)\)'
+            match = re.match(negPattern, toClean)
+            if match:
+                # Number is negative, so we update the Float return value appropriately
+                return -1 * locale.atof(match.group(1))
+            else:
+                # Number is positive, so return the cleaned string as a Float
+                return locale.atof(toClean)
+        elif isinstance(toClean, float):
+            # toClean is not a String; check if it is a NaN float (which we treat as zero)
+            if isnan(toClean):
+                return 0.0
+        # Return None if the value cannot be determined
+        return None
+        
     def urlList(url):
         """Obtains a list of TIF DAR URLs using BeautifulSoup."""
 
@@ -181,30 +190,30 @@ class YearParse:
         #         print(json.dumps(dar.outDict, indent=4))
 
         isFail = False
-        try:
-            # Create a multiprocessing Pool
-            pool = multiprocessing.Pool(initializer=self.setLocale, initargs=())
-            # Apply DAR to each URL in parallel
-            results = []
-            for url in self.urlList:
-                result = pool.apply_async(DAR, args=(url, self.termTable))
-                results.append(result)
-            # Wait for the results and collect DAR objects
-            for result in results:
-                dar = result.get()
-                self.darList.append(dar)
-                self.dictList.append(dar.outDict)
-                print(json.dumps(dar.outDict, indent=4))
-            # Close the multiprocessing Pool
-            pool.close()
-            pool.join()
-        except Exception as e:
-            # Handle keyboard interrupt (Ctrl+C)
-            print(f"Program failed, error occured: {e.getMessage()}")
-            pool.terminate()
-            pool.join()
-            # Perform any necessary cleanup or finalization steps
-            isFail = True
+        # try:
+        # Create a multiprocessing Pool
+        pool = multiprocessing.Pool(initializer=self.setLocale, initargs=())
+        # Apply DAR to each URL in parallel
+        results = []
+        for url in self.urlList:
+            result = pool.apply_async(DAR, args=(url, self.termTable))
+            results.append(result)
+        # Wait for the results and collect DAR objects
+        for result in results:
+            dar = result.get()
+            self.darList.append(dar)
+            self.dictList.append(dar.outDict)
+            print(json.dumps(dar.outDict, indent=4))
+        # Close the multiprocessing Pool
+        pool.close()
+        pool.join()
+        # except Exception as e:
+        #     # Handle keyboard interrupt (Ctrl+C)
+        #     print(f"Program failed, error occured: {e=}")
+        #     pool.terminate()
+        #     pool.join()
+        #     # Perform any necessary cleanup or finalization steps
+        #     isFail = True
             
         # After one year is parsed, store output in a CSV
         if not isFail:
@@ -253,8 +262,8 @@ class DAR:
         """Sets outDict start and end years from the Term Table DataFrame"""
         # Obtain the appropriate years from the DataFrame
         tifName = self.outDict['tif_name']
-        startYear = df[df['Name of Redevelopment Project Area'] == tifName]['Date Designated MM/DD/YYYY'].values[0].split('/')[2]
-        endYear = df[df['Name of Redevelopment Project Area'] == tifName]['Date Terminated MM/DD/YYYY'].values[0].split('/')[2]
+        startYear = df[df['Name of Redevelopment Project Area'] == tifName].loc[:, df.columns.str.contains('Date Designated', case=False)].values[0][0].split('/')[2]
+        endYear = df[df['Name of Redevelopment Project Area'] == tifName].loc[:, df.columns.str.contains('Date Terminated', case=False)].values[0][0].split('/')[2]
         self.outDict['start_year'] = startYear
         self.outDict['end_year'] = endYear
 
