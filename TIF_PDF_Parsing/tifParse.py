@@ -10,7 +10,7 @@ import requests  # For getting an HTML Response to parse with BeautifulSoup
 import sys, os  # For arg parsing and filepath management
 import time  # For reporting program runtime
 import pandas as pd  # For data cleaning
-import concurrent.futures  # For threading
+import multiprocessing, concurrent.futures  # For threading
 from bs4 import BeautifulSoup  # For HTML parsing the DAR URLs
 
 class Tools:
@@ -86,21 +86,53 @@ class YearParse:
     def buildCsvFromDicts(self, csvFp):
         """Create a CSV file from a list of Dictionaries. Each row is one Dictionary."""
 
-        # Get the list of keys from the first dictionary in the list
-        if len(self.dictList) > 0 :
-            fieldnames = list(self.dictList[0].keys())
-            # Write the data to the CSV file
-            with open(csvFp, 'w', newline='') as csvfile:
-                # Open the CSV and pass the fieldnames
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                # Write the header row (uses fieldnames)
-                writer.writeheader()
-                # Write the data rows (each dict in dictList is one TIF)
-                for dict in self.dictList:
-                    writer.writerow(dict)
+        # Define the fieldnames in the desired order
+        fieldnames = [
+            "tif_name",
+            "tif_year",
+            "start_year",
+            "end_year",
+            "tif_number",
+            "property_tax_extraction",
+            "cumulative_property_tax_extraction",
+            "transfers_in",
+            "cumulative_transfers_in",
+            "expenses",
+            "fund_balance_end",
+            "transfers_out",
+            "distribution",
+            "admin_costs",
+            "finance_costs",
+            "bank"
+        ]
+
+        # Write the data to the CSV file
+        with open(csvFp, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            # Write the header row
+            writer.writerow(fieldnames)
+            # Write the data rows
+            for dictionary in self.dictList:
+                row = [dictionary.get(key, "") for key in fieldnames]
+                writer.writerow(row)
             print("CSV File saved to: " + csvFp)
-        else:
-            print('Unable to save CSV: No data found in dictList')
+
+
+        # Get the list of keys from the first dictionary in the list
+        # if len(self.dictList) > 0 :
+        #     fieldnames = list(self.dictList[0].keys())
+        #     # Write the data to the CSV file
+        #     with open(csvFp, 'w', newline='') as csvfile:
+        #         # Open the CSV and pass the fieldnames
+        #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #         # Write the header row (uses fieldnames)
+        #         writer.writeheader()
+        #         # Write the data rows (each dict in dictList is one TIF)
+        #         for dict in self.dictList:
+        #             writer.writerow(dict)
+        #     print("CSV File saved to: " + csvFp)
+        # else:
+        #     print('Unable to save CSV: No data found in dictList')
     
     def parseTermTable_sec1(self, firstUrl, outDir):
         """Saves the Termination Table CSV to outDir"""
@@ -121,32 +153,62 @@ class YearParse:
         # Return the DataFrame
         return df
 
+    def setLocale(self):
+        # Set the locale for each process
+        locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
+
     def run(self):
         startTime = time.time()
-        # Iterate each TIF DAR URL in the specified year
-        # isFirst = True
-        # if isFirst:
-        #     # Obtain Year and Termination Table if this is the first url
-        #     isFirst = False
-        #     dar = DAR(self.urlList[0])
-        #     self.year = dar.outDict['tif_year']
-        #     self.termTable = dar.parseTermTable_sec1(self.outDir)
-        #     # Append to dictList and print structured output to console
+        # Without Threading
+        # for url in self.urlList:
+        #     dar = DAR(url, self.termTable)
         #     self.darList.append(dar)
-        #     self.dictList.append(dar.outDict) 
+        #     self.dictList.append(dar.outDict)
         #     print(json.dumps(dar.outDict, indent=4))
-        # Iterate each TIF DAR URL except the first one
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            future_to_dar = {executor.submit(DAR, url, self.termTable): url for url in self.urlList}
-            # Iterate the completed futures to obtain the DAR object data
-            for future in concurrent.futures.as_completed(future_to_dar):
-                # url = future_to_dar[future]
-                dar = future.result()
+        # With Threading
+        
+        # with concurrent.futures.ThreadPoolExecutor() as executor:
+        #     # Get Term Table from first URL (this is done one time only)
+        #     self.termTable = executor.submit(self.parseTermTable_sec1, self.urlList[0], self.outDir).result()
+        #     print(self.termTable)
+        #     future_to_dar = {executor.submit(DAR, url, self.termTable): url for url in self.urlList}
+        #     # Iterate the completed futures to obtain the DAR object data
+        #     for future in concurrent.futures.as_completed(future_to_dar):
+        #         # url = future_to_dar[future]
+        #         dar = future.result()
+        #         self.darList.append(dar)
+        #         self.dictList.append(dar.outDict)
+        #         print(json.dumps(dar.outDict, indent=4))
+
+        isFail = False
+        try:
+            # Create a multiprocessing Pool
+            pool = multiprocessing.Pool(initializer=self.setLocale, initargs=())
+            # Apply DAR to each URL in parallel
+            results = []
+            for url in self.urlList:
+                result = pool.apply_async(DAR, args=(url, self.termTable))
+                results.append(result)
+            # Wait for the results and collect DAR objects
+            for result in results:
+                dar = result.get()
                 self.darList.append(dar)
                 self.dictList.append(dar.outDict)
                 print(json.dumps(dar.outDict, indent=4))
+            # Close the multiprocessing Pool
+            pool.close()
+            pool.join()
+        except Exception as e:
+            # Handle keyboard interrupt (Ctrl+C)
+            print(f"Program failed, error occured: {e.getMessage()}")
+            pool.terminate()
+            pool.join()
+            # Perform any necessary cleanup or finalization steps
+            isFail = True
+            
         # After one year is parsed, store output in a CSV
-        self.buildCsvFromDicts(os.path.join(self.outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
+        if not isFail:
+            self.buildCsvFromDicts(os.path.join(self.outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
         # Print the runtime in minutes:seconds format
         endTime = time.time()
         runtime_seconds = endTime - startTime
@@ -165,12 +227,27 @@ class DAR:
         self.sec31 = Tools.getPageNumFromText(self.pdf, 'SECTION 3.1')
         self.sec32a = Tools.getPageNumFromText(self.pdf, 'ITEMIZED LIST OF ALL EXPENDITURES FROM THE SPECIAL TAX ALLOCATION FUND')
         self.sec32b = Tools.getPageNumFromText(self.pdf, "Section 3.2 B")
+        self.sec31_df = None
+        self.sec32b_df = None
         self.outDict = {}
-        # Populate the outDict dictionary using methods.
+        # CAN WE CONVERT THESE 4 LINES INTO ASYNC?
         self.parseNameAndYear_sec31() 
         self.setStartEndDates(termTable_df)
         self.sec31_df = self.parseIdAndData_sec31()
         self.sec32b_df = self.parseAdminFinanceBank_sec32b()
+        # Create an event loop
+        # loop = asyncio.get_event_loop()
+        # # Run the async methods concurrently
+        # tasks = [
+        #     self.parseNameAndYear_sec31(),
+        #     self.setStartEndDates(termTable_df),
+        #     self.parseIdAndData_sec31(),
+        #     self.parseAdminFinanceBank_sec32b()
+        # ]
+        # results = loop.run_until_complete(asyncio.gather(*tasks))
+        # # Assign the results to instance variables
+        # self.sec31_df = results[2]
+        # self.sec32b_df = results[3]
 
     def setStartEndDates(self, df):
         """Sets outDict start and end years from the Term Table DataFrame"""
@@ -178,9 +255,6 @@ class DAR:
         tifName = self.outDict['tif_name']
         startYear = df[df['Name of Redevelopment Project Area'] == tifName]['Date Designated MM/DD/YYYY'].values[0].split('/')[2]
         endYear = df[df['Name of Redevelopment Project Area'] == tifName]['Date Terminated MM/DD/YYYY'].values[0].split('/')[2]
-        # Set the Dictionary Values
-        # print(startYear)
-        # print(endYear)
         self.outDict['start_year'] = startYear
         self.outDict['end_year'] = endYear
 
@@ -344,9 +418,9 @@ def main():
         return
     year = sys.argv[1]
     # * MODIFY THIS: Filepath to write finalDict data to for each url
-    outDir = r'c:\sc'
+    outDir = f'c:\\sc\\{year}'
     # Set Locale for use of atoi() when parsing data (utilized in Tools.stof() function)
-    locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
+    # locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
     # DAR URLs to Parse
     darYearsUrls = {
         "2012": "https://www.chicago.gov/content/city/en/depts/dcd/supp_info/district_annual_reports2012.html",

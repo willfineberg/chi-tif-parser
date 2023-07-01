@@ -2,11 +2,11 @@ import pandas as pd
 import math
 
 # Experiential (from tifParse.py program)
-exp = pd.read_csv(r'C:\sc\2021\2021_out.csv')
+exp = pd.read_csv(r'C:\sc\2020_out.csv')
 # exp = exp.drop('tif_year', axis=1)
 
 # Real (from Anthony Moser Google Sheet)
-real = pd.read_csv(r"C:\sc\2021\2021_real_fromTom.csv")
+real = pd.read_csv(r"C:\sc\VALIDATE_2020_out.csv")
 # real = pd.read_csv(r"C:\sc\idleDemo\2020_out.csv")
 
 # Iterate df1 and df2 and print out differences
