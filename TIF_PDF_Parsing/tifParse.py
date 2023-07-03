@@ -19,27 +19,38 @@ class Tools:
 
     def stof(toClean):
         """Converts a string to a float."""
-
+        locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
         if isinstance(toClean, str):
             # toClean is a String
             if '-' in toClean:
-                # Handle zeroes (which are represented as dashes)
+                # Handle zeroes (for >= 2019, represented as dashes)
                 return 0.0
-            # Remove stray dollar signs to prepare for locale.atof() parsing
-            toClean = toClean.replace('$', '').strip()
+            # Remove stray dollar signs and/or asterisks to prepare for locale.atof() parsing
+            toClean = toClean.replace('$', '').replace('*', '').strip()
+            if len(toClean) <= 0:
+                # Handle zeroes (for <= 2018, no representation)
+                return 0.0
             # If enclosed in parenthesis, number is negative. So we try to Regex a value out of ()...
             negPattern = r'\((.+)\)'
             match = re.match(negPattern, toClean)
-            if match:
-                # Number is negative, so we update the Float return value appropriately
-                return -1 * locale.atof(match.group(1))
-            else:
-                # Number is positive, so return the cleaned string as a Float
-                return locale.atof(toClean)
+            try:
+                if match:
+                    # Number is negative, so we update the Float return value appropriately
+                    return -1 * locale.atof(match.group(1))
+                else:
+                    # Number is positive, so return the cleaned string as a Float
+                    return locale.atof(toClean)
+            except ValueError as e:
+                print(f"Caught: {e}")
+                print(len(toClean))
+                print(f"Trying to parse: '{toClean}'")
         elif isinstance(toClean, float):
             # toClean is not a String; check if it is a NaN float (which we treat as zero)
             if isnan(toClean):
                 return 0.0
+            else:
+                print("Parsed a float?")
+                sys.exit(1)
         # Return None if the value cannot be determined
         return None
         
@@ -156,7 +167,11 @@ class YearParse:
         # Combine all the DataFrames into one
         df = pd.concat(dfs, ignore_index=True)
         # Fix the header and indicies
-        df = Tools.fixHeader(df, 1, 3)
+        if int(self.year) >= 2019:
+            df = Tools.fixHeader(df, 1, 3)
+        else:
+            # 2018
+            df = Tools.fixHeader(df, 1, 2)
         # Save the DataFrame to a CSV in outDir
         df.to_csv(os.path.join(outDir, f"{self.year}_termTable.csv"))
         # Return the DataFrame
@@ -190,30 +205,30 @@ class YearParse:
         #         print(json.dumps(dar.outDict, indent=4))
 
         isFail = False
-        # try:
-        # Create a multiprocessing Pool
-        pool = multiprocessing.Pool(initializer=self.setLocale, initargs=())
-        # Apply DAR to each URL in parallel
-        results = []
-        for url in self.urlList:
-            result = pool.apply_async(DAR, args=(url, self.termTable))
-            results.append(result)
-        # Wait for the results and collect DAR objects
-        for result in results:
-            dar = result.get()
-            self.darList.append(dar)
-            self.dictList.append(dar.outDict)
-            print(json.dumps(dar.outDict, indent=4))
-        # Close the multiprocessing Pool
-        pool.close()
-        pool.join()
-        # except Exception as e:
-        #     # Handle keyboard interrupt (Ctrl+C)
-        #     print(f"Program failed, error occured: {e=}")
-        #     pool.terminate()
-        #     pool.join()
-        #     # Perform any necessary cleanup or finalization steps
-        #     isFail = True
+        try:
+            # Create a multiprocessing Pool
+            pool = multiprocessing.Pool(initializer=self.setLocale, initargs=())
+            # Apply DAR to each URL in parallel
+            results = []
+            for url in self.urlList:
+                result = pool.apply_async(DAR, args=(url, self.termTable))
+                results.append(result)
+            # Wait for the results and collect DAR objects
+            for result in results:
+                dar = result.get()
+                self.darList.append(dar)
+                self.dictList.append(dar.outDict)
+                print(json.dumps(dar.outDict, indent=4))
+            # Close the multiprocessing Pool
+            pool.close()
+            pool.join()
+        except Exception as e:
+            # Handle keyboard interrupt (Ctrl+C)
+            print(f"Program failed, error occured: {e=}")
+            pool.terminate()
+            pool.join()
+            # Perform any necessary cleanup or finalization steps
+            isFail = True
             
         # After one year is parsed, store output in a CSV
         if not isFail:
@@ -301,20 +316,29 @@ class DAR:
         df = tabula.read_pdf(
             input_path=self.pdf,
             pages=self.sec31, 
-            area=[130, 45, 595, 585], # [topY, leftX, bottomY, rightX]
-            # ! area above works only for 2019-onward. 
+            area=[130, 0, 600, 600], # [topY, leftX, bottomY, rightX]
+            # ! area above should work for 2018 and beyond. 
             # TODO: need to run tests for pre-2018 without area and update cleanDf() accordingly
-            # columns=[45, 362.43, 453.04, 528.64],
-        )[0]
+            columns=[45, 362.43, 453.04, 526],
+            stream=True,
+        )[0] 
         # *STEP 2: CLEAN DATAFRAME HEADER
-        # Remove unnamed column full of dollar signs
-        df = df.drop('Unnamed: 1', axis=1) # ? is this bad? does dollar sign always get its own column?
-        # Merge the first 5 rows to fix the header
-        df = Tools.fixHeader(df, 0, 4)
-        #df.drop(df.columns[df.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
+        sourceColName = 'SOURCE of Revenue/Cash Receipts:'
+        try:
+            # Remove unnamed column full of dollar signs, if it is there (>= 2019)
+            # if int(self.outDict['tif_year']) >= 2019:
+            df = df.drop('Unnamed: 0', axis=1) # ? is this bad? does dollar sign always get its own column?
+            # Merge the first 5 rows to fix the header
+            df = Tools.fixHeader(df, 0, 4)
+            #df.drop(df.columns[df.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
+            # Source Column Name
+            sourceColName = df.filter(like='SOURCE').columns.tolist()[0]
+        except:
+            print("FAILED ON: ", self.outDict['tif_name'])
+            print("URL: ", self.pdfUrl)
         # *STEP 3: PARSE CLEANED DATAFRAME INTO DICTIONARY
         # Obtain the Pandas series for the 'Property Tax Increment' Row
-        propTaxIncRow = df[df['SOURCE of Revenue/Cash Receipts:'] == 'Property Tax Increment']
+        propTaxIncRow = df[df[sourceColName] == 'Property Tax Increment']
         # Obtain the Current and Cumulative Strings out of the propTaxIncRow series
         propTaxIncCur = propTaxIncRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
         propTaxIncCum = propTaxIncRow['Totals of Revenue/Cash Receipts for life of TIF'].values[0]
@@ -323,7 +347,7 @@ class DAR:
         self.outDict['cumulative_property_tax_extraction'] = Tools.stof(propTaxIncCum)
 
         # Obtain the Pandas series for the 'Transfers from Municipal Sources' Row
-        transFromMunRow = df[df['SOURCE of Revenue/Cash Receipts:'] == 'Transfers from Municipal Sources']
+        transFromMunRow = df[df[sourceColName] == 'Transfers from Municipal Sources']
         # Obtain the Current and Cumulative Strings out of the propTaxIncRow series
         transFromMunCur = transFromMunRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
         transFromMunCum = transFromMunRow['Totals of Revenue/Cash Receipts for life of TIF'].values[0]
@@ -332,28 +356,28 @@ class DAR:
         self.outDict['cumulative_transfers_in'] = Tools.stof(transFromMunCum)
 
         # Obtain the Pandas series for the 'Total Expenditures/Cash Disbursements' Row
-        totExpRow = df[df['SOURCE of Revenue/Cash Receipts:'] == 'Total Expenditures/Cash Disbursements (Carried forward from']
+        totExpRow = df[df[sourceColName] == 'Total Expenditures/Cash Disbursements (Carried forward from']
         # Obtain the value as a String
         totExp = totExpRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
         # Use the user-defined Tools.stof() to clean the String to an Integer for storage in self.outDict
         self.outDict['expenses'] = Tools.stof(totExp)
 
         # Obtain the Pandas series for the 'FUND BALANCE, END OF REPORTING PERIOD*' Row
-        fundBalRow = df[df['SOURCE of Revenue/Cash Receipts:'] == 'FUND BALANCE, END OF REPORTING PERIOD*']
+        fundBalRow = df[df[sourceColName] == 'FUND BALANCE, END OF REPORTING PERIOD*']
         # Obtain the value as a String
         fundBal = fundBalRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
         # Use the user-defined Tools.stof() to clean the String to an Integer for storage in self.outDict
         self.outDict['fund_balance_end'] = Tools.stof(fundBal)
 
         # Obtain the Pandas series for the 'Transfers to Municipal Sources' Row
-        transToMunRow = df[df['SOURCE of Revenue/Cash Receipts:'] == 'Transfers to Municipal Sources']
+        transToMunRow = df[df[sourceColName] == 'Transfers to Municipal Sources']
         # Obtain the value as a String
         transToMun = transToMunRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
         # Use the user-defined Tools.stof() to clean the String to an Integer for storage in self.outDict
         self.outDict['transfers_out'] = Tools.stof(transToMun)
 
         # Obtain the Pandas series for the 'Total Expenditures/Cash Disbursements' Row
-        distSurpRow = df[df['SOURCE of Revenue/Cash Receipts:'] == 'Distribution of Surplus']
+        distSurpRow = df[df[sourceColName] == 'Distribution of Surplus']
         # Obtain the value as a String
         distSurp = distSurpRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
         # Use the user-defined Tools.stof() to clean the String to an Integer for storage in self.outDict
@@ -428,6 +452,9 @@ def main():
     year = sys.argv[1]
     # * MODIFY THIS: Filepath to write finalDict data to for each url
     outDir = f'c:\\sc\\{year}'
+    if not os.path.exists(outDir):
+        os.makedirs(outDir)
+
     # Set Locale for use of atoi() when parsing data (utilized in Tools.stof() function)
     # locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
     # DAR URLs to Parse
