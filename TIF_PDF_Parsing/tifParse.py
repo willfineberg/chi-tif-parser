@@ -22,7 +22,7 @@ class Tools:
         locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
         if isinstance(toClean, str):
             # Remove stray dollar signs and/or asterisks to prepare for locale.atof() parsing
-            toClean = toClean.replace('$', '').replace('*', '').strip()
+            toClean = toClean.replace('$', '').replace('*', '').replace(' ', '').strip()
             # toClean is a String
             if '-' in toClean and len(toClean) <= 1:
                 # Handle zeroes (for >= 2019, represented as dashes)

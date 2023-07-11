@@ -2,3 +2,4 @@ tabula-py==2.7.0
 PyPDF2==3.0.1
 bs4==0.0.1
 requests==2.29.0
+ocrmypdf==14.3.0
