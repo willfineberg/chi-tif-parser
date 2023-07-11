@@ -21,12 +21,12 @@ class Tools:
         """Converts a string to a float."""
         locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
         if isinstance(toClean, str):
-            # toClean is a String
-            if '-' in toClean:
-                # Handle zeroes (for >= 2019, represented as dashes)
-                return 0.0
             # Remove stray dollar signs and/or asterisks to prepare for locale.atof() parsing
             toClean = toClean.replace('$', '').replace('*', '').strip()
+            # toClean is a String
+            if '-' in toClean and len(toClean) <= 1:
+                # Handle zeroes (for >= 2019, represented as dashes)
+                return 0.0
             if len(toClean) <= 0:
                 # Handle zeroes (for <= 2018, no representation)
                 return 0.0
@@ -183,14 +183,14 @@ class YearParse:
 
     def run(self):
         startTime = time.time()
-        # Without Threading
-        # for url in self.urlList:
+        # Without Threading or Multiprocessing
+        # for url in self.urlList[]:
         #     dar = DAR(url, self.termTable)
         #     self.darList.append(dar)
         #     self.dictList.append(dar.outDict)
         #     print(json.dumps(dar.outDict, indent=4))
-        # With Threading
-        
+       
+        # With Threading 
         # with concurrent.futures.ThreadPoolExecutor() as executor:
         #     # Get Term Table from first URL (this is done one time only)
         #     self.termTable = executor.submit(self.parseTermTable_sec1, self.urlList[0], self.outDir).result()
@@ -204,6 +204,7 @@ class YearParse:
         #         self.dictList.append(dar.outDict)
         #         print(json.dumps(dar.outDict, indent=4))
 
+        # With Multiprocessing
         isFail = False
         try:
             # Create a multiprocessing Pool
@@ -317,8 +318,8 @@ class DAR:
             input_path=self.pdf,
             pages=self.sec31, 
             area=[130, 0, 600, 600], # [topY, leftX, bottomY, rightX]
-            # ! area above should work for 2018 and beyond. 
-            # TODO: need to run tests for pre-2018 without area and update cleanDf() accordingly
+            # ! area above should work for 2017 and beyond. 
+            # TODO: need to run tests for pre-2017 without area and update cleanDf() accordingly
             columns=[45, 362.43, 453.04, 526],
             stream=True,
         )[0] 
@@ -371,10 +372,14 @@ class DAR:
 
         # Obtain the Pandas series for the 'Transfers to Municipal Sources' Row
         transToMunRow = df[df[sourceColName] == 'Transfers to Municipal Sources']
-        # Obtain the value as a String
-        transToMun = transToMunRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
-        # Use the user-defined Tools.stof() to clean the String to an Integer for storage in self.outDict
-        self.outDict['transfers_out'] = Tools.stof(transToMun)
+        if not transToMunRow.empty:
+            # Obtain the value as a String
+            transToMun = transToMunRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
+            # Use the user-defined Tools.stof() to clean the String to an Integer for storage in self.outDict
+            self.outDict['transfers_out'] = Tools.stof(transToMun)
+        else:
+            # We cannot identify a 'Transfers to Municipal Sources' row, so value is 0.0
+            self.outDict['transfers_out'] = 0.0
 
         # Obtain the Pandas series for the 'Total Expenditures/Cash Disbursements' Row
         distSurpRow = df[df[sourceColName] == 'Distribution of Surplus']

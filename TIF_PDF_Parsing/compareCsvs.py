@@ -2,7 +2,7 @@ import pandas as pd
 import math
 
 # ! You may need to replace the paths in the pd.read_csv() calls (if not on Windows)
-year = '2020'
+year = '2017'
 
 # Experiential (from tifParse.py program)
 exp = pd.read_csv(f'C:\\sc\\{year}\\{year}_out.csv')
@@ -11,7 +11,7 @@ exp = pd.read_csv(f'C:\\sc\\{year}\\{year}_out.csv')
 # print(exp)
 
 # Real (from Anthony Moser Google Sheet)
-real = pd.read_csv(f'C:\\sc\\{year}\\VALID_{year}_out.csv')
+real = pd.read_csv(f'C:\\sc\\{year}\\{year}_realToValidate.csv')
 # real = pd.read_csv(r"C:\sc\idleDemo\2020_out.csv")
 
 # Iterate df1 and df2 and print out differences
