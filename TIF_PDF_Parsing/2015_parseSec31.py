@@ -1,44 +1,77 @@
 import locale, sys
 import tabula, csv
 import pandas as pd
-import PyPDF2, io
+import PyPDF2, pdfplumber, io, os
 import requests
 import json
 import re
+import tempfile, shutil
+import ocrmypdf
+from pdf2image import convert_from_bytes
 from math import isnan
 from bs4 import BeautifulSoup
 
 def main():
+    # try:
+    year = '2015'
+    urlListOffset = 24
     dictList = []
-    for url in Tools.urlList("https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2015-.html"):
+    pd.set_option('display.max_columns', None)
+    for i, url in enumerate(Tools.urlList(f"https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--{year}-.html")[urlListOffset:], urlListOffset):
         # Reset outDict
         outDict = {}
         # Obtain PDF bytes
-        pdf = io.BytesIO(requests.get(url).content)
-        # Obtain Section 3.1 Page Number
-        sec31 = Tools.getPageNumFromText(pdf, 'SECTION 3.1')
-        # TODO: grab the desired page and run ocrmypdf on it to redo the default low-quality OCR
+        pdf = io.BytesIO(requests.get(url).content)        
+        pdf_writer = PyPDF2.PdfWriter()
+        pdf_writer.add_page(PyPDF2.PdfReader(pdf).pages[Tools.getPageNumFromText(pdf, 'SECTION 3.1') - 1])
+        sec31_origBytes = io.BytesIO()
+        pdf_writer.write(sec31_origBytes)
+        # Bytes of Section 3.1 Page is now obtained; convert it to a PIL image
+        sec31_img = convert_from_bytes(sec31_origBytes.getvalue(), dpi=300) #, poppler_path=r'C:\Program Files\poppler-23.07.0\Library\bin'
+        with tempfile.TemporaryDirectory() as tempDir:
+            sec31_imgFp = os.path.join(tempDir, 'out.png')
+            sec31_pdfFp = os.path.join(tempDir, 'out.pdf')
+            sec31_img[0].save(sec31_imgFp, format='PNG')
+            ocrmypdf.ocr(sec31_imgFp, sec31_pdfFp, optimize=0, redo_ocr=True, image_dpi=300)
+            ocrmypdf.ocr(sec31_pdfFp, sec31_pdfFp, redo_ocr=True, optimize=1)
+            # Copy output pdf for debugging
+            shutil.copy(sec31_pdfFp, r'c:\sc\out.pdf')
 
-        # ! Parse Section 3.1 Name and Year into outDict
-        df = tabula.read_pdf(
-            input_path=pdf,
-            pages=sec31, 
-            area=[80, 0, 105, 600], # [topY, leftX, bottomY, rightX]
-            pandas_options={'header': None},
-        )[0]
-        # Obtains the name and year by table location
-        tifName = str(df.iloc[1,1]).replace(" Redevelopment Project Area", "")
-        tifYear = str(df.iloc[0,0]).split()[-1]
-        # Set the TIF name and year
-        outDict['tif_name'] = tifName.strip()
-        outDict['tif_year'] = tifYear.strip()
-        # Add current outDict to dictList
-        dictList.append(outDict)
-        
-        # ! Parse Section 3.1 Datatable into outDict
-        outDict = parseIdAndData_sec31(pdf, url, sec31, outDict)
+            # ! Parse Section 3.1 Name and Year into outDict
+            leftX, topY = Tools.getTextCoords(sec31_pdfFp, 'FY')
+            df = tabula.read_pdf(
+                input_path=r'c:\sc\out.pdf',
+                # pages=sec31, 
+                area=[topY-2, 0, topY+25, 600], # [topY, leftX, bottomY, rightX]
+                columns=[leftX-2, leftX+54],
+                pandas_options={'header': None},
+            )[0]
+            print(df)
+            # Obtains the name and year by table location
+            tifName = str(df.iloc[1,2]).replace(" Redevelopment Project Area", "").strip()
+            match = re.search(r"FY\s+(\d{4})", str(df.iloc[0,1]))
+            if match:
+                tifYear = match.group(1)
+            else:
+                print('\nFAILED TO IDENTIFY YEAR...\n')
+                sys.exit(0)
+            # Set the TIF name and year
+            outDict['tif_name'] = tifName.strip()
+            outDict['tif_year'] = tifYear.strip()
+            # Add current outDict to dictList
+            dictList.append(outDict)
+            
+            # ! Parse Section 3.1 Datatable into outDict
+            outDict = parseIdAndData_sec31(sec31_pdfFp, url, outDict)
 
         print(json.dumps(outDict, indent=4))
+        Tools.buildCsvFromDicts(outDict, f'c:\\sc\\out_2015.csv')
+        print('\nurlList Index: ', i, '\n')
+        # input()
+    # except Exception as e:
+    #     print(f'ERROR: {e=}')
+    #     print("FAILED ON: ", tifName, f'\n{url}')
+    #     print("urlList Index: ", i)
 
 class Tools:
     """A collection of utility functions for TIF data parsing and processing."""
@@ -48,11 +81,11 @@ class Tools:
         locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
         if isinstance(toClean, str):
             # Remove stray dollar signs and/or asterisks to prepare for locale.atof() parsing
-            toClean = toClean.replace('$', '').replace('*', '').replace('_', '').replace('~', '').replace('.', '').replace('I', '').replace(';', '').replace(' ', '').strip()
+            toClean = toClean.replace('L','').replace('_','').replace('-','')
             # toClean is a String
-            if '-' in toClean and len(toClean) <= 1:
+            # if 'L' in toClean or '-' in toClean or len(toClean) <= 1:
                 # Handle zeroes (for >= 2019, represented as dashes)
-                return 0.0
+                # return 0.0
             if len(toClean) <= 0:
                 # Handle zeroes (for <= 2018, no representation)
                 return 0.0
@@ -62,12 +95,21 @@ class Tools:
             try:
                 if match:
                     # Number is negative, so we update the Float return value appropriately
-                    return -1 * locale.atof(match.group(1))
+                    # toClean = match.group(1)
+                    # toClean = re.sub(r'\b\d{1,3}(?:,\d{3})*\b', '', toClean)
+                    toClean = Tools.extract_numeric_value(toClean)
+                    if len(toClean) <= 0:
+                        return 0.0
+                    return -1 * locale.atof(toClean)
                 else:
                     # Number is positive, so return the cleaned string as a Float
+                    # toClean = re.sub(r'^[^,\d]*|[^,\d]*$', '', toClean)
+                    toClean = Tools.extract_numeric_value(toClean)
+                    if len(toClean) <= 0:
+                        return 0.0
                     return locale.atof(toClean)
             except ValueError as e:
-                print(f"Caught: {e}")
+                print(f"Caught: {e=}")
                 print(len(toClean))
                 print(f"Trying to parse: '{toClean}'")
                 sys.exit(1)
@@ -81,6 +123,16 @@ class Tools:
         # Return None if the value cannot be determined
         return None
         
+    def extract_numeric_value(toClean):
+        pattern = r"(?<![^\s\d,])\d{1,3}(?:,\d{3})*(?![^\s\d,])"
+        match = re.search(pattern, toClean)
+        if match:
+            number = match.group()
+            print(toClean, ' ---> ', number)
+            return number
+        else:
+            print("No number found.")
+    
     def urlList(url):
         """Obtains a list of TIF DAR URLs using BeautifulSoup."""
 
@@ -92,6 +144,18 @@ class Tools:
         # Return a List of PDF links
         pdf_links = ["https://www.chicago.gov" + link['href'] for link in soup.find_all(href=lambda href: href and href.endswith('.pdf'))]
         return pdf_links
+
+    def getTextCoords(pdf, target_text):
+        with pdfplumber.open(pdf) as pdf:
+            page = pdf.pages[0]  # Assuming you want to check the first page
+            for word in page.extract_words():
+                if re.search(target_text, word["text"], re.IGNORECASE):
+                    print(word)
+                    x = float(word["x0"])
+                    y = float(word["top"])
+                    return x, y
+
+        return None  # Target text not found
 
     def getPageNumFromText(pdf, target_text):
         """Get the page number containing the specified text in a PDF document; return an int or None."""   
@@ -108,6 +172,46 @@ class Tools:
         # Return None if the target text is not found in any page
         return None
 
+    def buildCsvFromDicts(outDict, csvFp):
+        """Create a CSV file from a list of Dictionaries. Each row is one Dictionary."""
+
+        # Define the fieldnames in the desired order
+        fieldnames = [
+            "tif_name",
+            "tif_year",
+            "start_year",
+            "end_year",
+            "tif_number",
+            "property_tax_extraction",
+            "cumulative_property_tax_extraction",
+            "transfers_in",
+            "cumulative_transfers_in",
+            "expenses",
+            "fund_balance_end",
+            "transfers_out",
+            "distribution",
+            "admin_costs",
+            "finance_costs",
+            "bank"
+        ]
+
+        if os.path.exists(csvFp):
+            mode = 'a'
+        else:
+            mode = 'w'
+
+        # Write the data to the CSV file
+        with open(csvFp, mode, newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            # Write the header row
+            if mode =='w':
+                # Only write the header if it is a new CSV file
+                writer.writerow(fieldnames)
+            # Write the data rows
+            row = [outDict.get(key, "") for key in fieldnames]
+            writer.writerow(row)
+            print("CSV File saved to: " + csvFp)
+
     def fixHeader(df, startRow, endRow):
         """Gets the header row by concatenating multiple rows; returns a list of column headers"""
         header_row = df.iloc[startRow:endRow].fillna('').apply(lambda x: ' '.join(x.str.strip()), axis=0).tolist()
@@ -118,11 +222,12 @@ class Tools:
         df.columns = header_row
         return df
 
-def parseIdAndData_sec31(pdf, pdfUrl, sec31, outDict):
+def parseIdAndData_sec31(pdf, pdfUrl, outDict):
     """Converts TIF Section 3.1 into a CSV and parses the values; returns ID number or None"""
 
     # Obtain ID from URL
     filename = pdfUrl.split("/")[-1]
+    print(filename)
     pattern = r"T_(\d+)_"
     match = re.search(pattern, filename)
     if match:
@@ -132,14 +237,18 @@ def parseIdAndData_sec31(pdf, pdfUrl, sec31, outDict):
         print("ID number not found.")
         return None
     # *STEP 1: READ PDF INTO DATAFRAME
+    leftX, topY = Tools.getTextCoords(pdf, 'Revenue')
     df = tabula.read_pdf(
         input_path=pdf,
-        pages=sec31,
-        area=[144, 0, 540, 600],
-        columns=[45, 363, 428.5, 506], # [topY, leftX, bottomY, rightX]
+        area=[topY-3, 0, topY+401, 600], # [topY, leftX, bottomY, rightX]
+        columns=[leftX-3, leftX+311, leftX+382, leftX+457], 
         stream=True,
     )[0]
+    print(df)
     # *STEP 2: CLEAN DATAFRAME HEADER
+    sourceColName = 'Revenue/Cash Receipts Deposited in Fund During Reporting FY:'
+    curYearColName = 'Reporting Year'
+    cumColName = 'Cumulative*'
     try:
         sourceColName = df.filter(like='Revenue').columns.tolist()[0]
         curYearColName = df.filter(like='Reporting Year').columns.tolist()[0]
@@ -149,7 +258,7 @@ def parseIdAndData_sec31(pdf, pdfUrl, sec31, outDict):
         print("URL: ", pdfUrl)
     # *STEP 3: PARSE CLEANED DATAFRAME INTO DICTIONARY
     # Obtain the Pandas series for the 'Property Tax Increment' Row
-    propTaxIncRow = df[df[sourceColName] == 'Property Tax Increment']
+    propTaxIncRow = df[df[sourceColName].str.contains('Property Tax Increment', na=False, case=False)]
     # Obtain the Current and Cumulative Strings out of the propTaxIncRow series
     propTaxIncCur = propTaxIncRow[curYearColName].values[0]
     propTaxIncCum = propTaxIncRow[cumColName].values[0]
@@ -167,7 +276,7 @@ def parseIdAndData_sec31(pdf, pdfUrl, sec31, outDict):
     outDict['cumulative_transfers_in'] = Tools.stof(transFromMunCum)
 
     # Obtain the Pandas series for the 'Total Expenditures/Cash Disbursements' Row
-    totExpRow = df[df[sourceColName].str.contains('Total Expenditures/Cash Disbursements', na=False, case=False)]
+    totExpRow = df[df[sourceColName].str.contains('Carried', na=False, case=False)]
     # Obtain the value as a String
     totExp = totExpRow[curYearColName].values[0]
     # Use the user-defined Tools.stof() to clean the String to an Integer for storage in outDict
@@ -181,7 +290,7 @@ def parseIdAndData_sec31(pdf, pdfUrl, sec31, outDict):
     outDict['fund_balance_end'] = Tools.stof(fundBal)
 
     # Obtain the Pandas series for the 'Transfers to Municipal Sources' Row
-    transToMunRow = df[df[sourceColName] == 'Transfers to Municipal Sources']
+    transToMunRow = df[df[sourceColName].str.contains('Transfers to Municipal Sources', na=False, case=False)]
     if not transToMunRow.empty:
         print('\nFOUND A TRANSFER TO MUNICIPAL SOURCES ROW!\n')
         # Obtain the value as a String
@@ -193,7 +302,7 @@ def parseIdAndData_sec31(pdf, pdfUrl, sec31, outDict):
         outDict['transfers_out'] = 0.0
 
     # Obtain the Pandas series for the 'Total Expenditures/Cash Disbursements' Row
-    distSurpRow = df[df[sourceColName] == 'Distribution of Surplus']
+    distSurpRow = df[df[sourceColName].str.contains('Distribution of Surplus', na=False, case=False)]
     # Obtain the value as a String
     distSurp = distSurpRow[curYearColName].values[0]
     # Use the user-defined Tools.stof() to clean the String to an Integer for storage in outDict
