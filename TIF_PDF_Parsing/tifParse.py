@@ -381,7 +381,7 @@ class DAR:
             # We cannot identify a 'Transfers to Municipal Sources' row, so value is 0.0
             self.outDict['transfers_out'] = 0.0
 
-        # Obtain the Pandas series for the 'Total Expenditures/Cash Disbursements' Row
+        # Obtain the Pandas series for the 'Distribution of Surplus' Row
         distSurpRow = df[df[sourceColName] == 'Distribution of Surplus']
         # Obtain the value as a String
         distSurp = distSurpRow['Revenue/Cash Receipts for Current Reporting Year'].values[0]
