@@ -45,9 +45,9 @@ def main():
         print('Isolating Page', sec32b)
         if sec32b == None:
             sec32b = 11 # hardcode it to page 7 if string 'Section 3.2 B' is not found
-        pdf_page = PyPDF2.PdfReader(pdf).pages[sec32b - 1]
-        height = float(pdf_page.mediabox[3])
-        pdf_writer.add_page(pdf_page) # TODO: this can be done without making a new pdf_writer (i think?)
+        sec32b_page = PyPDF2.PdfReader(pdf).pages[sec32b - 1]
+        height = float(sec32b_page.mediabox[3])
+        pdf_writer.add_page(sec32b_page) # TODO: this can be done without making a new pdf_writer (i think?)
         sec32b_origBytes = io.BytesIO()
         pdf_writer.write(sec32b_origBytes)
         # Bytes of Section 3.1 Page is now obtained; convert it to a PIL image

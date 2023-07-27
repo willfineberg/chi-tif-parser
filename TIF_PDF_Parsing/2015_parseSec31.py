@@ -69,10 +69,10 @@ def main():
             # Set the TIF name and year
             outDict['tif_name'] = tifName.replace('_','').replace('—','').strip()
             outDict['tif_year'] = tifYear.strip()
-            # Add current outDict to dictList
-            dictList.append(outDict)
             # ! Parse Section 3.1 Datatable into outDict
             outDict = parseIdAndData_sec31(sec31_pdfFp, url, outDict)
+            # Add current outDict to dictList
+            dictList.append(outDict)
 
         print(json.dumps({k: f"{v:,}" if isinstance(v, int) else v for k, v in outDict.items()}, indent=4, separators=(',', ': ')))
         print('\nurlList Index: ', i, '\n')
