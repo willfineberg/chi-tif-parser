@@ -13,6 +13,7 @@ from contextlib import suppress
 import pyautogui
 import time
 from pdf2image import convert_from_bytes
+from urllib.parse import urljoin  # For joining URLs in Tools.darYearsUrls()
 from math import isnan
 from bs4 import BeautifulSoup
 
@@ -61,7 +62,7 @@ def parseIdAndData_sec31(pdf, pdfUrl, outDict): # TODO - copy this code back to 
     outDict['cumulative_property_tax_extraction'] = int(Tools.stof(propTaxIncCum))
 
     # Obtain the Pandas series for the 'Transfers from Municipal Sources' Row
-    transFromMunRow = df[df[sourceColName].str.contains('from Municipal Sources', na=False, case=False)]
+    transFromMunRow = df[df[sourceColName].str.contains('Transfers from', na=False, case=False)]
     # Obtain the Current and Cumulative Strings out of the propTaxIncRow series
     transFromMunCur = transFromMunRow[curYearColName].values[0]
     transFromMunCum = transFromMunRow[cumColName].values[0]
@@ -108,7 +109,6 @@ def parseIdAndData_sec31(pdf, pdfUrl, outDict): # TODO - copy this code back to 
 def main():
     pd.set_option('display.max_columns', None)
     dictList = []
-    scratchDir = 'c:\\sc' # * - MODIFY THIS to an existing scratch directory
     # ! - Parse Command Line Args
     parser = argparse.ArgumentParser()
     parser.add_argument("year", type=str)
@@ -117,28 +117,28 @@ def main():
     args = parser.parse_args()
     redoOcr = args.redoOcr
     year, urlListOffset = args.year, args.urlListOffset
-    termTable_df = pd.read_csv(os.path.join(scratchDir, f'{year}_termTable.csv'))
+    scratchDir = f'c:\\sc\\{year}' # * - MODIFY THIS to an existing scratch directory
+    if not os.path.exists(scratchDir):
+        os.makedirs(scratchDir)
+    # ! - Make Filepath Variables
     csvFp = os.path.join(scratchDir, f'{year}_out.csv')
     sec31_pdfFp_out = os.path.join(scratchDir, 'sec31.pdf')
     sec32b_pdfFp_out = os.path.join(scratchDir, 'sec32b.pdf')
     print("urlList Offset Inputted:", urlListOffset)
-    # try:
-    darYearsUrls = {
-        "2012": "https://www.chicago.gov/content/city/en/depts/dcd/supp_info/district_annual_reports2012.html",
-        "2013": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2013-.html",
-        "2014": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2014-.html",
-        "2015": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2015-.html",
-        "2016": "https://www.chicago.gov/city/en/depts/dcd/supp_info/2016TIFAnnualReports.html",
-        "2017": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2017-.html",
-        "2018": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2018-.html",
-        "2019": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2019-.html",
-        "2020": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2020-.html",
-        "2021": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2021-.html",
-        "2022": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2022-.html",
-        "2023": "https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2023-.html"
-    }
+    # ! - DAR URLs than can be parsed
+    darYearsUrls = Tools.darYearsUrls()
+    try:
+        url = darYearsUrls[year]
+    except KeyError as e:
+        print(f'{e=}')
+        print(f'No URL found for {year}')
+        sys.exit(1)
+    # ! - Read Termination Table from Disk (previously extracted)
+    termTable_df = pd.read_csv(os.path.join(scratchDir, f'{year}_termTable.csv'))
+    # ! Use the DAR YEAR URL for the appropriate year to generaye the URL LIST OF PDFS
     urlList = Tools.urlList(darYearsUrls[year])
     urlListLen = len(urlList)
+    print('URLLIST LENGTH:', urlListLen)
     # ! - Iterate each TIF DAR URL for a single year
     for i, url in enumerate(urlList[urlListOffset:], urlListOffset):
         print("ENABLED VIA ARGS - REDO OCR") if redoOcr else print("DISABLED BY DEFAULT - REDO OCR")
@@ -233,13 +233,13 @@ def main():
                     # input("Press Enter to continue (paused after PDF creation)...")
             
             # ! - Obtain and Parse Section 3.1 Dataframe
-            try:
-                outDict = parseIdAndData_sec31(sec31_pdfFp_out, url, outDict)
-            except Exception as e:
-                print(f'{e=}')
-                print("FAILED ON: ", url)
-                print('\nurlList Index: ', i, '\n')
-                sys.exit()
+            # try:
+            outDict = parseIdAndData_sec31(sec31_pdfFp_out, url, outDict)
+            # except Exception as e:
+                # print(f'{e=}')
+                # print("FAILED ON: ", url)
+                # print('\nurlList Index: ', i, '\n')
+                # sys.exit()
             ''' sec31_pdfFp_out was first arg ^^^^^^^^^^^^   '''
             # ! - Obtain and Parse Section 3.2 B Dataframe
             try:
@@ -303,7 +303,7 @@ def main():
             print(json.dumps({k: f'{v:,}' if isinstance(v, int) else v for k, v in outDict.items()}, indent=4, separators=(',', ': ')))
             print('\nurlList Index: ', i, '\n')
             Tools.buildCsvFromDicts(outDict, csvFp)
-            print("ON DECK:", urlList[i+1].split('/')[-1]) if i < urlListLen - 1 else print("ON DECK:", "NONE!!!")
+            print("ON DECK:", f"({str(i+1)})", urlList[i+1].split('/')[-1]) if i < urlListLen - 1 else print("ON DECK:", "NONE!!!")
             # ! - Open PDF and CSV in GUI for manual validation
             # TODO -  MODIFY THIS: IT IS WINDOWS-SPECIFIC
             # pdfxchange = r"C:\Program Files\Tracker Software\PDF Editor\PDFXEdit.exe"
@@ -318,8 +318,8 @@ def main():
                 sec31_pdf_gw.moveTo(0, 0)
                 sec31_pdf_gw.resizeTo(1168, 1190)
                 sec32b_pdf_gw = gw.getWindowsWithTitle('sec32b - PDF-XChange Editor')[0]
-                sec32b_pdf_gw.moveTo(1164, 497)
-                sec32b_pdf_gw.resizeTo(1188, 711)
+                sec32b_pdf_gw.moveTo(1153, 0)
+                sec32b_pdf_gw.resizeTo(1188, 434)
                 xcl_gw = gw.getWindowsWithTitle(f'{year}_out.csv - Excel')[0]
                 vscode_gw = gw.getWindowsWithTitle([window for window in gw.getAllTitles() if 'Visual Studio Code' in window][0])[0]
                 sec31_pdf_gw.activate() # put sec31 on bottom
@@ -355,13 +355,13 @@ class Tools:
         locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
         if isinstance(toClean, str):
             # Remove stray dollar signs and other bad chars to prepare for locale.atof() parsing
-            # if '$' in toClean:
-            #     toClean = toClean[toClean.index('$'):]
+            if '$' in toClean:
+                toClean = toClean[toClean.index('$'):]
             toClean = toClean.replace('L','').replace('I','').replace('_','')\
                             .replace('-','').replace('|','').replace('~','').replace(']','')\
-                            .replace('$', '').replace(' ','').replace('o','0')
-            # OCR often parses '5' as '§'
-            toClean = toClean.replace('§', '5')
+                            .replace('$','').replace(' ','')
+            # OCR sometimes parses '5' as '§' or 's' and '0' as 'o'
+            toClean = toClean.replace('§', '5').replace('s', '5').replace('o','0')
             # toClean is a String
             # if 'L' in toClean or '-' in toClean or len(toClean) <= 1:
                 # Handle zeroes (for >= 2019, represented as dashes)
@@ -376,7 +376,8 @@ class Tools:
                 if match:
                     # Number is negative, so we update the Float return value appropriately
                     # toClean = match.group(1)
-                    # toClean = re.sub(r'\b\d{1,3}(?:,\d{3})*\b', '', toClean)
+                    toClean = toClean.replace(')','').replace('(','')
+                    toClean = re.sub(r'[,.](?P<digit>\d{3})1$', r',\g<digit>', toClean)
                     toClean = Tools.extract_numeric_value(toClean)
                     if toClean == None or len(toClean) <= 0:
                         return 0.0
@@ -384,6 +385,7 @@ class Tools:
                 else:
                     # Number is positive, so return the cleaned string as a Float
                     # toClean = re.sub(r'^[^,\d]*|[^,\d]*$', '', toClean)
+                    # Handle a trailing '1' using regex (ex. '123,456,7891')
                     toClean = re.sub(r'[,.](?P<digit>\d{3})1$', r',\g<digit>', toClean)
                     toClean = Tools.extract_numeric_value(toClean)
                     if toClean == None or len(toClean) <= 0:
@@ -444,6 +446,25 @@ class Tools:
         # Return a List of PDF links
         pdf_links = ["https://www.chicago.gov" + link['href'] for link in soup.find_all(href=lambda href: href and href.endswith('.pdf'))]
         return pdf_links
+
+    def darYearsUrls():
+        """Parses the chicago.gov 'TIF District Annual Reports 1997-present' webpage; returns a Dictionary with Years matched to URLs"""
+        html = requests.get('https://www.chicago.gov/city/en/depts/dcd/supp_info/tif-district-annual-reports-2004-present.html').text
+        soup = BeautifulSoup(html, "html.parser")
+        year_links = soup.find_all("a", href=True)
+        darYearsUrls = {}
+        for link in year_links:
+            text = link.text.strip()
+            href = link["href"]
+            # Extract the year from the link text using regular expression
+            year_match = re.search(r"\d{4}", text)
+            if year_match:
+                year = year_match.group(0)
+                full_url = urljoin("https://www.chicago.gov", href)
+                # Filter URLs to include only those containing 'city/en/depts/dcd/supp_info'
+                if 'city/en/depts/dcd/supp_info' in full_url:
+                    darYearsUrls[year] = full_url
+        return darYearsUrls
 
     def getTextCoords(pdf, target_text):
         with pdfplumber.open(pdf) as pdf:
