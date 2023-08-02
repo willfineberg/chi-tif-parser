@@ -1,0 +1,103 @@
+---
+title: "Shiny App Pract"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Libraries
+```{r}
+library(ggplot2)
+library(ggmap)
+library(maps)
+library(mapdata)
+library(rgdal)
+library(sf)
+library(tidyverse)
+library(rgeos)
+library(rstudioapi)
+library(tidyr)
+library(broom)
+library(RSocrata)
+library(mapproj)
+library(readxl)
+library(rjson)
+library(geojsonio)
+```
+
+Reading in excel file
+```{r}
+setwd("/Users/andresmeza/Desktop/Shiny_practice")
+X2021_TIF_Report <- read_excel("2021 TIF Report.xlsx", 
+    col_types = c("text", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "numeric", "numeric", "numeric", 
+        "text"))
+TIF_2021_df <- readOGR( 
+  dsn= "/Users/andresmeza/Desktop/TIF_Boundaries/" , 
+  layer="TIF_Boundaries")
+TIF_districts <- spTransform(TIF_2021_df, CRS("+proj=longlat +datum=WGS84"))
+TIF_districts.f = TIF_districts %>% fortify(region = 'name')
+ChiTIFs  = merge(TIF_districts.f, TIF_districts@data, by.x = 'id', by.y = 'name')
+TIFs = ChiTIFs %>% select(id) %>% distinct()
+values = data.frame(id = c(TIFs),
+                      value = c(runif(TIFs %>% count() %>% unlist(),5.0, 25.0)))
+TIFfinal = merge(ChiTIFs, values, by.x='id')
+TIFfinal %>% group_by(id) %>% do(head(., 1)) %>% head(10)
+TIFfinal3 <- cbind(TIFfinal, TIFfinal2[,30, drop=FALSE])
+colnames(TIFfinal3) [29] = "Propertytaxextraction"
+```
+
+Transforming shapefile for map
+```{r}
+TIFsf <- sf::st_read("~/Desktop/TIF_Boundaries/TIF_Boundaries.shp")
+TIFsf <- sf::st_transform(TIFsf, crs = "+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0")
+
+map <- google_map(
+  key = api_key,
+  data = TIFsf) %>%
+  add_polygons()
+map
+names(TIFsf)
+```
+
+Shiny page w/ tif districts
+```{r}
+library(shiny)
+library(dplyr)
+library(googleway)
+
+api_key <- "AIzaSyDYu3ooTegFHilgtg0SnM8Iw2ggry1-kQI"
+TIFdata <- TIFsf
+
+ui <- fluidPage(
+  tags$h1("Chicago TIF districts"),
+  fluidRow(
+    column(
+      width = 3,
+      selectInput(inputId = "input", label = "Select TIF District:", multiple = TRUE, choices = sort(TIFdata$name), selected = "Belmont/Central")
+    ),
+    column(
+      width = 9,
+      google_mapOutput(outputId = "map")
+)
+)
+)
+
+server <- function(input,output){
+  map_key <- 'AIzaSyDYu3ooTegFHilgtg0SnM8Iw2ggry1-kQI'
+  
+  output$map <- renderGoogle_map({
+    google_map(key = map_key) %>%
+      add_polygons(data = TIFdata)
+    
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
