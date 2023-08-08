@@ -75,6 +75,7 @@ class Tools:
                     darYearsUrls[year] = full_url
         return darYearsUrls
 
+    # TODO - return UNIQUE LIST of urls (duplicates possible)
     def urlList(url):
         """Obtains a list of TIF DAR URLs using BeautifulSoup."""
 
@@ -212,12 +213,12 @@ class YearParse:
     def run(self):
         startTime = time.time()
         # ! - OPTION #1: Without Threading or Multiprocessing (Slow)
-        for url in self.urlList:
-            dar = DAR(self.year, url, self.termTable)
-            self.darList.append(dar)
-            self.dictList.append(dar.outDict)
-            print(json.dumps(dar.outDict, indent=4))
-            input('Press Enter to coninue...')
+        # for url in self.urlList:
+        #     dar = DAR(self.year, url, self.termTable)
+        #     self.darList.append(dar)
+        #     self.dictList.append(dar.outDict)
+        #     print(json.dumps(dar.outDict, indent=4))
+        #     input('Press Enter to coninue...')
        
         # ! - OPTION #2: With Threading (Much Faster) 
         # with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -235,31 +236,31 @@ class YearParse:
 
         # ! - OPTION #3: With Multiprocessing (Fastest)
         isFail = False
-        # try:
-        #     # Create a multiprocessing Pool
-        #     pool = multiprocessing.Pool(initializer=self.setLocale, initargs=())
-        #     # Apply DAR to each URL in parallel
-        #     results = []
-        #     for url in self.urlList:
-        #         result = pool.apply_async(DAR, args=(self.year, url, self.termTable))
-        #         results.append(result)
-        #     # Wait for the results and collect DAR objects
-        #     for result in results:
-        #         dar = result.get()
-        #         self.darList.append(dar)
-        #         self.dictList.append(dar.outDict)
-        #         print(json.dumps(dar.outDict, indent=4))
-        #     # Close the multiprocessing Pool
-        #     pool.close()
-        #     pool.join()
-        # except Exception as e:
-        #     # Handle keyboard interrupt (Ctrl+C)
-        #     print(f"Program failed, error occured: {e=}")
-        #     traceback.print_exc()
-        #     pool.terminate()
-        #     pool.join()
-        #     # Perform any necessary cleanup or finalization steps
-        #     isFail = True
+        try:
+            # Create a multiprocessing Pool
+            pool = multiprocessing.Pool(initializer=self.setLocale, initargs=())
+            # Apply DAR to each URL in parallel
+            results = []
+            for url in self.urlList:
+                result = pool.apply_async(DAR, args=(self.year, url, self.termTable))
+                results.append(result)
+            # Wait for the results and collect DAR objects
+            for result in results:
+                dar = result.get()
+                self.darList.append(dar)
+                self.dictList.append(dar.outDict)
+                print(json.dumps(dar.outDict, indent=4))
+            # Close the multiprocessing Pool
+            pool.close()
+            pool.join()
+        except Exception as e:
+            # Handle keyboard interrupt (Ctrl+C)
+            print(f"Program failed, error occured: {e=}")
+            traceback.print_exc()
+            pool.terminate()
+            pool.join()
+            # Perform any necessary cleanup or finalization steps
+            isFail = True
             
         # After one year is parsed, store output in a CSV
         if not isFail:
@@ -487,10 +488,10 @@ class DAR:
         # Parse each Admin Cost and sum them; assume larger value is more accurate
         adminCosts_service = df[df['Service'] == 'Administration']['Amount'].apply(Tools.stof).sum()
         adminCosts_byName = df[df['Name'].astype(str).str.contains('City Program Management Cost|City Staff Cost', case=False, na=False)]['Amount'].apply(Tools.stof).sum()
-        adminCosts = max(adminCosts_service, adminCosts_byName)
-        if adminCosts_service != adminCosts_byName:
-            print('\nAdmin Cost Discrepancy! Larger value chosen between', adminCosts_service, 'and', adminCosts_byName)
-            print(f"Chosen Admin Value for TIF #{self.outDict['tif_number']}: {adminCosts}\n")
+        # adminCosts = max(adminCosts_service, adminCosts_byName)
+        # if adminCosts_service != adminCosts_byName:
+        #     print('\nAdmin Cost Discrepancy! Larger value chosen between', adminCosts_service, 'and', adminCosts_byName)
+        #     print(f"Chosen Admin Value for TIF #{self.outDict['tif_number']}: {adminCosts}\n")
         # TODO: rely on the names, not service administration
         # Parse each Finance Cost Amount and sum them
         financeCosts = df[df['Service'] == 'Financing']['Amount'].apply(Tools.stof).sum()
@@ -500,7 +501,7 @@ class DAR:
                     bankNameList[bankNameList.index("Amalgamated Bank of Chicago")] = "Amalgamated Bank"
         bankNames = ', '.join(sorted(bankNameList))
         # Set the adminCosts, financeCosts, and bankNames
-        self.outDict['admin_costs'] = adminCosts
+        self.outDict['admin_costs'] = adminCosts_byName # ? - adminCosts
         self.outDict['finance_costs'] = financeCosts
         self.outDict['bank'] = bankNames
         # Return the DataFrame for storage
