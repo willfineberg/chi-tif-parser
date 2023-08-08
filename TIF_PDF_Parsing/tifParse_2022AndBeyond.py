@@ -75,7 +75,6 @@ class Tools:
                     darYearsUrls[year] = full_url
         return darYearsUrls
 
-    # TODO - return UNIQUE LIST of urls (duplicates possible)
     def urlList(url):
         """Obtains a list of TIF DAR URLs using BeautifulSoup."""
 
@@ -86,7 +85,10 @@ class Tools:
         links = soup.find_all(href=True) #contains hyperlink
         # Return a List of PDF links
         pdf_links = ["https://www.chicago.gov" + link['href'] for link in soup.find_all(href=lambda href: href and href.endswith('.pdf'))]
-        return pdf_links
+        # Remove any duplicates
+        outList = []
+        [outList.append(url) for url in pdf_links if url not in outList]
+        return outList
 
     def getPageNumFromText(pdf, target_text):
         """Get the page number containing the specified text in a PDF document; return an int or None."""   
