@@ -1,6 +1,7 @@
-# Dependencies: tabula-py, bs4, PyPDF2, requests (install with `pip install -r requirements.txt`)
 
-# tabula-py Documentation: https://tabula-py.readthedocs.io/en/latest/tabula.html#tabula.io.convert_into
+# ! - Install Dependencies with `pip install -r requirements.txt`
+
+# * tabula-py Documentation: https://tabula-py.readthedocs.io/en/latest/tabula.html#tabula.io.convert_into
 import tabula, csv  # For PDF parsing to CSV
 import PyPDF2, pdfplumber  # For finding the right page number and page locations to point Tabula to
 import locale  # For using C-style atoi() function

@@ -17,7 +17,24 @@ from urllib.parse import urljoin  # For joining URLs in Tools.darYearsUrls()
 from math import isnan
 from bs4 import BeautifulSoup
 
-def parseIdAndData_sec31(pdf, pdfUrl, outDict): # TODO - copy this code back to tifParse_2017AndBeyond.py b/c str.contains() is more robust
+# ! FUNCTIONS
+def configurePandas():
+    pd.set_option('display.max_columns', None)
+    pd.set_option('display.max_rows', None)
+    pd.set_option('display.width', 100000)
+
+def cleanDf_before2011(df):
+    print(df)
+    # cols = df.columns.tolist()
+    # cols[0] = 'Revenue/Cash Receipts Deposited in Fund During Reporting FY'
+    # newIndexZero = df[df[df.columns[0]].str.contains('Property', na=False)].index[0]
+    # if newIndexZero is None:
+    #     print('USE DEFAULT 3 AS INDEX VALUE')
+    # cleaned = df[3:]
+    df.columns = ['Revenue/Cash Receipts Deposited in Fund During Reporting FY', 'Reporting Year', 'Cumulative*', '% of Total']
+    return df
+
+def parseIdAndData_sec31(pdf, pdfUrl, year, sec32b_height, outDict): # TODO - copy this code back to tifParse_2017AndBeyond.py b/c str.contains() is more robust
     """Converts TIF Section 3.1 into a CSV and parses the values; returns outDict with added key/value pairs"""
 
     # Obtain ID from URL
@@ -32,14 +49,24 @@ def parseIdAndData_sec31(pdf, pdfUrl, outDict): # TODO - copy this code back to 
         print("ID number not found.")
         return None
     # *STEP 1: READ PDF INTO DATAFRAME
-    coords_revenue = Tools.getTextCoords(pdf, 'Revenue')
-    leftX, topY = coords_revenue["x0"], coords_revenue["top"]
+    if int(year) <= 2011:
+        coords_revenue = Tools.getTextCoords(pdf, 'Year')
+    else:
+        coords_revenue = Tools.getTextCoords(pdf, 'Revenue/')
+    if coords_revenue is None:
+        # Hardcoded from previous usage in-case bad OCR causes None return from Tools.getTextCoords()
+        leftX, topY = 406.32, 85.9199
+    else:
+        leftX, topY = coords_revenue["x0"], coords_revenue["top"]
     df = tabula.read_pdf(
         input_path=pdf,
-        area=[topY-3, 0, topY+401, 600], # [topY, leftX, bottomY, rightX]
-        columns=[leftX-3, leftX+311, leftX+382, leftX+457], 
+        area=[(topY/sec32b_height)*100, 0, 100, 100], # [topY, leftX, bottomY, rightX]
+        columns=[leftX-47, leftX+24, leftX+98], 
         stream=True,
+        relative_area=True,
     )[0]
+    if int(year) <= 2011:
+        df = cleanDf_before2011(df)
     print(df)
 
     # *STEP 2: CLEAN DATAFRAME HEADER
@@ -54,6 +81,15 @@ def parseIdAndData_sec31(pdf, pdfUrl, outDict): # TODO - copy this code back to 
     # *STEP 3: PARSE CLEANED DATAFRAME INTO DICTIONARY
     # Obtain the Pandas series for the 'Property Tax Increment' Row
     propTaxIncRow = df[df[sourceColName].str.contains('property tax inc', na=False, case=False)]
+    if propTaxIncRow.empty:
+        propTaxIncRow = df[df[sourceColName].str.contains('Prooertv Tax', na=False, case=False)]
+        if propTaxIncRow.empty:
+            propTaxIncRow = df[df[sourceColName].str.contains('erty Tax', na=False, case=False)]
+            if propTaxIncRow.empty:
+                propTaxIncRow = df[df[sourceColName].str.contains('PropertTyax', na=False, case=False)]
+    if propTaxIncRow.empty:
+        propTaxIncRow = df[3]
+    print('PROPTAXINCROW: ', propTaxIncRow)
     # Obtain the Current and Cumulative Strings out of the propTaxIncRow series
     propTaxIncCur = propTaxIncRow[curYearColName].values[0]
     propTaxIncCum = propTaxIncRow[cumColName].values[0]
@@ -62,7 +98,7 @@ def parseIdAndData_sec31(pdf, pdfUrl, outDict): # TODO - copy this code back to 
     outDict['cumulative_property_tax_extraction'] = int(Tools.stof(propTaxIncCum))
 
     # Obtain the Pandas series for the 'Transfers from Municipal Sources' Row
-    transFromMunRow = df[df[sourceColName].str.contains('Transfers from', na=False, case=False)]
+    transFromMunRow = df[df[sourceColName].str.contains('Transfers in', na=False, case=False)]
     # Obtain the Current and Cumulative Strings out of the propTaxIncRow series
     transFromMunCur = transFromMunRow[curYearColName].values[0]
     transFromMunCum = transFromMunRow[cumColName].values[0]
@@ -71,21 +107,23 @@ def parseIdAndData_sec31(pdf, pdfUrl, outDict): # TODO - copy this code back to 
     outDict['cumulative_transfers_in'] = int(Tools.stof(transFromMunCum))
 
     # Obtain the Pandas series for the 'Total Expenditures/Cash Disbursements' Row
-    totExpRow = df[df[sourceColName].str.contains('Carried', na=False, case=False)]
+    totExpRow = df[df[sourceColName].str.contains('Cash Disbursements', na=False, case=False)]
     # Obtain the value as a String
     totExp = totExpRow[curYearColName].values[0]
     # Use the user-defined Tools.stof() to clean the String to an Integer for storage in outDict
+    # if int(year) == 2011:
+    #     totExp = totExp[:-1]
     outDict['expenses'] = int(Tools.stof(totExp))
 
     # Obtain the Pandas series for the 'FUND BALANCE, END OF REPORTING PERIOD*' Row
-    fundBalRow = df[df[sourceColName].str.contains('END OF REPORT', na=False, case=False)]
+    fundBalRow = df[df[sourceColName].str.contains('END OF REPORTING', na=False)]
     # Obtain the value as a String
     fundBal = fundBalRow[curYearColName].values[0]
     # Use the user-defined Tools.stof() to clean the String to an Integer for storage in outDict
     outDict['fund_balance_end'] = int(Tools.stof(fundBal))
 
     # Obtain the Pandas series for the 'Transfers to Municipal Sources' Row
-    transToMunRow = df[df[sourceColName].str.contains('Transfers t', na=False, case=False)]
+    transToMunRow = df[df[sourceColName].str.contains('to Municipal Sources', na=False, case=False)]
     if not transToMunRow.empty:
         print('\nFOUND A TRANSFER TO MUNICIPAL SOURCES ROW!\n')
         # Obtain the value as a String
@@ -106,16 +144,78 @@ def parseIdAndData_sec31(pdf, pdfUrl, outDict): # TODO - copy this code back to 
     # Return Section 3.1 DataFrame for Storage
     return outDict
 
+def parseAdminFinance_sec32b(sec32b_pdfFp_out, sec32b_height, outDict):
+    try:
+        x1, top = (coords := Tools.getTextCoords(sec32b_pdfFp_out, 'Nam')).get('x1'), coords.get('top')
+        x2, x3 = (coords := Tools.getTextCoords(sec32b_pdfFp_out, 'Amount')).get('x0'), coords.get('x1')
+        col = [0, x1+60, x2-45, x3+55]
+        print("COL:", col)
+        top = 100 * ((top - 15) / sec32b_height)
+        print("TOP:", top)
+        dfs = tabula.read_pdf(
+            input_path=sec32b_pdfFp_out,
+            pages=1, 
+            area=[top, 0, 100, 100], # [topY, leftX, bottomY, rightX]
+            relative_area=True,
+            columns=col,
+            # pandas_options={'header': None},
+        )
+        df = dfs[0].drop('Unnamed: 0', axis=1)
+        print(df)
+        # ! - Parse Section 3.2 B Admin and Finance Data into outDict
+        # Get Column Names
+        try:
+            nameColName = df.filter(like='Nam').columns.tolist()[0]
+            serviceColName = df.filter(like='vice').columns.tolist()[0]
+            amountColName = df.filter(like='Amount').columns.tolist()[0]
+        except:
+            print("FAILED ON: ", outDict['tif_name'])
+        # Parse each Admin Cost and sum them; assume larger value is more accurate
+        # TODO - Copy this code to post2017 script b/c this is more robust using str.contains
+        adminCosts_service = df[df[serviceColName].astype(str).str.contains('Administration', case=False, na=False)][amountColName].apply(Tools.stof).sum()
+        adminCosts_byName = df[df[nameColName].astype(str).str.contains('City Program Management Costs|City Staff Costs', case=False, na=False)][amountColName].apply(Tools.stof).sum()
+        adminCosts = max(adminCosts_service, adminCosts_byName)
+        if adminCosts_service != adminCosts_byName:
+            print("\nAdmin Cost Discrepancy! Larger value chosen.")
+            print(f"Chosen Admin Value for TIF #{outDict['tif_number']}: {adminCosts}\n")
+        # TODO: rely on the names, not service administration?
+        # Parse each Finance Cost Amount and sum them
+        financeCosts = df[df[serviceColName].astype(str).str.contains('Financing', case=False, na=False)][amountColName].apply(Tools.stof).sum()
+        # Obtain the Bank Name(s)
+        bankNameList = df[df[serviceColName].astype(str).str.contains('Financing', case=False, na=False)][nameColName].drop_duplicates().tolist()
+        if "Amalgamated Bank of Chicago" in bankNameList:
+            bankNameList[bankNameList.index("Amalgamated Bank of Chicago")] = "Amalgamated Bank"
+        bankNames = ', '.join(sorted(bankNameList))
+    except Exception as e:
+        adminCosts = 0
+        financeCosts = 0
+        bankNames = ''
+        print(f'{e=}')
+        # Check if the "No Vendors" message is present
+        if Tools.getTextCoords(sec32b_pdfFp_out, 'There') is None:
+            print("CHECK OUTPUT, unable to verify presence of vendors")
+        else:
+            print("NO VENDORS ABOVE $10,000 FOUND, proceed to next...")
+    
+    outDict['admin_costs'] = int(adminCosts)
+    outDict['finance_costs'] = int(financeCosts)
+    outDict['bank'] = bankNames
+    return outDict
+
+
+# ! MAIN METHOD
 def main():
-    pd.set_option('display.max_columns', None)
+    configurePandas()
     dictList = []
     # ! - Parse Command Line Args
     parser = argparse.ArgumentParser()
     parser.add_argument("year", type=str)
     parser.add_argument("urlListOffset", type=int, nargs="?", default=0)
     parser.add_argument("-o", "--redoOcr", action="store_true", help="Enable to redo OCR")
+    parser.add_argument("-m", "--manual", action="store_true", help="Enable for manual verification after each TIF")
     args = parser.parse_args()
     redoOcr = args.redoOcr
+    manualMode = args.manual
     year, urlListOffset = args.year, args.urlListOffset
     scratchDir = f'c:\\sc\\{year}' # * - MODIFY THIS to an existing scratch directory
     if not os.path.exists(scratchDir):
@@ -137,6 +237,17 @@ def main():
     termTable_df = pd.read_csv(os.path.join(scratchDir, f'{year}_termTable.csv'))
     # ! Use the DAR YEAR URL for the appropriate year to generaye the URL LIST OF PDFS
     urlList = Tools.urlList(darYearsUrls[year])
+    # HIDDEN TIF: 40th/State, BUT IT HAS NO DATA IN ANY YEAR REPORT
+    # FURTHER INVESTEGATION IS REQUIRED
+    if (int(year) <= 2013 and int(year) >= 2011):
+        # There is a hidden TIF (40th/State) that is not present on any year's pages
+        # However, it is present in this url format below for 2010-2013 inclusive
+        missingTifUrl = f'https://www.chicago.gov/content/dam/city/depts/dcd/tif/{year[2:]}reports/T_132_40thStateAR{year[2:]}.pdf'
+        urlList.insert(5, missingTifUrl)
+    # HIDDEN TIF: ChathamRidge
+    if (int(year) == 2011):
+        missingTifUrl = f'https://www.chicago.gov/content/dam/city/depts/dcd/tif/{year[2:]}reports/T_015_ChathamRidgeAR{year[2:]}.pdf'
+        urlList.insert(57, missingTifUrl)
     urlListLen = len(urlList)
     print('URLLIST LENGTH:', urlListLen)
     # ! - Iterate each TIF DAR URL for a single year
@@ -151,9 +262,9 @@ def main():
         tifName = filename[2][:-8] 
         outDict['tif_name'] = tifName
         # ! - Obtain Start and End Years from TermTable DataFrame
-        startYear = termTable_df[termTable_df['NameofRedevelopmentProjectArea'] == tifName]['YearDesignated'].values[0]
+        startYear = termTable_df[termTable_df['Name of Redevelopment Project Area'] == tifName]['Date Designated'].values[0].split('/')[-1]
         outDict['start_year'] = int(startYear)
-        endYear = termTable_df[termTable_df['NameofRedevelopmentProjectArea'] == tifName]['YearTerminated'].values[0]
+        endYear = termTable_df[termTable_df['Name of Redevelopment Project Area'] == tifName]['Date Terminated'].values[0].split('/')[-1]
         outDict['end_year'] = int(endYear)
         # ! - Isolate Desired PDF Page Numbers
         # Get Full PDF bytes
@@ -172,9 +283,10 @@ def main():
         #     sec32b = future_sec32b.result()
         print('Isolating Pages', sec31, 'and', sec32b)
         if sec31 == None:
-            sec31 =  7
+            sec31 = 7 if int(year) > 2011 else 8
         if sec32b == None:
-            sec32b = 11
+            sec32b = 11 if int(year) > 2011 else 12
+                
         # ! - Convert PDF Pages to PIL Images
         # Convert Section 3.1 to PIL Image
         sec31_page = PyPDF2.PdfReader(pdf).pages[sec31 - 1]
@@ -195,6 +307,8 @@ def main():
         # ! - OPTIONAL STEP - Redo OCR
         while True:
             if redoOcr:
+                # TODO: Only redoOcr once; Do not let this setting persist, hence redoOcr = False
+                # redoOcr = False
                 sec31_img = convert_from_bytes(sec31_origBytes.getvalue(), dpi=300)
                 sec32b_img = convert_from_bytes(sec32b_origBytes.getvalue(), dpi=300)
                 # ! - Redo OCR and save to disk for each section 
@@ -231,115 +345,67 @@ def main():
                     shutil.copy(sec31_pdfFp, sec31_pdfFp_out) 
                     shutil.copy(sec32b_pdfFp, sec32b_pdfFp_out)
                     # input("Press Enter to continue (paused after PDF creation)...")
-            
-            # ! - Obtain and Parse Section 3.1 Dataframe
             # try:
-            outDict = parseIdAndData_sec31(sec31_pdfFp_out, url, outDict)
-            # except Exception as e:
-                # print(f'{e=}')
-                # print("FAILED ON: ", url)
-                # print('\nurlList Index: ', i, '\n')
-                # sys.exit()
+            # ! - Obtain and Parse Section 3.1 Dataframe
+            outDict = parseIdAndData_sec31(sec31_pdfFp_out, url, year, sec32b_height, outDict)
             ''' sec31_pdfFp_out was first arg ^^^^^^^^^^^^   '''
             # ! - Obtain and Parse Section 3.2 B Dataframe
-            try:
-                x1, top = (coords := Tools.getTextCoords(sec32b_pdfFp_out, 'Nam')).get('x1'), coords.get('top')
-                x2, x3 = (coords := Tools.getTextCoords(sec32b_pdfFp_out, 'Amount')).get('x0'), coords.get('x1')
-                col = [0, x1+80, x2-45, x3+55]
-                print("COL:", col)
-                top = 100 * ((top - 15) / sec32b_height)
-                print("TOP:", top)
-                dfs = tabula.read_pdf(
-                    input_path=sec32b_pdfFp_out,
-                    pages=1, 
-                    area=[top, 7.3, 100, 92.5], # [topY, leftX, bottomY, rightX]
-                    relative_area=True,
-                    columns=col,
-                    # pandas_options={'header': None},
-                )
-                df = dfs[0].drop('Unnamed: 0', axis=1)
-                print(df)
-                # ! - Parse Section 3.2 B Admin and Finance Data into outDict
-                # Get Column Names
-                try:
-                    nameColName = df.filter(like='Nam').columns.tolist()[0]
-                    serviceColName = df.filter(like='vice').columns.tolist()[0]
-                    amountColName = df.filter(like='Amount').columns.tolist()[0]
-                except:
-                    print("FAILED ON: ", outDict['tif_name'])
-                # Parse each Admin Cost and sum them; assume larger value is more accurate
-                # TODO - Copy this code to post2017 script b/c this is more robust using str.contains
-                adminCosts_service = df[df[serviceColName].astype(str).str.contains('Administration', case=False, na=False)][amountColName].apply(Tools.stof).sum()
-                adminCosts_byName = df[df[nameColName].astype(str).str.contains('City Program Management Costs|City Staff Costs', case=False, na=False)][amountColName].apply(Tools.stof).sum()
-                adminCosts = max(adminCosts_service, adminCosts_byName)
-                if adminCosts_service != adminCosts_byName:
-                    print("\nAdmin Cost Discrepancy! Larger value chosen.")
-                    print(f"Chosen Admin Value for TIF #{outDict['tif_number']}: {adminCosts}\n")
-                # TODO: rely on the names, not service administration?
-                # Parse each Finance Cost Amount and sum them
-                financeCosts = df[df[serviceColName].astype(str).str.contains('Financing', case=False, na=False)][amountColName].apply(Tools.stof).sum()
-                # Obtain the Bank Name(s)
-                bankNameList = df[df[serviceColName].astype(str).str.contains('Financing', case=False, na=False)][nameColName].drop_duplicates().tolist()
-                if "Amalgamated Bank of Chicago" in bankNameList:
-                    bankNameList[bankNameList.index("Amalgamated Bank of Chicago")] = "Amalgamated Bank"
-                bankNames = ', '.join(sorted(bankNameList))
-            except Exception as e:
-                adminCosts = 0
-                financeCosts = 0
-                bankNames = ''
-                print(f'{e=}')
-                # Check if the "No Vendors" message is present
-                if Tools.getTextCoords(sec32b_pdfFp_out, 'There') is None:
-                    print("CHECK OUTPUT, unable to verify presence of vendors")
-                else:
-                    print("NO VENDORS ABOVE $10,000 FOUND, proceed to next...")
-            # Either way, set the adminCosts, financeCosts, and bankNames
-            outDict['admin_costs'] = int(adminCosts)
-            outDict['finance_costs'] = int(financeCosts)
-            outDict['bank'] = bankNames
-            # Add current outDict to dictList
+            outDict = parseAdminFinance_sec32b(sec32b_pdfFp_out, sec32b_height, outDict)           
+            # except Exception as e:
+            #     print(f'{e=}')
+            #     print(f"REDOING OCR...\n({i}) {outDict['tif_name']}") 
+            #     redoOcr = True
+            #     continue
+            # ! - Data parsed; add to dictList
             dictList.append(outDict)
             # FOR OCR, INDENT FROM HERE ABOVE
             print(json.dumps({k: f'{v:,}' if isinstance(v, int) else v for k, v in outDict.items()}, indent=4, separators=(',', ': ')))
             print('\nurlList Index: ', i, '\n')
             Tools.buildCsvFromDicts(outDict, csvFp)
             print("ON DECK:", f"({str(i+1)})", urlList[i+1].split('/')[-1]) if i < urlListLen - 1 else print("ON DECK:", "NONE!!!")
-            # ! - Open PDF and CSV in GUI for manual validation
-            # TODO -  MODIFY THIS: IT IS WINDOWS-SPECIFIC
-            # pdfxchange = r"C:\Program Files\Tracker Software\PDF Editor\PDFXEdit.exe"
-            # subprocess.Popen([pdfxchange, sec31_pdfFp_out], shell=True)
-            # subprocess.Popen([pdfxchange, sec32b_pdfFp_out], shell=True)
-            subprocess.Popen(['start', '', sec31_pdfFp_out], shell=True)
-            subprocess.Popen(['start', '', sec32b_pdfFp_out], shell=True)
-            subprocess.Popen(['start', '', csvFp], shell=True)
-            time.sleep(0.8)
-            with suppress(PyGetWindowException):
-                sec31_pdf_gw = gw.getWindowsWithTitle('sec31 - PDF-XChange Editor')[0]
-                sec31_pdf_gw.moveTo(0, 0)
-                sec31_pdf_gw.resizeTo(1168, 1190)
-                sec32b_pdf_gw = gw.getWindowsWithTitle('sec32b - PDF-XChange Editor')[0]
-                sec32b_pdf_gw.moveTo(1153, 0)
-                sec32b_pdf_gw.resizeTo(1188, 434)
-                xcl_gw = gw.getWindowsWithTitle(f'{year}_out.csv - Excel')[0]
-                vscode_gw = gw.getWindowsWithTitle([window for window in gw.getAllTitles() if 'Visual Studio Code' in window][0])[0]
-                sec31_pdf_gw.activate() # put sec31 on bottom
-                sec32b_pdf_gw.activate() # put sec32b on top of sec31
-                xcl_gw.activate()
-                time.sleep(1)
-                pyautogui.hotkey('ctrl', 'end') # go to end of csv
-                time.sleep(0.5)
-                vscode_gw.activate() # put vs code on top of pdf
-            # except PyGetWindowException as e:
-            #     print(f'{e=}')
-            # Wait
-            redoOcr = input("Input NOTHING (Enter) to proceed, input SOMETHING (and then Enter) to redo OCR on current PDF: ")
-            # Close Windows
-            xcl_gw.close()
-            sec31_pdf_gw.close()
-            sec32b_pdf_gw.close()
-            # Either redo current iteration of for loop, or continue to the next one
-            if redoOcr:
-                continue
+            # ! - MANAUAL VERIFICATION (Open PDF and CSV in GUI for manual validation)
+            if manualMode:
+                # pdfxchange = r"C:\Program Files\Tracker Software\PDF Editor\PDFXEdit.exe"
+                # subprocess.Popen([pdfxchange, sec31_pdfFp_out], shell=True)
+                # subprocess.Popen([pdfxchange, sec32b_pdfFp_out], shell=True)
+                subprocess.Popen(['start', '', sec31_pdfFp_out], shell=True)
+                subprocess.Popen(['start', '', sec32b_pdfFp_out], shell=True)
+                subprocess.Popen(['start', '', csvFp], shell=True)
+                time.sleep(0.8)
+                with suppress(PyGetWindowException):
+                    # PyGetWindow code is dependant on OS default editors for .csv and .pdf, as well as screen size
+                    sec31_pdf_gw = gw.getWindowsWithTitle('sec31 - PDF-XChange Editor')[0]
+                    sec31_pdf_gw.moveTo(0, 0)
+                    sec31_pdf_gw.resizeTo(1168, 1190)
+                    sec32b_pdf_gw = gw.getWindowsWithTitle('sec32b - PDF-XChange Editor')[0]
+                    sec32b_pdf_gw.moveTo(1153, 0)
+                    sec32b_pdf_gw.resizeTo(1188, 574)
+                    xcl_gw = gw.getWindowsWithTitle(f'{year}_out.csv - Excel')[0]
+                    vscode_gw = gw.getWindowsWithTitle([window for window in gw.getAllTitles() if 'Visual Studio Code' in window][0])[0]
+                    sec31_pdf_gw.activate() # put sec31 on bottom
+                    sec32b_pdf_gw.activate() # put sec32b on top of sec31
+                    xcl_gw.activate()
+                    time.sleep(1)
+                    pyautogui.hotkey('ctrl', 'end') # go to end of csv
+                    time.sleep(0.5)
+                    vscode_gw.activate() # put vs code on top of pdf
+                # except PyGetWindowException as e:
+                #     print(f'{e=}')
+                # Wait
+                redoCurrent = input("Input NOTHING (Enter) to proceed, input SOMETHING (and then Enter) to redo OCR on current PDF: ")
+                # Close Windows
+                xcl_gw.close()
+                sec31_pdf_gw.close()
+                sec32b_pdf_gw.close()
+                # Either redo current iteration of for loop, or continue to the next one
+                if redoCurrent:
+                    redoOcr = True
+                    continue
+            # else:
+            #     # Keep redoOcr off for AUTOMATIC MODE
+            #     redoOcr = False # TODO: allow for this functionality: -o switch enables ocr/manual.
+            #     # ? - should ocr/auto be an option? see how 2012 performs
+            # ^^^^^^^^^^^^^^ MANUAL VERIFICATION CODE ^^^^^^^^^^^^^
             break
     print("Script completed successfully!")
     # except Exception as e:
@@ -361,7 +427,9 @@ class Tools:
                             .replace('-','').replace('|','').replace('~','').replace(']','')\
                             .replace('$','').replace(' ','')
             # OCR sometimes parses '5' as '§' or 's' and '0' as 'o'
-            toClean = toClean.replace('§', '5').replace('s', '5').replace('o','0')
+            toClean = toClean.replace('§', '5').replace('o','0')
+            if len(toClean) > 1:
+                toClean = toClean.replace('s', '5')
             # toClean is a String
             # if 'L' in toClean or '-' in toClean or len(toClean) <= 1:
                 # Handle zeroes (for >= 2019, represented as dashes)
