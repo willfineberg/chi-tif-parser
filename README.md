@@ -2,7 +2,7 @@
 
 # 2023 MCDC Project with The CivicLab
 
-This is the 2022 TIF Illumination produced by the [TIF Illumination Project](https://tifreports.com/) which is a work of the [CivicLab](https://www.civiclab.us/), a Chicago based nonprofit Black-led "do tank" for civic engagement and grassroots democracy. Reach us via email at  info@civiclab.us. The research for this Illumination was done by Interns from the [Metropolitan Chicago Data-Science Corps](https://sites.northwestern.edu/mcdc) under the supervision of [Professor Phil Yates of DePaul University](https://csh.depaul.edu/faculty-staff/faculty-a-z/Pages/mathematical-sciences/philip-yates.aspx).
+This is the 2022 TIF Illumination produced by the [TIF Illumination Project](https://tifreports.com) which is a work of the [CivicLab](https://www.civiclab.us), a Chicago based nonprofit Black-led "do tank" for civic engagement and grassroots democracy. Reach us via email at  info@civiclab.us. The research for this Illumination was done by Interns from the [Metropolitan Chicago Data-Science Corps](https://sites.northwestern.edu/mcdc) under the supervision of [Professor Phil Yates of DePaul University](https://csh.depaul.edu/faculty-staff/faculty-a-z/Pages/mathematical-sciences/philip-yates.aspx).
 
 ## Chicago Shiny TIF Heatmap 
 
