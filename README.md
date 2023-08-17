@@ -40,7 +40,7 @@ Here are explanations for each data variable accessed in the [Chicago Top TIFs W
 | **Distribution**                       | Disbursement of surplus funds. This is often directed to the Treasurer for reallocation elsewhere.  |
 | **Administration Costs**               | Amount taken by the City of Chicago Department of Planning for "City Staff Costs" and "City Program Management Costs". |
 | **Finance Costs**                      | Amount paid to a banking institution to settle debt. This is money that was loaned to the TIF Fund previously and is now being paid back to the bank. |
-| **Bank Names**                         | Banks that provided the financing (Finance Costs) to the TIF Fund. |
+| **Bank Names**                         | Bank(s) that provided the financing (Finance Costs) to the TIF Fund. |
 
 Please refer back to this table for concise explanations of variables while utilizing the app.
 
