@@ -4,11 +4,23 @@
   <img src="docs/images/civiclab_tifillum.jpg" height='200' alt="The CivicLab Logo" style="position: absolute; left: 0;">
 </div>
 
+<<<<<<< HEAD
 # TIF Analysis - [MCDC](https://sites.northwestern.edu/mcdc/) Project with [The CivicLab](https://www.civiclab.us/) (2023)
+=======
+This is the 2022 TIF Illumination produced by the [TIF Illumination Project](https://tifreports.com) which is a work of the [CivicLab](https://www.civiclab.us), a Chicago based nonprofit Black-led "do tank" for civic engagement and grassroots democracy. Reach us via email at  info@civiclab.us. The research for this Illumination was done by Interns from the [Metropolitan Chicago Data-Science Corps](https://sites.northwestern.edu/mcdc) under the supervision of [Professor Phil Yates of DePaul University](https://csh.depaul.edu/faculty-staff/faculty-a-z/Pages/mathematical-sciences/philip-yates.aspx).
+>>>>>>> 4cabc1e3fa7dbdfa1d98f499d00dedf64fa787ae
 
 _This project was produced through the Metropolitan Chicago Data-science Corps (MCDC) which is a collaboration of non-profit or community organizations and data science students. We worked with The CivicLab to illuminate the City of Chicago finances through Tax Increment Financing (TIF) analysis. Please view the resources below to learn more about the City of Chicago finances._
 
+<<<<<<< HEAD
 ## Chicago 2022 TIF Heatmap - Developed in [R](https://www.r-project.org/) using [Shiny](https://shiny.posit.co/)
+=======
+For R users, code is provided to run a Shiny app locally. You will need the shape files found in the folder `chiTifBoundaries`as well as the 2022 TIF data (`2022_out.csv`) and the `CivicLabLogo.jpeg` file. The app is named `TIF2022-Shiny.R`. Be sure to save all of the files in the same directory.
+
+For non-R users, the Shiny App for the 2022 TIF data can be found here:
+
+  - https://philipayates.shinyapps.io/apps/
+>>>>>>> 4cabc1e3fa7dbdfa1d98f499d00dedf64fa787ae
 
 For R users, code is provided to run a Shiny app locally. You will need the shape files found in the folder `chiTifBoundaries` as well as the 2022 TIF data (`2022_out.csv`) and the `CivicLabLogo.jpeg` file. The app is named `TIF2022-Shiny.R`. Be sure to save all of the files in the same directory.
 
