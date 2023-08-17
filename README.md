@@ -37,10 +37,10 @@ Here are explanations for each data variable accessed in the [Chicago Top TIFs W
 | **Expenses**                           | The Total Expenditures. The amount of money spent on projects applicable to the TIF. |
 | **Fund Balance End**                   | Balance of this TIF District's Fund at the end of the Current Data Year.    |
 | **Transfers Out**                      | Amount of funds transferred out of the account and ported to a neighboring TIF District. |
-| **Distribution**                       | Allocation and disbursement of funds.  |
-| **Administration Costs**               | Amount taken by the City of Chicago for "City Staff Costs" and "City Program Management Costs". |
-| **Finance Costs**                      | Amount provided to the TIF Fund by a banking institution. |
-| **Bank Names**                         | Banks that provided the Finance Costs to the TIF Fund. |
+| **Distribution**                       | Disbursement of surplus funds. This is often directed to the Treasurer for reallocation elsewhere.  |
+| **Administration Costs**               | Amount taken by the City of Chicago Department of Planning for "City Staff Costs" and "City Program Management Costs". |
+| **Finance Costs**                      | Amount paid to a banking institution to settle debt. This is money that was loaned to the TIF Fund that is now owed back to the bank. |
+| **Bank Names**                         | Banks that provided the financing (Finance Costs) to the TIF Fund. |
 
 Please refer back to this table for concise explanations of variables while utilizing the app.
 
