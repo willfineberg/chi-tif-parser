@@ -6,7 +6,11 @@
 
 ## Chicago Shiny TIF Heatmap 
 
-- [put info about the shiny app and how to use it here]
+For R users, code is provided to run a Shiny app locally. You will need the shape files found in the folder `chiTifBoundaries`as well as the 2022 TIF data (`2022_out.csv`) and the `CivicLabLogo.jpeg` file. The app is named `TIF2022-Shiny.R`. Be sure to save all of the files in the same directory.
+
+For non-R users, the Shiny App for the 2022 TIF data can be found here:
+
+  - https://philipayates.shinyapps.io/apps/
 
 ## Chicago Top TIFs Web App
 
