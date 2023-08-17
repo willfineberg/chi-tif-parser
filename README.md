@@ -1,18 +1,22 @@
 <img src="docs/images/civiclab_tifillum.jpg" width="240" alt="The CivicLab Logo">
 
 # 2023 MCDC Project with The CivicLab
+
 - [put generalized info about our project here?]
 
 ## Chicago Shiny TIF Heatmap 
+
 - [put info about the shiny app and how to use it here]
 
 ## Chicago Top TIFs Web App
-Chicago Top TIFs is a Google Earth Engine Web App designed to illuminate the finances of the City of Chicago. Please review ["App Features"](https://github.com/willfineberg/chi-top-tifs#app-features) and ["What Are These Variables?"](https://github.com/willfineberg/chi-top-tifs#what-are-these-variables) to better understand the [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs).
+
+Chicago Top TIFs is a Google Earth Engine Web App designed to illuminate the finances of the City of Chicago. Please review ["App Features"](https://github.com/philipayates/chicago2022TIF#app-features) and ["What Are These Variables?"](https://github.com/philipayates/chicago2022TIF#what-are-these-variables) to better understand the [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs).
 
 - Chicago Top TIFs Web App URL: https://wtfineberg.users.earthengine.app/view/toptifs
 - Google Earth Engine Snapshot: https://code.earthengine.google.com/f132f5ff21f5b0b2d9e273e950d41d18
 
 ### App Features
+
 - **Modify Map (Top/Bottom Five Outlines)**
   - The app will find the largest five and smallest five values across all TIFs based on your selections. Changing the Selected Year or Variable (top-left) will modify the outlines appropriately. 
     - For example, the default map highlights the five TIFs with the largest Property Tax Extraction in 2022 as well as the five TIFs with the smallest Property Tax Extraction values in 2022.
@@ -24,8 +28,9 @@ Chicago Top TIFs is a Google Earth Engine Web App designed to illuminate the fin
     - Bottom-Left UI: This panel is populated with a Bar Chart that visualizes all values of the currently selected variable for the TIF that was clicked.
 
 ### What Are These Variables?
-Data for Chicago TIF Districts are released once per year. A yearly report for each TIF contains a variety 
-Here are explanations for each data variable accessed in the [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs):
+
+Data for Chicago TIF Districts are released once per year. A yearly report for each TIF contains a variety of different metrics, but the ones listed below are the values that we have obtained from all PDFs from 2010 through 2022. Please refer to these explanations while using the [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs):
+
 | Variable                               | Explanation                                 |
 | -------------------------------------- | ------------------------------------------- |
 | **TIF Lifespan**                       | The starting year through the proposed ending year. |
