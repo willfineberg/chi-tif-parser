@@ -1,6 +1,7 @@
-# 2023 MCDC Project with The CivicLab
-
 <img src="docs/images/civiclab_tifillum.jpg" width="240" alt="The CivicLab Logo">
+
+# 2023 MCDC Project with The CivicLab
+<put generalized info about our project here?>
 
 ## Chicago Top TIFs Web App
 Chicago Top TIFs is a Google Earth Engine Web App designed to illuminate the finances of the City of Chicago. Please review ["App Features"](https://github.com/willfineberg/chi-top-tifs#app-features) and ["What Are These Variables?"](https://github.com/willfineberg/chi-top-tifs#what-are-these-variables) to better understand the [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs).
