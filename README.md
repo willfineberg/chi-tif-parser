@@ -1,7 +1,7 @@
 
 <div style="position: relative;">
   <img src="docs/images/mcdc.png" width="200" height=200 alt="MCDC Logo" style="position: absolute; right: 0;">
-  <img src="docs/images/CivicLabLogo.jpg" height='200' alt="The CivicLab Logo" style="position: absolute; left: 0;">
+  <img src="docs/images/CivicLabLogo.jpeg" height='200' alt="The CivicLab Logo" style="position: absolute; left: 0;">
 </div>
 
 # TIF Analysis - [MCDC](https://sites.northwestern.edu/mcdc/) Project with [The CivicLab](https://www.civiclab.us/) (2023)
