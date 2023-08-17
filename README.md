@@ -28,7 +28,7 @@ The Chicago Top TIFs Web App is published publicly at this URL:
 You can select a TIF by clicking within its boundary on the map. This will outline the district in cyan and highlight it in yellow (similar to the top/bottom five outlines). TIF Selection causes both Data Displays to update.
 
 #### **_Modify Map Selection UI (top-left)_**
-Changing the Selected Year or Variable will modify the outlines for the top 5 layer and the bottom 5 layer, as well as clear the current TIF Selection. The app is selecting the largest five and smallest five values across all TIFs based on your Selected Year and Variable. For some variables (like Transfers), the bottom 5 values will often be all zeros. The Selected Variable also determines which data the bottom-left chart will graph. To further understand the variables, please reference the [What Are These Variables?](What Are These Variables?) table below.
+Changing the Selected Year or Variable will modify the outlines for the top 5 layer and the bottom 5 layer, as well as clear the current TIF Selection. The app is selecting the largest five and smallest five values across all TIFs based on your Selected Year and Variable. For some variables (like Transfers), the bottom 5 values will often be all zeros. The Selected Variable also determines which data the bottom-left chart will graph. To further understand the variables, please reference the [What Are These Variables?](https://github.com/philipayates/chicago2022TIF/blob/main/README.md#what-are-these-variables) table below.
 
 #### **_Data Displays (top-right & bottom-left)_**
 Selecting different TIFs, variables, and years will modify the two different Data Displays as described below:
