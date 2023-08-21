@@ -70,7 +70,7 @@ library(shiny)
 library(dplyr)
 library(googleway)
 
-api_key <- "AIzaSyDYu3ooTegFHilgtg0SnM8Iw2ggry1-kQI"
+api_key <- "'enter your api key here'"
 TIFdata <- TIFsf
 
 ui <- fluidPage(
@@ -88,7 +88,7 @@ ui <- fluidPage(
 )
 
 server <- function(input,output){
-  map_key <- 'AIzaSyDYu3ooTegFHilgtg0SnM8Iw2ggry1-kQI'
+  map_key <- ''enter your api key here''
   
   output$map <- renderGoogle_map({
     google_map(key = map_key) %>%
