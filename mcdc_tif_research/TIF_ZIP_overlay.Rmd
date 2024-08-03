@@ -28,7 +28,7 @@ library(scales)
 
 Setting up the Chicago google map
 ```{r}
-register_google(key = "AIzaSyDYu3ooTegFHilgtg0SnM8Iw2ggry1-kQI")
+register_google(key = "'enter your api key here'")
 Chimap = map = get_map(location = 'Chicago', zoom = 11)
 ggmap(Chimap)
 ```
