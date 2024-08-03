@@ -39,7 +39,7 @@ Selecting different TIFs, variables, and years will modify the two different Dat
 
 Developers can modify the JavaScript code by using the [Earth Engine Code Editor](https://developers.google.com/earth-engine/guides/playground) Snapshot URL below:
 
-  - https://code.earthengine.google.com/4e69cac1236837eeceae30a644a74a08 _Updated 8/3/2024 05:32 UTC_
+  - https://code.earthengine.google.com/4e69cac1236837eeceae30a644a74a08 _-----08/03/2024 05:32 UTC-----_
     - _NOTE: The Editor requires you to register with a Google account. Earth Engine is free for non-commercial use._
 
 
