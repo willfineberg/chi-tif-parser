@@ -76,19 +76,23 @@ class Tools:
                     darYearsUrls[year] = full_url
         return darYearsUrls
 
-    def urlList(url):
+    def urlList(url, year):
         """Obtains a list of TIF DAR URLs using BeautifulSoup."""
 
-        # Load 2021 TIF reports URL
+        # Obtain a 2 digit year
+        yr = str(year)[-2:]
+        # Load TIF reports URL for a specific year
         r = requests.get(url)
         # Parses through HTML
         soup = BeautifulSoup(r.text, "html.parser")
-        links = soup.find_all(href=True) #contains hyperlink
+        #links = soup.find_all(href=True) #contains hyperlink
         # Return a List of PDF links
-        pdf_links = ["https://www.chicago.gov" + link['href'] for link in soup.find_all(href=lambda href: href and href.endswith('.pdf'))]
+        pdf_links = ["https://www.chicago.gov" + link['href'] for link in soup.find_all(href=lambda href: href and href.endswith(f'AR{yr}.pdf'))]
         # Remove any duplicates
         outList = []
         [outList.append(url) for url in pdf_links if url not in outList]
+        # ! - FIX THIS .remove below ONCE THE 2023 ARCHER COURTS DAR IS RELEASED, if ever
+        outList.remove('https://www.chicago.gov/content/dam/city/depts/dcd/tif/23reports/T_067_ArcherCourtsAR23.pdf')
         return outList
 
     def getPageNumFromText(pdf, target_text):
@@ -133,7 +137,7 @@ class YearParse:
         self.year = year
         self.yearUrl = yearUrl
         self.outDir = outDir
-        self.urlList = Tools.urlList(yearUrl)
+        self.urlList = Tools.urlList(yearUrl, self.year)
         self.termTable = self.parseTermTable_sec1(self.urlList[0], outDir)
         self.darList = []
         self.dictList = []
@@ -215,13 +219,26 @@ class YearParse:
 
     def run(self):
         startTime = time.time()
+        print(self.urlList)
+
         # ! - OPTION #1: Without Threading or Multiprocessing (Slow)
-        # for url in self.urlList:
-        #     dar = DAR(self.year, url, self.termTable)
-        #     self.darList.append(dar)
-        #     self.dictList.append(dar.outDict)
-        #     print(json.dumps(dar.outDict, indent=4))
-        #     input('Press Enter to coninue...')
+        # isFail = False
+        # try:
+        #     for url in self.urlList:
+        #         dar = DAR(self.year, url, self.termTable)
+        #         self.darList.append(dar)
+        #         self.dictList.append(dar.outDict)
+        #         print(json.dumps(dar.outDict, indent=4))
+        #         # input('Press Enter to coninue...')
+        # except:
+        #     self.buildCsvFromDicts(os.path.join(self.outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
+        #     # Print the runtime in minutes:seconds format
+        #     endTime = time.time()
+        #     runtime_seconds = endTime - startTime
+        #     runtime_minutes = runtime_seconds // 60
+        #     runtime_seconds %= 60
+        #     print(f"Program runtime: {int(runtime_minutes)} minutes {int(runtime_seconds)} seconds")
+
        
         # ! - OPTION #2: With Threading (Much Faster) 
         # with concurrent.futures.ThreadPoolExecutor() as executor:
@@ -265,7 +282,7 @@ class YearParse:
             # Perform any necessary cleanup or finalization steps
             isFail = True
             
-        # After one year is parsed, store output in a CSV
+        # # After one year is parsed, store output in a CSV
         if not isFail:
             self.buildCsvFromDicts(os.path.join(self.outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
         # Print the runtime in minutes:seconds format
@@ -284,11 +301,28 @@ class DAR:
         self.year = year
         self.pdfUrl = url
         self.pdf = io.BytesIO(requests.get(url).content)
-        self.sec31 = Tools.getPageNumFromText(self.pdf, 'SECTION 3.1')
-        self.sec32a = Tools.getPageNumFromText(self.pdf, 'ITEMIZED LIST OF ALL EXPENDITURES FROM THE SPECIAL TAX ALLOCATION FUND')
-        self.sec32b = Tools.getPageNumFromText(self.pdf, "Section 3.2 B")
+        try:
+            self.sec31 = Tools.getPageNumFromText(self.pdf, 'SECTION 3.1')
+        except:
+            print("Tools.getPageNumFromText() ERROR on 'SECTION 3.1'")
+            print("ASSUMING PAGE 6...")
+            self.sec31 = 6
+        try:
+            self.sec32a = Tools.getPageNumFromText(self.pdf, 'ITEMIZED LIST OF ALL EXPENDITURES FROM THE SPECIAL TAX ALLOCATION FUND')
+        except:
+            print("Tools.getPageNumFromText() ERROR on 'ITEMIZED LIST OF ALL EXPENDITURES FROM THE SPECIAL TAX ALLOCATION FUND'")
+            print("ASSUMING PAGE 8...")
+            self.sec32a = 8
+        try:
+            self.sec32b = Tools.getPageNumFromText(self.pdf, "Section 3.2 B")
+        except:
+            print("Tools.getPageNumFromText() ERROR on 'Section 3.2 B'")
+            print("ASSUMING PAGE 11...")
+            self.sec32a = 8
         self.sec31_df = None
         self.sec32b_df = None
+        self.startYear = -1
+        self.endYear = -1
         self.outDict = {}
         # CAN WE CONVERT THESE 4 LINES INTO ASYNC?
         self.setIdNameYear_sec31() 
@@ -313,15 +347,22 @@ class DAR:
         """Sets outDict start and end years from the Term Table DataFrame"""
         # Obtain the appropriate years from the DataFrame
         tifName = self.outDict['tif_name']
+        print(f'tifName: {tifName}')
         # Set Column Names
         nameCol = df.filter(like='Name of Redevelopment Project Area').columns.tolist()[0]
         desigCol = df.filter(like='Date Designated').columns.tolist()[0]
         termCol = df.filter(like='Date Terminated').columns.tolist()[0]
         # Parse values
-        startYear = df[df[nameCol] == tifName].loc[:, df.columns.str.contains(desigCol, case=False)].values[0][0].split('/')[2]
-        endYear = df[df[nameCol] == tifName].loc[:, df.columns.str.contains(termCol, case=False)].values[0][0].split('/')[2]
-        self.outDict['start_year'] = startYear
-        self.outDict['end_year'] = endYear
+        try:
+            print(df[df[nameCol] == tifName])
+            self.startYear = df[df[nameCol] == tifName].loc[:, df.columns.str.contains(desigCol, case=False)].values[0][0].split('/')[2]
+            self.endYear = df[df[nameCol] == tifName].loc[:, df.columns.str.contains(termCol, case=False)].values[0][0].split('/')[2]
+        except:
+            print("FAILED ON: ", self.outDict['tif_name'])
+            print("URL: ", self.pdfUrl)
+
+        self.outDict['start_year'] = self.startYear
+        self.outDict['end_year'] = self.endYear
 
     def setIdNameYear_sec31(self):
         """Obtains the name and year of a TIF from a PDF."""
