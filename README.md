@@ -4,25 +4,20 @@
   <img src="docs/images/CivicLabLogo.jpeg" height='200' alt="The CivicLab Logo" style="position: absolute; left: 0;">
 </div>
 
-# TIF Analysis - [MCDC](https://sites.northwestern.edu/mcdc/) Project with [The CivicLab](https://www.civiclab.us/) (2023)
+# TIF Analysis - [MCDC](https://sites.northwestern.edu/mcdc/) Project with [The CivicLab](https://www.civiclab.us/) for [TIF Illumination](http://tifreports.com/)
 
-_This project was produced through the Metropolitan Chicago Data-science Corps (MCDC) which is a collaboration of non-profit or community organizations and data science students. We worked with The CivicLab to illuminate the City of Chicago finances through Tax Increment Financing (TIF) analysis. Please view the resources below to learn more about the City of Chicago finances._
+_The [TIF Illumination Project](http://tifreports.com/) uses data mining, investigatory reporting, graphic design, and popular education methods to expose the hyper-local harms Tax Increment Financing Districts bring to our communities. We have been in the field since 2013 and have been called into community over 230 times. As far as we know, this is the only civic project in America interrogating and organizing around TIFs. See www.tifreports.com. Reach us at info@tifreports.com._
 
-## Chicago 2022 TIF Heatmap - Developed in [R](https://www.r-project.org/) using [Shiny](https://shiny.posit.co/)
+_This particular project was coordinated by the Metropolitan Chicago Data-science Corps (MCDC), which is a collaboration of non-profit or community organizations and data science students. We worked with The CivicLab on the aforementioned [TIF Illumination Project](http://tifreports.com/) to reveal City of Chicago finances through Tax Increment Financing (TIF) analysis. Please view the resources below to learn more about the City of Chicago finances and how TIFs work._
 
-For R users, code is provided to run a Shiny app locally. You will need the shape files found in the folder `chiTifBoundaries` as well as the 2022 TIF data (`2022_out.csv`) and the `CivicLabLogo.jpeg` file. The app is named `TIF2022-Shiny.R`. Be sure to save all of the files in the same directory.
+## Chicago Top TIFs Web App - Developed using [Google Earth Engine (GEE)](https://earthengine.google.com/)
 
-For non-R users, the Shiny App for the 2022 TIF data can be found here:
+The Chicago Top TIFs Web App contains data from 2010-2023[^1] and is published publicly at this URL: 
 
-  - https://philipayates.shinyapps.io/apps/
+* https://wtfineberg.users.earthengine.app/view/toptifs
+  * _Updated 08/07/2024_
 
-## Chicago Top TIFs Web App - Developed in [JavaScript](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference) using [Google Earth Engine](https://earthengine.google.com/)
-
-The Chicago Top TIFs Web App is published publicly at this URL: 
-
-  - https://wtfineberg.users.earthengine.app/view/toptifs
-
-### Web App Usage
+### Web App Instructional Guide for Users
 
 #### **_TIF Selection (click the map)_**
 You can select a TIF by clicking within its boundary on the map. This will outline the district in cyan and highlight it in yellow (similar to the top/bottom five outlines). TIF Selection causes both Data Displays to update.
@@ -32,23 +27,30 @@ Changing the Selected Year or Variable will modify the outlines for the top 5 la
 
 #### **_Data Displays (top-right & bottom-left)_**
 Selecting different TIFs, variables, and years will modify the two different Data Displays as described below:
-- Top-Right UI: This panel is populated with all data points for the current **_TIF Selection_** within the currently __*Selected Year*__.
-- Bottom-Left UI: This panel is populated with a Bar Chart that visualizes all values of the currently Selected Variable for the TIF that was clicked.
+* Top-Right UI: This panel is populated with all data points for the current **_TIF Selection_** within the currently __*Selected Year*__.
+* Bottom-Left UI: This panel is populated with a Bar Chart that visualizes all values of the currently Selected Variable for the TIF that was clicked.
 
 ### For Developers
 
-Developers can modify the JavaScript code by using the [Earth Engine Code Editor](https://developers.google.com/earth-engine/guides/playground) Snapshot URL below:
+Developers can modify the JavaScript code by using the [Earth Engine Code Editor](https://developers.google.com/earth-engine/guides/playground) Snapshot URL[^2] below:
 
-  - https://code.earthengine.google.com/4e69cac1236837eeceae30a644a74a08 _-----08/03/2024 05:32 UTC-----_
-    - _NOTE: The Editor requires you to register with a Google account. Earth Engine is free for non-commercial use._
+* https://code.earthengine.google.com/4e69cac1236837eeceae30a644a74a08
+  * _Updated 08/03/2024 05:32 UTC_
 
+## Chicago 2022 TIF Heatmap - Developed in [R](https://www.r-project.org/) using [Shiny](https://shiny.posit.co/)
+
+For R users, code is provided to run a Shiny app locally. You will need the shape files found in the folder `chiTifBoundaries` as well as the 2022 TIF data (`2022_out.csv`) and the `CivicLabLogo.jpeg` file. The app is named `TIF2022-Shiny.R`. Be sure to save all of the files in the same directory.
+
+For non-R users, the Shiny App for the 2022 TIF data can be found here:
+
+* https://philipayates.shinyapps.io/apps/
 
 ## TIF Resources
 
 ### What Are TIFs?
 TIF stands for Tax Increment Financing. TIF Districts are designated by the municipality to capture property taxes for a fixed period of time. The captured property taxes are used to boost development in the designated TIF district. Visit the [The CivicLab](https://www.civiclab.us/) website to read more about what TIFs are and how they work. Here are two resources to start with:
-- [TIF 101 Video](https://www.civiclab.us/tif-101/)
-- [How Do TIFs Work?](https://www.civiclab.us/tif_illumination_project/how-do-tifs-work/)
+* [TIF 101 Video](https://www.civiclab.us/tif-101/)
+* [How Do TIFs Work?](https://www.civiclab.us/tif_illumination_project/how-do-tifs-work/)
 
 ### Where Is The Data From?
 * The financial data was parsed from the City of Chicago's [TIF District Annual Report webpage](https://www.chicago.gov/city/en/depts/dcd/supp_info/tif-district-annual-reports-2004-present.html). Data from 2010-2022 inclusive was parsed from the PDFs using various Python libraries.
@@ -56,7 +58,7 @@ TIF stands for Tax Increment Financing. TIF Districts are designated by the muni
 
 ### What Are These Variables?
 
-Data for Chicago TIF Districts are released once per year. A yearly report for each TIF contains a variety of different metrics, but the ones listed below are the values that we have obtained from all PDFs from 2010 through 2022. Please refer to these explanations while using the [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs):
+Data for Chicago TIF Districts are released once per year. A yearly report for each TIF contains a variety of different metrics, but the ones listed below are the values that we have obtained from all PDFs from 2010 through 2023.[^1] Please refer to these explanations while using the [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs):
 
 | Variable                               | Explanation                                 |
 | -------------------------------------- | ------------------------------------------- |
@@ -75,3 +77,6 @@ Data for Chicago TIF Districts are released once per year. A yearly report for e
 | **Bank Names**                         | Bank(s) that provided the financing (Finance Costs) to the TIF Fund. |
 
 Please refer back to this table for concise explanations of variables while utilizing the app.
+
+[^1]: Data is released annually each summer (for the prior year) around June 30th. Expect the GEE Top TIFs Web Map to be updated around that time.
+[^2]: The GEE Editor requires you to register with a Google account. Earth Engine is free for non-commercial use.
