@@ -1,0 +1,325 @@
+2025-08-23 17:16:24,702 - SpawnPoolWorker-9 - STARTING: T_136_47thStateAR24.pdf | Path: <_io.BytesIO object at 0x0000013B9FB6D9A0>
+2025-08-23 17:16:24,808 - SpawnPoolWorker-2 - STARTING: T_141_26thKingAR24.pdf | Path: <_io.BytesIO object at 0x00000177DA540E00>
+2025-08-23 17:16:25,219 - SpawnPoolWorker-9 - SUCCESS: T_136_47thStateAR24.pdf
+2025-08-23 17:16:25,353 - SpawnPoolWorker-2 - SUCCESS: T_141_26thKingAR24.pdf
+2025-08-23 17:16:26,569 - SpawnPoolWorker-14 - STARTING: T_098_63rdPulaskiAR24.pdf | Path: <_io.BytesIO object at 0x000001ED1C76EB30>
+2025-08-23 17:16:27,059 - SpawnPoolWorker-14 - SUCCESS: T_098_63rdPulaskiAR24.pdf
+2025-08-23 17:16:27,681 - SpawnPoolWorker-7 - STARTING: T_121_47thHalstedAR24.pdf | Path: <_io.BytesIO object at 0x000002B6AEAFD900>
+2025-08-23 17:16:28,413 - SpawnPoolWorker-7 - SUCCESS: T_121_47thHalstedAR24.pdf
+2025-08-23 17:16:28,598 - SpawnPoolWorker-9 - STARTING: T_060_71stStonyIslandAR24.pdf | Path: <_io.BytesIO object at 0x0000013B9D3856D0>
+2025-08-23 17:16:28,678 - SpawnPoolWorker-1 - STARTING: T_072_24thMichiganAR24.pdf | Path: <_io.BytesIO object at 0x000002D7CB62E950>
+2025-08-23 17:16:28,691 - SpawnPoolWorker-8 - STARTING: T_118_47thKingAR24.pdf | Path: <_io.BytesIO object at 0x0000018D0ADBBB30>
+2025-08-23 17:16:28,820 - SpawnPoolWorker-15 - STARTING: T_124_67thCiceroAR24.pdf | Path: <_io.BytesIO object at 0x000001EBCCF1CA90>
+2025-08-23 17:16:29,018 - SpawnPoolWorker-2 - STARTING: T_145_73rdUniversityAR24.pdf | Path: <_io.BytesIO object at 0x00000177DA0A5540>
+2025-08-23 17:16:29,142 - SpawnPoolWorker-12 - STARTING: T_105_53rdAR24.pdf | Path: <_io.BytesIO object at 0x000001C04F92B9F0>
+2025-08-23 17:16:30,048 - SpawnPoolWorker-11 - STARTING: T_175_51stLakeParkAR24.pdf | Path: <_io.BytesIO object at 0x00000248975DE950>
+2025-08-23 17:16:30,056 - SpawnPoolWorker-9 - SUCCESS: T_060_71stStonyIslandAR24.pdf
+2025-08-23 17:16:30,145 - SpawnPoolWorker-8 - SUCCESS: T_118_47thKingAR24.pdf
+2025-08-23 17:16:30,407 - SpawnPoolWorker-1 - SUCCESS: T_072_24thMichiganAR24.pdf
+2025-08-23 17:16:30,581 - SpawnPoolWorker-2 - SUCCESS: T_145_73rdUniversityAR24.pdf
+2025-08-23 17:16:30,618 - SpawnPoolWorker-15 - SUCCESS: T_124_67thCiceroAR24.pdf
+2025-08-23 17:16:31,031 - SpawnPoolWorker-5 - STARTING: T_055_43rdCottageGroveAR24.pdf | Path: <_io.BytesIO object at 0x000001F55B7CDA40>
+2025-08-23 17:16:31,144 - SpawnPoolWorker-12 - SUCCESS: T_105_53rdAR24.pdf
+2025-08-23 17:16:31,180 - SpawnPoolWorker-14 - STARTING: T_056_79thAR24.pdf | Path: <_io.BytesIO object at 0x000001ED1A075810>
+2025-08-23 17:16:31,375 - SpawnPoolWorker-3 - STARTING: T_001_35thHalstedAR24.pdf | Path: <_io.BytesIO object at 0x000001C21AF6DA40>
+2025-08-23 17:16:31,503 - SpawnPoolWorker-10 - STARTING: T_097_51stArcherAR24.pdf | Path: <_io.BytesIO object at 0x000001872BBBBA40>
+2025-08-23 17:16:31,645 - SpawnPoolWorker-16 - STARTING: T_174_67thWentworthAR24.pdf | Path: <_io.BytesIO object at 0x00000192F2903630>
+2025-08-23 17:16:31,786 - SpawnPoolWorker-4 - STARTING: T_131_35thStateAR24.pdf | Path: <_io.BytesIO object at 0x00000145BADDEA40>
+2025-08-23 17:16:32,096 - SpawnPoolWorker-6 - STARTING: T_117_47thAshlandAR24.pdf | Path: <_io.BytesIO object at 0x000002A0E409E9F0>
+2025-08-23 17:16:32,299 - SpawnPoolWorker-11 - SUCCESS: T_175_51stLakeParkAR24.pdf
+2025-08-23 17:16:32,440 - SpawnPoolWorker-5 - SUCCESS: T_055_43rdCottageGroveAR24.pdf
+2025-08-23 17:16:32,667 - SpawnPoolWorker-13 - STARTING: T_143_63rdAshlandAR24.pdf | Path: <_io.BytesIO object at 0x00000251605B9860>
+2025-08-23 17:16:34,656 - SpawnPoolWorker-10 - SUCCESS: T_097_51stArcherAR24.pdf
+2025-08-23 17:16:34,730 - SpawnPoolWorker-16 - SUCCESS: T_174_67thWentworthAR24.pdf
+2025-08-23 17:16:35,068 - SpawnPoolWorker-3 - SUCCESS: T_001_35thHalstedAR24.pdf
+2025-08-23 17:16:35,611 - SpawnPoolWorker-6 - SUCCESS: T_117_47thAshlandAR24.pdf
+2025-08-23 17:16:35,621 - SpawnPoolWorker-7 - STARTING: T_140_79thCiceroAR24.pdf | Path: <_io.BytesIO object at 0x000002B6AC315540>
+2025-08-23 17:16:36,968 - SpawnPoolWorker-4 - SUCCESS: T_131_35thStateAR24.pdf
+2025-08-23 17:16:36,998 - SpawnPoolWorker-13 - SUCCESS: T_143_63rdAshlandAR24.pdf
+2025-08-23 17:16:37,226 - SpawnPoolWorker-14 - SUCCESS: T_056_79thAR24.pdf
+2025-08-23 17:16:37,871 - SpawnPoolWorker-9 - STARTING: T_112_79thSWHighwayAR24.pdf | Path: <_io.BytesIO object at 0x0000013BA06C7C70>
+2025-08-23 17:16:38,055 - SpawnPoolWorker-7 - SUCCESS: T_140_79thCiceroAR24.pdf
+2025-08-23 17:16:39,783 - SpawnPoolWorker-2 - STARTING: T_155_79thVincennesAR24.pdf | Path: <_io.BytesIO object at 0x00000177DD3B6810>
+2025-08-23 17:16:39,825 - SpawnPoolWorker-9 - SUCCESS: T_112_79thSWHighwayAR24.pdf
+2025-08-23 17:16:40,603 - SpawnPoolWorker-1 - STARTING: T_133_83rdStewartAR24.pdf | Path: <_io.BytesIO object at 0x000002D7C8E37F90>
+2025-08-23 17:16:41,894 - SpawnPoolWorker-2 - SUCCESS: T_155_79thVincennesAR24.pdf
+2025-08-23 17:16:42,072 - SpawnPoolWorker-11 - STARTING: T_111_105thVincennesAR24.pdf | Path: <_io.BytesIO object at 0x0000024894DE7F90>
+2025-08-23 17:16:42,157 - SpawnPoolWorker-12 - STARTING: T_127_87thCottageGroveAR24.pdf | Path: <_io.BytesIO object at 0x000001C04D145590>
+2025-08-23 17:16:42,382 - SpawnPoolWorker-1 - SUCCESS: T_133_83rdStewartAR24.pdf
+2025-08-23 17:16:42,439 - SpawnPoolWorker-8 - STARTING: T_009_95thWesternAR24.pdf | Path: <_io.BytesIO object at 0x0000018D0B0B56D0>
+2025-08-23 17:16:42,847 - SpawnPoolWorker-15 - STARTING: T_176_107thHalstedAR24.pdf | Path: <_io.BytesIO object at 0x000001EBCA7345E0>
+2025-08-23 17:16:42,894 - SpawnPoolWorker-16 - STARTING: T_114_119thHalstedAR24.pdf | Path: <_io.BytesIO object at 0x00000192F2C04450>
+2025-08-23 17:16:43,380 - SpawnPoolWorker-5 - STARTING: T_182_116thAvenueOAR24.pdf | Path: <_io.BytesIO object at 0x000001F55C0919A0>
+2025-08-23 17:16:43,444 - SpawnPoolWorker-10 - STARTING: T_073_111thKedzieAR24.pdf | Path: <_io.BytesIO object at 0x00000187293D56D0>
+2025-08-23 17:16:43,450 - SpawnPoolWorker-12 - SUCCESS: T_127_87thCottageGroveAR24.pdf
+2025-08-23 17:16:43,572 - SpawnPoolWorker-3 - STARTING: T_125_119thI57AR24.pdf | Path: <_io.BytesIO object at 0x000001C218875680>
+2025-08-23 17:16:44,082 - SpawnPoolWorker-13 - STARTING: T_067_ArcherCourtsAR24.pdf | Path: <_io.BytesIO object at 0x0000025104915630>
+2025-08-23 17:16:44,139 - SpawnPoolWorker-11 - SUCCESS: T_111_105thVincennesAR24.pdf
+2025-08-23 17:16:45,036 - SpawnPoolWorker-6 - STARTING: T_150_AddisonSouthAR24.pdf | Path: <_io.BytesIO object at 0x000002A0E18B5720>
+2025-08-23 17:16:45,542 - SpawnPoolWorker-16 - SUCCESS: T_114_119thHalstedAR24.pdf
+2025-08-23 17:16:45,568 - SpawnPoolWorker-8 - SUCCESS: T_009_95thWesternAR24.pdf
+2025-08-23 17:16:45,588 - SpawnPoolWorker-10 - SUCCESS: T_073_111thKedzieAR24.pdf
+2025-08-23 17:16:45,628 - SpawnPoolWorker-15 - SUCCESS: T_176_107thHalstedAR24.pdf
+2025-08-23 17:16:45,753 - SpawnPoolWorker-5 - SUCCESS: T_182_116thAvenueOAR24.pdf
+2025-08-23 17:16:45,907 - SpawnPoolWorker-4 - STARTING: T_099_ArcherCentralAR24.pdf | Path: <_io.BytesIO object at 0x00000145B85F5680>
+2025-08-23 17:16:45,970 - SpawnPoolWorker-13 - Error from tabula-java:
+Error: Error: End-of-File, expected line
+
+
+2025-08-23 17:16:45,971 - SpawnPoolWorker-13 - FAILED: T_067_ArcherCourtsAR24.pdf | Error: Command '['java', '-Dfile.encoding=UTF8', '-Dorg.slf4j.simpleLogger.defaultLogLevel=off', '-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.NoOpLog', '-jar', 'C:\\Users\\w\\AppData\\Local\\Programs\\Python\\Python38\\lib\\site-packages\\tabula\\tabula-1.0.5-jar-with-dependencies.jar', '--pages', '6', '--area', '50,0,97,500', '--format', 'JSON', '--silent', 'C:\\Users\\w\\AppData\\Local\\Temp\\8e909371-7117-4c5a-89b4-d192bf2ad5eb.pdf']' returned non-zero exit status 1.
+2025-08-23 17:16:45,974 - SpawnPoolWorker-14 - STARTING: T_163_ArcherWesternAR24.pdf | Path: <_io.BytesIO object at 0x000001ED1A085B30>
+2025-08-23 17:16:46,070 - SpawnPoolWorker-3 - SUCCESS: T_125_119thI57AR24.pdf
+2025-08-23 17:16:46,183 - SpawnPoolWorker-7 - STARTING: T_151_ArmitagePulaskiAR24.pdf | Path: <_io.BytesIO object at 0x000002B6AF7A3EA0>
+2025-08-23 17:16:46,985 - SpawnPoolWorker-6 - SUCCESS: T_150_AddisonSouthAR24.pdf
+2025-08-23 17:16:47,451 - SpawnPoolWorker-14 - SUCCESS: T_163_ArcherWesternAR24.pdf
+2025-08-23 17:16:47,883 - SpawnPoolWorker-4 - SUCCESS: T_099_ArcherCentralAR24.pdf
+2025-08-23 17:16:49,134 - SpawnPoolWorker-13 - STARTING: T_123_AvalonSouthShoreAR24.pdf | Path: <_io.BytesIO object at 0x00000251069EB400>
+2025-08-23 17:16:49,919 - SpawnPoolWorker-1 - STARTING: T_167_AvondaleAR24.pdf | Path: <_io.BytesIO object at 0x000002D7CC2C7400>
+2025-08-23 17:16:50,073 - SpawnPoolWorker-7 - SUCCESS: T_151_ArmitagePulaskiAR24.pdf
+2025-08-23 17:16:52,117 - SpawnPoolWorker-13 - SUCCESS: T_123_AvalonSouthShoreAR24.pdf
+2025-08-23 17:16:52,939 - SpawnPoolWorker-2 - STARTING: T_081_BelmontCentralAR24.pdf | Path: <_io.BytesIO object at 0x00000177DD100860>
+2025-08-23 17:16:53,474 - SpawnPoolWorker-1 - SUCCESS: T_167_AvondaleAR24.pdf
+2025-08-23 17:16:54,135 - SpawnPoolWorker-8 - STARTING: T_061_BronzevilleAR24.pdf | Path: <_io.BytesIO object at 0x0000018D0B702A40>
+2025-08-23 17:16:54,275 - SpawnPoolWorker-10 - STARTING: T_082_BelmontCiceroAR24.pdf | Path: <_io.BytesIO object at 0x000001872C8FAE50>
+2025-08-23 17:20:25,876 - SpawnPoolWorker-11 - STARTING: T_175_51stLakeParkAR24.pdf | Path: <_io.BytesIO object at 0x0000027C842AAA40>
+2025-08-23 17:20:25,998 - SpawnPoolWorker-9 - STARTING: T_136_47thStateAR24.pdf | Path: <_io.BytesIO object at 0x0000020DEEE9AAE0>
+2025-08-23 17:20:26,263 - SpawnPoolWorker-2 - STARTING: T_141_26thKingAR24.pdf | Path: <_io.BytesIO object at 0x0000016B2C0BABD0>
+2025-08-23 17:20:26,487 - SpawnPoolWorker-11 - SUCCESS: T_175_51stLakeParkAR24.pdf
+2025-08-23 17:20:26,584 - SpawnPoolWorker-12 - STARTING: T_105_53rdAR24.pdf | Path: <_io.BytesIO object at 0x000001A1DB8EDAE0>
+2025-08-23 17:20:26,698 - SpawnPoolWorker-9 - SUCCESS: T_136_47thStateAR24.pdf
+2025-08-23 17:20:27,046 - SpawnPoolWorker-4 - STARTING: T_131_35thStateAR24.pdf | Path: <_io.BytesIO object at 0x000001A4CCDB0E00>
+2025-08-23 17:20:27,050 - SpawnPoolWorker-5 - STARTING: T_055_43rdCottageGroveAR24.pdf | Path: <_io.BytesIO object at 0x000001462851BA90>
+2025-08-23 17:20:27,100 - SpawnPoolWorker-15 - STARTING: T_124_67thCiceroAR24.pdf | Path: <_io.BytesIO object at 0x00000236FC75DA90>
+2025-08-23 17:20:27,181 - SpawnPoolWorker-2 - SUCCESS: T_141_26thKingAR24.pdf
+2025-08-23 17:20:27,515 - SpawnPoolWorker-12 - SUCCESS: T_105_53rdAR24.pdf
+2025-08-23 17:20:27,648 - SpawnPoolWorker-10 - STARTING: T_097_51stArcherAR24.pdf | Path: <_io.BytesIO object at 0x000001DDB2E88CC0>
+2025-08-23 17:20:27,894 - SpawnPoolWorker-14 - STARTING: T_098_63rdPulaskiAR24.pdf | Path: <_io.BytesIO object at 0x0000025FD8B12B80>
+2025-08-23 17:20:28,002 - SpawnPoolWorker-3 - STARTING: T_001_35thHalstedAR24.pdf | Path: <_io.BytesIO object at 0x000002C1735FDAE0>
+2025-08-23 17:20:28,267 - SpawnPoolWorker-7 - STARTING: T_121_47thHalstedAR24.pdf | Path: <_io.BytesIO object at 0x000001C420D4DA90>
+2025-08-23 17:20:28,393 - SpawnPoolWorker-8 - STARTING: T_118_47thKingAR24.pdf | Path: <_io.BytesIO object at 0x000001D195FFC9F0>
+2025-08-23 17:20:28,578 - SpawnPoolWorker-16 - STARTING: T_174_67thWentworthAR24.pdf | Path: <_io.BytesIO object at 0x00000214B9B33AE0>
+2025-08-23 17:20:28,633 - SpawnPoolWorker-4 - SUCCESS: T_131_35thStateAR24.pdf
+2025-08-23 17:20:28,762 - SpawnPoolWorker-15 - SUCCESS: T_124_67thCiceroAR24.pdf
+2025-08-23 17:20:28,908 - SpawnPoolWorker-1 - STARTING: T_072_24thMichiganAR24.pdf | Path: <_io.BytesIO object at 0x0000026C1CC20CC0>
+2025-08-23 17:20:28,961 - SpawnPoolWorker-5 - SUCCESS: T_055_43rdCottageGroveAR24.pdf
+2025-08-23 17:20:29,757 - SpawnPoolWorker-6 - STARTING: T_117_47thAshlandAR24.pdf | Path: <_io.BytesIO object at 0x00000213D134DAE0>
+2025-08-23 17:20:29,826 - SpawnPoolWorker-13 - STARTING: T_143_63rdAshlandAR24.pdf | Path: <_io.BytesIO object at 0x00000247EEA2CAE0>
+2025-08-23 17:20:30,686 - SpawnPoolWorker-8 - SUCCESS: T_118_47thKingAR24.pdf
+2025-08-23 17:20:30,958 - SpawnPoolWorker-10 - SUCCESS: T_097_51stArcherAR24.pdf
+2025-08-23 17:20:30,958 - SpawnPoolWorker-14 - SUCCESS: T_098_63rdPulaskiAR24.pdf
+2025-08-23 17:20:31,373 - SpawnPoolWorker-1 - SUCCESS: T_072_24thMichiganAR24.pdf
+2025-08-23 17:20:31,747 - SpawnPoolWorker-3 - SUCCESS: T_001_35thHalstedAR24.pdf
+2025-08-23 17:20:32,335 - SpawnPoolWorker-7 - SUCCESS: T_121_47thHalstedAR24.pdf
+2025-08-23 17:20:32,436 - SpawnPoolWorker-13 - SUCCESS: T_143_63rdAshlandAR24.pdf
+2025-08-23 17:20:32,845 - SpawnPoolWorker-16 - SUCCESS: T_174_67thWentworthAR24.pdf
+2025-08-23 17:20:33,283 - SpawnPoolWorker-11 - STARTING: T_060_71stStonyIslandAR24.pdf | Path: <_io.BytesIO object at 0x0000027C81AB8F90>
+2025-08-23 17:20:33,752 - SpawnPoolWorker-9 - STARTING: T_145_73rdUniversityAR24.pdf | Path: <_io.BytesIO object at 0x0000020DEEE3E9F0>
+2025-08-23 17:20:34,041 - SpawnPoolWorker-6 - SUCCESS: T_117_47thAshlandAR24.pdf
+2025-08-23 17:20:35,819 - SpawnPoolWorker-12 - STARTING: T_056_79thAR24.pdf | Path: <_io.BytesIO object at 0x000001A1D91067C0>
+2025-08-23 17:20:36,599 - SpawnPoolWorker-2 - STARTING: T_140_79thCiceroAR24.pdf | Path: <_io.BytesIO object at 0x0000016B298D67C0>
+2025-08-23 17:20:37,170 - SpawnPoolWorker-9 - SUCCESS: T_145_73rdUniversityAR24.pdf
+2025-08-23 17:20:37,673 - SpawnPoolWorker-11 - SUCCESS: T_060_71stStonyIslandAR24.pdf
+2025-08-23 17:20:38,323 - SpawnPoolWorker-5 - STARTING: T_112_79thSWHighwayAR24.pdf | Path: <_io.BytesIO object at 0x00000146284BD5E0>
+2025-08-23 17:20:38,445 - SpawnPoolWorker-12 - SUCCESS: T_056_79thAR24.pdf
+2025-08-23 17:20:38,877 - SpawnPoolWorker-4 - STARTING: T_127_87thCottageGroveAR24.pdf | Path: <_io.BytesIO object at 0x000001A4CC916810>
+2025-08-23 17:20:38,981 - SpawnPoolWorker-2 - SUCCESS: T_140_79thCiceroAR24.pdf
+2025-08-23 17:20:39,360 - SpawnPoolWorker-15 - STARTING: T_133_83rdStewartAR24.pdf | Path: <_io.BytesIO object at 0x00000236F9F75720>
+2025-08-23 17:20:39,541 - SpawnPoolWorker-8 - STARTING: T_155_79thVincennesAR24.pdf | Path: <_io.BytesIO object at 0x000001D193816680>
+2025-08-23 17:20:39,963 - SpawnPoolWorker-1 - STARTING: T_009_95thWesternAR24.pdf | Path: <_io.BytesIO object at 0x0000026C1C8767C0>
+2025-08-23 17:20:40,219 - SpawnPoolWorker-5 - SUCCESS: T_112_79thSWHighwayAR24.pdf
+2025-08-23 17:20:40,744 - SpawnPoolWorker-4 - SUCCESS: T_127_87thCottageGroveAR24.pdf
+2025-08-23 17:20:41,390 - SpawnPoolWorker-14 - STARTING: T_111_105thVincennesAR24.pdf | Path: <_io.BytesIO object at 0x0000025FD63366D0>
+2025-08-23 17:20:41,680 - SpawnPoolWorker-1 - SUCCESS: T_009_95thWesternAR24.pdf
+2025-08-23 17:20:41,776 - SpawnPoolWorker-16 - STARTING: T_073_111thKedzieAR24.pdf | Path: <_io.BytesIO object at 0x00000214B7346770>
+2025-08-23 17:20:41,865 - SpawnPoolWorker-3 - STARTING: T_176_107thHalstedAR24.pdf | Path: <_io.BytesIO object at 0x000002C170E16810>
+2025-08-23 17:20:42,241 - SpawnPoolWorker-15 - SUCCESS: T_133_83rdStewartAR24.pdf
+2025-08-23 17:20:42,601 - SpawnPoolWorker-8 - SUCCESS: T_155_79thVincennesAR24.pdf
+2025-08-23 17:20:42,602 - SpawnPoolWorker-13 - STARTING: T_125_119thI57AR24.pdf | Path: <_io.BytesIO object at 0x00000247EC246770>
+2025-08-23 17:20:42,942 - SpawnPoolWorker-6 - STARTING: T_150_AddisonSouthAR24.pdf | Path: <_io.BytesIO object at 0x00000213CEB66770>
+2025-08-23 17:20:43,020 - SpawnPoolWorker-10 - STARTING: T_114_119thHalstedAR24.pdf | Path: <_io.BytesIO object at 0x000001DDB06667C0>
+2025-08-23 17:20:43,672 - SpawnPoolWorker-7 - STARTING: T_182_116thAvenueOAR24.pdf | Path: <_io.BytesIO object at 0x000001C421046720>
+2025-08-23 17:20:43,952 - SpawnPoolWorker-14 - SUCCESS: T_111_105thVincennesAR24.pdf
+2025-08-23 17:20:44,056 - SpawnPoolWorker-12 - STARTING: T_163_ArcherWesternAR24.pdf | Path: <_io.BytesIO object at 0x000001A1DB8EDAE0>
+2025-08-23 17:20:44,262 - SpawnPoolWorker-9 - STARTING: T_099_ArcherCentralAR24.pdf | Path: <_io.BytesIO object at 0x0000020DEF7BF900>
+2025-08-23 17:20:44,603 - SpawnPoolWorker-13 - SUCCESS: T_125_119thI57AR24.pdf
+2025-08-23 17:20:44,735 - SpawnPoolWorker-16 - SUCCESS: T_073_111thKedzieAR24.pdf
+2025-08-23 17:20:45,427 - SpawnPoolWorker-3 - SUCCESS: T_176_107thHalstedAR24.pdf
+2025-08-23 17:20:45,435 - SpawnPoolWorker-10 - SUCCESS: T_114_119thHalstedAR24.pdf
+2025-08-23 17:20:45,509 - SpawnPoolWorker-11 - STARTING: T_151_ArmitagePulaskiAR24.pdf | Path: <_io.BytesIO object at 0x0000027C84C1C090>
+2025-08-23 17:20:45,805 - SpawnPoolWorker-12 - SUCCESS: T_163_ArcherWesternAR24.pdf
+2025-08-23 17:20:46,374 - SpawnPoolWorker-6 - SUCCESS: T_150_AddisonSouthAR24.pdf
+2025-08-23 17:20:46,388 - SpawnPoolWorker-7 - SUCCESS: T_182_116thAvenueOAR24.pdf
+2025-08-23 17:20:47,720 - SpawnPoolWorker-9 - SUCCESS: T_099_ArcherCentralAR24.pdf
+2025-08-23 17:20:49,671 - SpawnPoolWorker-11 - SUCCESS: T_151_ArmitagePulaskiAR24.pdf
+2025-08-23 17:20:50,024 - SpawnPoolWorker-2 - STARTING: T_123_AvalonSouthShoreAR24.pdf | Path: <_io.BytesIO object at 0x0000016B298F6AE0>
+2025-08-23 17:20:50,663 - SpawnPoolWorker-1 - STARTING: T_167_AvondaleAR24.pdf | Path: <_io.BytesIO object at 0x0000026C1CC20CC0>
+2025-08-23 17:20:52,248 - SpawnPoolWorker-5 - STARTING: T_082_BelmontCiceroAR24.pdf | Path: <_io.BytesIO object at 0x0000014629097A40>
+2025-08-23 17:20:52,295 - SpawnPoolWorker-2 - SUCCESS: T_123_AvalonSouthShoreAR24.pdf
+2025-08-23 17:20:52,344 - SpawnPoolWorker-8 - STARTING: T_081_BelmontCentralAR24.pdf | Path: <_io.BytesIO object at 0x000001D196C82CC0>
+2025-08-23 17:20:52,903 - SpawnPoolWorker-1 - SUCCESS: T_167_AvondaleAR24.pdf
+2025-08-23 17:20:53,696 - SpawnPoolWorker-5 - SUCCESS: T_082_BelmontCiceroAR24.pdf
+2025-08-23 17:20:53,751 - SpawnPoolWorker-15 - STARTING: T_061_BronzevilleAR24.pdf | Path: <_io.BytesIO object at 0x00000236FD202360>
+2025-08-23 17:20:53,774 - SpawnPoolWorker-8 - SUCCESS: T_081_BelmontCentralAR24.pdf
+2025-08-23 17:20:54,085 - SpawnPoolWorker-14 - STARTING: T_013_BrynMawrBroadwayAR24.pdf | Path: <_io.BytesIO object at 0x0000025FD965CEF0>
+2025-08-23 17:20:54,528 - SpawnPoolWorker-3 - STARTING: T_063_CanalCongressAR24.pdf | Path: <_io.BytesIO object at 0x000002C173ECE180>
+2025-08-23 17:20:54,810 - SpawnPoolWorker-15 - SUCCESS: T_061_BronzevilleAR24.pdf
+2025-08-23 17:20:55,312 - SpawnPoolWorker-13 - STARTING: T_185_CiceroStevensonAR24.pdf | Path: <_io.BytesIO object at 0x00000247F0C0A770>
+2025-08-23 17:20:55,323 - SpawnPoolWorker-14 - SUCCESS: T_013_BrynMawrBroadwayAR24.pdf
+2025-08-23 17:20:56,151 - SpawnPoolWorker-3 - SUCCESS: T_063_CanalCongressAR24.pdf
+2025-08-23 17:20:56,848 - SpawnPoolWorker-13 - SUCCESS: T_185_CiceroStevensonAR24.pdf
+2025-08-23 17:20:57,079 - SpawnPoolWorker-16 - STARTING: T_094_ChicagoKingsburyAR24.pdf | Path: <_io.BytesIO object at 0x00000214BA699770>
+2025-08-23 17:20:57,236 - SpawnPoolWorker-7 - STARTING: T_070_ClarkMontroseAR24.pdf | Path: <_io.BytesIO object at 0x000001C4217175E0>
+2025-08-23 17:20:57,267 - SpawnPoolWorker-10 - STARTING: T_086_CentralWestAR24.pdf | Path: <_io.BytesIO object at 0x000001DDB3BCDB80>
+2025-08-23 17:20:57,619 - SpawnPoolWorker-6 - STARTING: T_115_ChicagoCentralParkAR24.pdf | Path: <_io.BytesIO object at 0x00000213D3059090>
+2025-08-23 17:20:57,735 - SpawnPoolWorker-11 - STARTING: T_128_CommercialAR24.pdf | Path: <_io.BytesIO object at 0x0000027C84AA6090>
+2025-08-23 17:20:58,700 - SpawnPoolWorker-9 - STARTING: T_183_CortlandChicagoRiverAR24.pdf | Path: <_io.BytesIO object at 0x0000020DEC6F9D60>
+2025-08-23 17:20:58,844 - SpawnPoolWorker-12 - STARTING: T_096_CiceroArcherAR24.pdf | Path: <_io.BytesIO object at 0x000001A1B78944F0>
+2025-08-23 17:20:58,870 - SpawnPoolWorker-7 - SUCCESS: T_070_ClarkMontroseAR24.pdf
+2025-08-23 17:20:59,066 - SpawnPoolWorker-10 - SUCCESS: T_086_CentralWestAR24.pdf
+2025-08-23 17:20:59,323 - SpawnPoolWorker-16 - SUCCESS: T_094_ChicagoKingsburyAR24.pdf
+2025-08-23 17:21:00,254 - SpawnPoolWorker-6 - SUCCESS: T_115_ChicagoCentralParkAR24.pdf
+2025-08-23 17:21:00,304 - SpawnPoolWorker-11 - SUCCESS: T_128_CommercialAR24.pdf
+2025-08-23 17:21:00,381 - SpawnPoolWorker-1 - STARTING: T_179_DiverseyChicagoRiverAR24.pdf | Path: <_io.BytesIO object at 0x0000026C1C868EF0>
+2025-08-23 17:21:00,500 - SpawnPoolWorker-9 - SUCCESS: T_183_CortlandChicagoRiverAR24.pdf
+2025-08-23 17:21:00,895 - SpawnPoolWorker-12 - SUCCESS: T_096_CiceroArcherAR24.pdf
+2025-08-23 17:21:01,493 - SpawnPoolWorker-8 - STARTING: T_107_DivisionHomanAR24.pdf | Path: <_io.BytesIO object at 0x000001D196D3FB80>
+2025-08-23 17:21:01,625 - SpawnPoolWorker-5 - STARTING: T_129_DiverseyNarragansettAR24.pdf | Path: <_io.BytesIO object at 0x00000146291BEC70>
+2025-08-23 17:21:01,944 - SpawnPoolWorker-2 - STARTING: T_134_DevonSheridanAR24.pdf | Path: <_io.BytesIO object at 0x0000016B2C8B92C0>
+2025-08-23 17:21:02,404 - SpawnPoolWorker-1 - SUCCESS: T_179_DiverseyChicagoRiverAR24.pdf
+2025-08-23 17:21:02,952 - SpawnPoolWorker-15 - STARTING: T_130_EdgewaterAshlandAR24.pdf | Path: <_io.BytesIO object at 0x00000236FCF58180>
+2025-08-23 17:21:03,115 - SpawnPoolWorker-14 - STARTING: T_153_ElstonArmstrongAR24.pdf | Path: <_io.BytesIO object at 0x0000025FD630F3B0>
+2025-08-23 17:21:04,548 - SpawnPoolWorker-2 - SUCCESS: T_134_DevonSheridanAR24.pdf
+2025-08-23 17:21:04,675 - SpawnPoolWorker-5 - SUCCESS: T_129_DiverseyNarragansettAR24.pdf
+2025-08-23 17:21:05,443 - SpawnPoolWorker-15 - SUCCESS: T_130_EdgewaterAshlandAR24.pdf
+2025-08-23 17:21:05,461 - SpawnPoolWorker-8 - SUCCESS: T_107_DivisionHomanAR24.pdf
+2025-08-23 17:21:05,833 - SpawnPoolWorker-13 - STARTING: T_106_EnglewoodNeighborhoodAR24.pdf | Path: <_io.BytesIO object at 0x00000247F0928040>
+2025-08-23 17:21:05,893 - SpawnPoolWorker-14 - SUCCESS: T_153_ElstonArmstrongAR24.pdf
+2025-08-23 17:21:06,918 - SpawnPoolWorker-4 - STARTING: T_156_AustinCommercialAR24.pdf | Path: <_io.BytesIO object at 0x000001A4CC8E3C20>
+2025-08-23 17:21:07,131 - SpawnPoolWorker-13 - SUCCESS: T_106_EnglewoodNeighborhoodAR24.pdf
+2025-08-23 17:21:07,168 - SpawnPoolWorker-3 - STARTING: T_021_EnglewoodMallAR24.pdf | Path: <_io.BytesIO object at 0x000002C14F599810>
+2025-08-23 17:21:09,136 - SpawnPoolWorker-4 - SUCCESS: T_156_AustinCommercialAR24.pdf
+2025-08-23 17:21:09,190 - SpawnPoolWorker-11 - STARTING: T_023_GooseIslandAR24.pdf | Path: <_io.BytesIO object at 0x0000027C853807C0>
+2025-08-23 17:21:09,295 - SpawnPoolWorker-3 - SUCCESS: T_021_EnglewoodMallAR24.pdf
+2025-08-23 17:21:09,656 - SpawnPoolWorker-7 - STARTING: T_169_EwingAR24.pdf | Path: <_io.BytesIO object at 0x000001C4217AC220>
+2025-08-23 17:21:09,688 - SpawnPoolWorker-9 - STARTING: T_177_FosterCaliforniaAR24.pdf | Path: <_io.BytesIO object at 0x0000020DEFB21D60>
+2025-08-23 17:21:10,535 - SpawnPoolWorker-6 - STARTING: T_071_GalewoodArmitageAR24.pdf | Path: <_io.BytesIO object at 0x00000213D33CFF90>
+2025-08-23 17:21:10,567 - SpawnPoolWorker-16 - STARTING: T_181_FosterEdensAR24.pdf | Path: <_io.BytesIO object at 0x00000214BA5F8950>
+2025-08-23 17:21:10,792 - SpawnPoolWorker-7 - SUCCESS: T_169_EwingAR24.pdf
+2025-08-23 17:21:10,880 - SpawnPoolWorker-9 - SUCCESS: T_177_FosterCaliforniaAR24.pdf
+2025-08-23 17:21:10,958 - SpawnPoolWorker-10 - STARTING: T_087_FullertonMilwaukeeAR24.pdf | Path: <_io.BytesIO object at 0x000001DDB3885900>
+2025-08-23 17:21:11,077 - SpawnPoolWorker-1 - STARTING: T_092_GreaterSouthwestWestAR24.pdf | Path: <_io.BytesIO object at 0x0000026C1FC1D860>
+2025-08-23 17:21:11,098 - SpawnPoolWorker-11 - SUCCESS: T_023_GooseIslandAR24.pdf
+2025-08-23 17:21:11,185 - SpawnPoolWorker-12 - STARTING: T_066_GreaterSouthwestEastAR24.pdf | Path: <_io.BytesIO object at 0x000001A1DCBE6D10>
+2025-08-23 17:21:12,937 - SpawnPoolWorker-6 - SUCCESS: T_071_GalewoodArmitageAR24.pdf
+2025-08-23 17:21:13,236 - SpawnPoolWorker-16 - SUCCESS: T_181_FosterEdensAR24.pdf
+2025-08-23 17:21:13,394 - SpawnPoolWorker-12 - SUCCESS: T_066_GreaterSouthwestEastAR24.pdf
+2025-08-23 17:21:13,562 - SpawnPoolWorker-15 - STARTING: T_024_HomanArthingtonAR24.pdf | Path: <_io.BytesIO object at 0x00000236FD3F6900>
+2025-08-23 17:21:13,681 - SpawnPoolWorker-2 - STARTING: T_157_HollywoodSheridanAR24.pdf | Path: <_io.BytesIO object at 0x0000016B2C5C4E00>
+2025-08-23 17:21:13,984 - SpawnPoolWorker-5 - STARTING: T_144_HarrisonCentralAR24.pdf | Path: <_io.BytesIO object at 0x000001462993AF40>
+2025-08-23 17:21:14,109 - SpawnPoolWorker-1 - SUCCESS: T_092_GreaterSouthwestWestAR24.pdf
+2025-08-23 17:21:14,318 - SpawnPoolWorker-8 - STARTING: T_108_HumboldtParkAR24.pdf | Path: <_io.BytesIO object at 0x000001D1972B3D10>
+2025-08-23 17:21:14,405 - SpawnPoolWorker-10 - SUCCESS: T_087_FullertonMilwaukeeAR24.pdf
+2025-08-23 17:21:15,154 - SpawnPoolWorker-14 - STARTING: T_101_JeffersonRooseveltAR24.pdf | Path: <_io.BytesIO object at 0x0000025FD96AC720>
+2025-08-23 17:21:16,079 - SpawnPoolWorker-15 - SUCCESS: T_024_HomanArthingtonAR24.pdf
+2025-08-23 17:21:16,306 - SpawnPoolWorker-2 - SUCCESS: T_157_HollywoodSheridanAR24.pdf
+2025-08-23 17:21:16,440 - SpawnPoolWorker-13 - STARTING: T_160_KennedyKimballAR24.pdf | Path: <_io.BytesIO object at 0x00000247F01077C0>
+2025-08-23 17:21:17,533 - SpawnPoolWorker-5 - SUCCESS: T_144_HarrisonCentralAR24.pdf
+2025-08-23 17:21:17,642 - SpawnPoolWorker-8 - SUCCESS: T_108_HumboldtParkAR24.pdf
+2025-08-23 17:21:17,975 - SpawnPoolWorker-3 - STARTING: T_052_KinzieAR24.pdf | Path: <_io.BytesIO object at 0x000002C174111E50>
+2025-08-23 17:21:18,162 - SpawnPoolWorker-14 - SUCCESS: T_101_JeffersonRooseveltAR24.pdf
+2025-08-23 17:21:19,823 - SpawnPoolWorker-13 - SUCCESS: T_160_KennedyKimballAR24.pdf
+2025-08-23 17:21:19,948 - SpawnPoolWorker-7 - STARTING: T_103_LakeCalumetAR24.pdf | Path: <_io.BytesIO object at 0x000001C421857E00>
+2025-08-23 17:21:19,978 - SpawnPoolWorker-3 - SUCCESS: T_052_KinzieAR24.pdf
+2025-08-23 17:21:21,703 - SpawnPoolWorker-9 - STARTING: T_147_LaSalleCentralAR24.pdf | Path: <_io.BytesIO object at 0x0000020DEF916D60>
+2025-08-23 17:21:21,807 - SpawnPoolWorker-16 - STARTING: T_119_LakefrontAR24.pdf | Path: <_io.BytesIO object at 0x00000214B73B9EF0>
+2025-08-23 17:21:22,089 - SpawnPoolWorker-7 - SUCCESS: T_103_LakeCalumetAR24.pdf
+2025-08-23 17:21:23,230 - SpawnPoolWorker-9 - SUCCESS: T_147_LaSalleCentralAR24.pdf
+2025-08-23 17:21:24,035 - SpawnPoolWorker-16 - SUCCESS: T_119_LakefrontAR24.pdf
+2025-08-23 17:21:24,129 - SpawnPoolWorker-11 - STARTING: T_088_LawrenceKedzieAR24.pdf | Path: <_io.BytesIO object at 0x0000027C84635F40>
+2025-08-23 17:21:24,270 - SpawnPoolWorker-4 - STARTING: T_109_LawrenceBroadwayAR24.pdf | Path: <_io.BytesIO object at 0x000001A4CFB7FF40>
+2025-08-23 17:21:24,386 - SpawnPoolWorker-12 - STARTING: T_152_LittleVillageAR24.pdf | Path: <_io.BytesIO object at 0x000001A1DC5059F0>
+2025-08-23 17:21:24,551 - SpawnPoolWorker-6 - STARTING: T_077_LincolnAvenueAR24.pdf | Path: <_io.BytesIO object at 0x00000213D3157270>
+2025-08-23 17:21:24,667 - SpawnPoolWorker-1 - STARTING: T_116_LawrencePulaskiAR24.pdf | Path: <_io.BytesIO object at 0x0000026C1FAC46D0>
+2025-08-23 17:21:24,810 - SpawnPoolWorker-2 - STARTING: T_075_MadisonAustinAR24.pdf | Path: <_io.BytesIO object at 0x0000016B2C3DCDB0>
+2025-08-23 17:21:25,795 - SpawnPoolWorker-11 - SUCCESS: T_088_LawrenceKedzieAR24.pdf
+2025-08-23 17:21:25,833 - SpawnPoolWorker-10 - STARTING: T_164_LittleVillageEastAR24.pdf | Path: <_io.BytesIO object at 0x000001DDB2E5F400>
+2025-08-23 17:21:26,087 - SpawnPoolWorker-4 - SUCCESS: T_109_LawrenceBroadwayAR24.pdf
+2025-08-23 17:21:26,164 - SpawnPoolWorker-12 - SUCCESS: T_152_LittleVillageAR24.pdf
+2025-08-23 17:21:26,500 - SpawnPoolWorker-5 - STARTING: T_029_MichiganCermakAR24.pdf | Path: <_io.BytesIO object at 0x00000146292323B0>
+2025-08-23 17:21:26,745 - SpawnPoolWorker-6 - SUCCESS: T_077_LincolnAvenueAR24.pdf
+2025-08-23 17:21:26,786 - SpawnPoolWorker-8 - STARTING: T_126_MaddenWellsAR24.pdf | Path: <_io.BytesIO object at 0x000001D196A82360>
+2025-08-23 17:21:27,039 - SpawnPoolWorker-1 - SUCCESS: T_116_LawrencePulaskiAR24.pdf
+2025-08-23 17:21:27,325 - SpawnPoolWorker-10 - SUCCESS: T_164_LittleVillageEastAR24.pdf
+2025-08-23 17:21:27,517 - SpawnPoolWorker-2 - SUCCESS: T_075_MadisonAustinAR24.pdf
+2025-08-23 17:21:28,170 - SpawnPoolWorker-5 - SUCCESS: T_029_MichiganCermakAR24.pdf
+2025-08-23 17:21:28,395 - SpawnPoolWorker-14 - STARTING: T_089_MidwayAR24.pdf | Path: <_io.BytesIO object at 0x0000025FD959ADB0>
+2025-08-23 17:21:28,858 - SpawnPoolWorker-13 - STARTING: T_173_MontroseClarendonAR24.pdf | Path: <_io.BytesIO object at 0x00000247F0A22F90>
+2025-08-23 17:21:29,113 - SpawnPoolWorker-7 - STARTING: T_064_NorthwestAR24.pdf | Path: <_io.BytesIO object at 0x000001C422159F40>
+2025-08-23 17:21:29,765 - SpawnPoolWorker-8 - SUCCESS: T_126_MaddenWellsAR24.pdf
+2025-08-23 17:21:30,421 - SpawnPoolWorker-3 - STARTING: T_030_NearNorthAR24.pdf | Path: <_io.BytesIO object at 0x000002C173F85770>
+2025-08-23 17:21:30,509 - SpawnPoolWorker-14 - SUCCESS: T_089_MidwayAR24.pdf
+2025-08-23 17:21:31,390 - SpawnPoolWorker-13 - SUCCESS: T_173_MontroseClarendonAR24.pdf
+2025-08-23 17:21:31,404 - SpawnPoolWorker-7 - SUCCESS: T_064_NorthwestAR24.pdf
+2025-08-23 17:21:32,265 - SpawnPoolWorker-9 - STARTING: T_100_OhioWabashAR24.pdf | Path: <_io.BytesIO object at 0x0000020DEFAACCC0>
+2025-08-23 17:21:32,424 - SpawnPoolWorker-16 - STARTING: T_166_NorthPullmanAR24.pdf | Path: <_io.BytesIO object at 0x00000214BA4E5F40>
+2025-08-23 17:21:33,253 - SpawnPoolWorker-15 - STARTING: T_095_MidwestAR24.pdf | Path: <_io.BytesIO object at 0x00000236FCF625E0>
+2025-08-23 17:21:33,443 - SpawnPoolWorker-3 - SUCCESS: T_030_NearNorthAR24.pdf
+2025-08-23 17:21:34,656 - SpawnPoolWorker-16 - SUCCESS: T_166_NorthPullmanAR24.pdf
+2025-08-23 17:21:34,910 - SpawnPoolWorker-9 - SUCCESS: T_100_OhioWabashAR24.pdf
+2025-08-23 17:21:35,096 - SpawnPoolWorker-11 - STARTING: T_161_OgdenPulaskiAR24.pdf | Path: <_io.BytesIO object at 0x0000027C81AC60E0>
+2025-08-23 17:21:35,552 - SpawnPoolWorker-10 - STARTING: T_053_PilsenAR24.pdf | Path: <_io.BytesIO object at 0x000001DDB0686540>
+2025-08-23 17:21:36,048 - SpawnPoolWorker-15 - SUCCESS: T_095_MidwestAR24.pdf
+2025-08-23 17:21:36,928 - SpawnPoolWorker-11 - SUCCESS: T_161_OgdenPulaskiAR24.pdf
+2025-08-23 17:21:37,243 - SpawnPoolWorker-4 - STARTING: T_091_PetersonPulaskiAR24.pdf | Path: <_io.BytesIO object at 0x000001A4CF952590>
+2025-08-23 17:21:37,294 - SpawnPoolWorker-10 - SUCCESS: T_053_PilsenAR24.pdf
+2025-08-23 17:21:37,429 - SpawnPoolWorker-5 - STARTING: T_186_RedLineExtensionAR24.pdf | Path: <_io.BytesIO object at 0x000001462909F4F0>
+2025-08-23 17:21:37,597 - SpawnPoolWorker-12 - STARTING: T_135_PrattRidgeAR24.pdf | Path: <_io.BytesIO object at 0x000001A1D91069A0>
+2025-08-23 17:21:37,853 - SpawnPoolWorker-2 - STARTING: T_069_PulaskiAR24.pdf | Path: <_io.BytesIO object at 0x0000016B299100E0>
+2025-08-23 17:21:37,885 - SpawnPoolWorker-1 - STARTING: T_172_RandolphWellsAR24.pdf | Path: <_io.BytesIO object at 0x0000026C1CC20CC0>
+2025-08-23 17:21:38,235 - SpawnPoolWorker-6 - STARTING: T_104_RiverWestAR24.pdf | Path: <_io.BytesIO object at 0x00000213D33E1630>
+2025-08-23 17:21:38,957 - SpawnPoolWorker-5 - SUCCESS: T_186_RedLineExtensionAR24.pdf
+2025-08-23 17:21:39,030 - SpawnPoolWorker-4 - SUCCESS: T_091_PetersonPulaskiAR24.pdf
+2025-08-23 17:21:40,165 - SpawnPoolWorker-12 - SUCCESS: T_135_PrattRidgeAR24.pdf
+2025-08-23 17:21:40,403 - SpawnPoolWorker-1 - SUCCESS: T_172_RandolphWellsAR24.pdf
+2025-08-23 17:21:40,433 - SpawnPoolWorker-6 - SUCCESS: T_104_RiverWestAR24.pdf
+2025-08-23 17:21:40,674 - SpawnPoolWorker-2 - SUCCESS: T_069_PulaskiAR24.pdf
+2025-08-23 17:21:40,872 - SpawnPoolWorker-14 - STARTING: T_062_RooseveltRacineAR24.pdf | Path: <_io.BytesIO object at 0x0000025FD94EDD10>
+2025-08-23 17:21:41,019 - SpawnPoolWorker-7 - STARTING: T_184_RooseveltClarkAR24.pdf | Path: <_io.BytesIO object at 0x000001C421C54E50>
+2025-08-23 17:21:41,663 - SpawnPoolWorker-13 - STARTING: T_113_RoselandMichiganAR24.pdf | Path: <_io.BytesIO object at 0x00000247EC256A90>
+2025-08-23 17:21:42,023 - SpawnPoolWorker-8 - STARTING: T_038_RooseveltCiceroAR24.pdf | Path: <_io.BytesIO object at 0x000001D19684E590>
+2025-08-23 17:21:42,298 - SpawnPoolWorker-3 - STARTING: T_180_RPMPhaseOneProjectAR24.pdf | Path: <_io.BytesIO object at 0x000002C1742314A0>
+2025-08-23 17:21:43,990 - SpawnPoolWorker-16 - STARTING: T_042_SanitaryDrainageShipCanalAR24.pdf | Path: <_io.BytesIO object at 0x00000214BA5F8810>
+2025-08-23 17:21:44,449 - SpawnPoolWorker-14 - SUCCESS: T_062_RooseveltRacineAR24.pdf
+2025-08-23 17:21:44,768 - SpawnPoolWorker-7 - SUCCESS: T_184_RooseveltClarkAR24.pdf
+2025-08-23 17:21:44,816 - SpawnPoolWorker-8 - SUCCESS: T_038_RooseveltCiceroAR24.pdf
+2025-08-23 17:21:44,891 - SpawnPoolWorker-13 - SUCCESS: T_113_RoselandMichiganAR24.pdf
+2025-08-23 17:21:45,247 - SpawnPoolWorker-3 - SUCCESS: T_180_RPMPhaseOneProjectAR24.pdf
+2025-08-23 17:21:45,444 - SpawnPoolWorker-9 - STARTING: T_093_SouthChicagoAR24.pdf | Path: <_io.BytesIO object at 0x0000020DEC7479A0>
+2025-08-23 17:21:45,930 - SpawnPoolWorker-16 - SUCCESS: T_042_SanitaryDrainageShipCanalAR24.pdf
+2025-08-23 17:21:47,252 - SpawnPoolWorker-9 - SUCCESS: T_093_SouthChicagoAR24.pdf
+2025-08-23 17:21:47,386 - SpawnPoolWorker-11 - STARTING: T_149_StevensonBrightonAR24.pdf | Path: <_io.BytesIO object at 0x0000027C84C1CB30>
+2025-08-23 17:21:48,044 - SpawnPoolWorker-15 - STARTING: T_045_StockyardsSEQuadrantAR24.pdf | Path: <_io.BytesIO object at 0x00000236FD040BD0>
+2025-08-23 17:21:48,851 - SpawnPoolWorker-11 - SUCCESS: T_149_StevensonBrightonAR24.pdf
+2025-08-23 17:21:49,373 - SpawnPoolWorker-10 - STARTING: T_054_StonyIslandBurnsideAR24.pdf | Path: <_io.BytesIO object at 0x000001DDB396CE50>
+2025-08-23 17:21:49,393 - SpawnPoolWorker-4 - STARTING: T_146_TouhyWesternAR24.pdf | Path: <_io.BytesIO object at 0x000001A4CFA85270>
+2025-08-23 17:21:49,993 - SpawnPoolWorker-12 - STARTING: T_178_WashingtonParkAR24.pdf | Path: <_io.BytesIO object at 0x000001A1DC15FD60>
+2025-08-23 17:21:50,016 - SpawnPoolWorker-15 - SUCCESS: T_045_StockyardsSEQuadrantAR24.pdf
+2025-08-23 17:21:50,707 - SpawnPoolWorker-5 - STARTING: T_083_WestIrvingParkAR24.pdf | Path: <_io.BytesIO object at 0x00000146298E1D60>
+2025-08-23 17:21:50,723 - SpawnPoolWorker-1 - STARTING: T_085_WesternSouthAR24.pdf | Path: <_io.BytesIO object at 0x0000026C1FA53450>
+2025-08-23 17:21:50,752 - SpawnPoolWorker-10 - SUCCESS: T_054_StonyIslandBurnsideAR24.pdf
+2025-08-23 17:21:50,793 - SpawnPoolWorker-4 - SUCCESS: T_146_TouhyWesternAR24.pdf
+2025-08-23 17:21:51,610 - SpawnPoolWorker-2 - STARTING: T_142_WesternRockIslandAR24.pdf | Path: <_io.BytesIO object at 0x0000016B2D0B8E50>
+2025-08-23 17:21:51,649 - SpawnPoolWorker-13 - STARTING: T_171_WestWoodlawnAR24.pdf | Path: <_io.BytesIO object at 0x00000247F0C92090>
+2025-08-23 17:21:51,660 - SpawnPoolWorker-12 - SUCCESS: T_178_WashingtonParkAR24.pdf
+2025-08-23 17:21:52,016 - SpawnPoolWorker-6 - STARTING: T_084_WesternNorthAR24.pdf | Path: <_io.BytesIO object at 0x00000213CEB86EF0>
+2025-08-23 17:21:52,690 - SpawnPoolWorker-1 - SUCCESS: T_085_WesternSouthAR24.pdf
+2025-08-23 17:21:52,696 - SpawnPoolWorker-5 - SUCCESS: T_083_WestIrvingParkAR24.pdf
+2025-08-23 17:21:53,670 - SpawnPoolWorker-3 - STARTING: T_065_WoodlawnAR24.pdf | Path: <_io.BytesIO object at 0x000002C17435D090>
+2025-08-23 17:21:53,894 - SpawnPoolWorker-13 - SUCCESS: T_171_WestWoodlawnAR24.pdf
+2025-08-23 17:21:53,925 - SpawnPoolWorker-2 - SUCCESS: T_142_WesternRockIslandAR24.pdf
+2025-08-23 17:21:53,936 - SpawnPoolWorker-6 - SUCCESS: T_084_WesternNorthAR24.pdf
+2025-08-23 17:21:54,245 - SpawnPoolWorker-7 - STARTING: T_048_WesternOgdenAR24.pdf | Path: <_io.BytesIO object at 0x000001C42176DBD0>
+2025-08-23 17:21:54,916 - SpawnPoolWorker-14 - STARTING: T_110_WilsonYardAR24.pdf | Path: <_io.BytesIO object at 0x0000025FD9704F40>
+2025-08-23 17:21:55,929 - SpawnPoolWorker-3 - SUCCESS: T_065_WoodlawnAR24.pdf
+2025-08-23 17:21:56,412 - SpawnPoolWorker-7 - SUCCESS: T_048_WesternOgdenAR24.pdf
+2025-08-23 17:21:57,729 - SpawnPoolWorker-14 - SUCCESS: T_110_WilsonYardAR24.pdf
