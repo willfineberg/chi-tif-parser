@@ -112,7 +112,7 @@ def create_tif_charts(file_path, current_report_year):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TIF Charts Report {current_report_year}</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
     <style>
         * {{
             margin: 0;
@@ -526,8 +526,60 @@ def create_tif_charts(file_path, current_report_year):
             });
         });
         
-        // Initialize charts when page loads
-        document.addEventListener('DOMContentLoaded', createCharts);
+        // Initialize charts as the user scrolls
+        const chartInstances = {};  // Keep track of created charts
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const canvas = entry.target;
+                    const idParts = canvas.id.split('_');          // ["chart", tifNumber, metric parts...]
+                    const tifNumber = idParts[1];
+                    const metric = idParts.slice(2).join('_');    // join remaining parts for metric name
+
+                    if (!chartInstances[canvas.id]) {
+                        const data = chartData[tifNumber]?.[metric];
+                        
+                        if (!data) {
+                            console.warn(`No chart data for ${canvas.id}`);
+                            return;
+                        }
+
+                        chartInstances[canvas.id] = new Chart(canvas, {
+                            type: 'bar',
+                            data: {
+                                labels: data.labels,
+                                datasets: [{
+                                    label: data.title,
+                                    data: data.values,
+                                    backgroundColor: data.background_colors,
+                                    borderColor: data.border_colors,
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: { ticks: { maxRotation: 45, font: { size: 10 } } },
+                                    y: { beginAtZero: true, ticks: { font: { size: 10 } } }
+                                },
+                                interaction: { intersect: false, mode: 'index' }
+                            }
+                        });
+                    }
+
+                    observer.unobserve(canvas);  // Only create once
+                }
+            });
+        }, { rootMargin: '0px 0px 200px 0px' });  // preload slightly before viewport
+
+        document.querySelectorAll('.chart-canvas').forEach(canvas => {
+            observer.observe(canvas);
+        });
+
+
     </script>
 </body>
 </html>'''
