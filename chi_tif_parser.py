@@ -152,7 +152,50 @@ class Tools:
         df.columns = header_row
         return df
 
-    def mergeNewYear
+    def mergeNewYear(masterFp, mergeFp):
+        """
+        Merge new rows from mergeFp into masterFp.
+        
+        Parameters:
+            masterFp (str): Path to master CSV.
+            mergeFp (str): Path to new year CSV.
+            
+        Returns:
+            pd.DataFrame: The updated master DataFrame.
+        """
+        # Read CSVs
+        master_df = pd.read_csv(masterFp)
+        master_df_len = len(master_df)
+        merge_df = pd.read_csv(mergeFp)
+        merge_df_len = len(merge_df)
+        
+        # Confirm original master row count
+        
+        print(f"Original master row count: {master_df_len}")
+        
+        # Append new rows (only rows not already in master)
+        # Assuming 'ID' or similar unique column exists; adjust if needed
+        # If no unique ID, this will append all rows
+        combined_df = pd.concat([master_df, merge_df], ignore_index=True).drop_duplicates()
+        
+        new_count = len(combined_df)
+        added_rows = new_count - master_df_len
+        print(f"New rows added: {added_rows}")
+        # Confirm this matches the appended data
+        if added_rows != merge_df_len:
+            print(f"ERROR: Expected {merge_df_len} rows to append, but found {added_rows} actually appended. Data will remain unmodified")
+            return None
+        
+        # Write updated master back to disk
+        combined_df.to_csv(masterFp, index=False)
+        print(f"Master CSV updated: {masterFp}")
+
+        # Sort the Data
+        # Assuming your DataFrame is called df
+        combined_df = combined_df.sort_values(by=['tif_name', 'tif_year'], ascending=[True, True]).reset_index(drop=True)
+        
+        return combined_df
+        
 
 
 class YearParse:
