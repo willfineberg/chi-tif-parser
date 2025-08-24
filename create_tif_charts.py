@@ -377,8 +377,9 @@ def create_tif_charts(file_path, current_report_year):
     </div>
     
     <div class="header">
-        <h1>TIF Financial Charts Report</h1>
-        <p>Year {current_report_year} • {len(tif_names)} Tax Increment Financing Districts</p>
+        <h1>Chicago Tax Increment Financing (TIF) Report Charts</h1>
+        <p>Year {current_report_year} • {len(tif_names)} TIF Districts</p>
+        <p style="font-size: 1.0rem; opacity: 0.8; margin-top: 0.5rem;">Blue year buttons link directly to PDF reports</p>
     </div>
     '''
 
@@ -392,7 +393,7 @@ def create_tif_charts(file_path, current_report_year):
         if links:
             html_content += '<div class="year-links">'
             for year, url in sorted(links.items()):
-                html_content += f'<a href="{url}" target="_blank" class="year-link">[{year}]</a>'
+                html_content += f'<a href="{url}" target="_blank" class="year-link">{year}</a>'
             html_content += '</div>'
         
         html_content += '<div class="charts-grid">'
