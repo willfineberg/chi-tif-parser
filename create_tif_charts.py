@@ -119,7 +119,7 @@ def create_tif_charts(file_path, current_report_year):
             padding: 0;
             box-sizing: border-box;
         }}
-        
+
         body {{
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
@@ -234,6 +234,7 @@ def create_tif_charts(file_path, current_report_year):
         .header {{
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
+            height: auto; /* Ensure natural height */
             padding: 2rem;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -368,9 +369,9 @@ def create_tif_charts(file_path, current_report_year):
         </div>
         <div class="toc-list">'''
 
-    # Add TOC entries
+    # Add TOC entries - simple anchor links
     for tif_name, tif_number in toc_entries:
-        html_content += f'<a href="#tif-{tif_number}" class="toc-item" onclick="closeTOC()">{tif_name}</a>'
+        html_content += f'<a href="#tif-{tif_number}" class="toc-item">{tif_name}</a>'
 
     html_content += f'''
         </div>
@@ -512,20 +513,6 @@ def create_tif_charts(file_path, current_report_year):
                 }
             });
         }
-        
-        // Smooth scrolling for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
         
         // Initialize charts as the user scrolls
         const chartInstances = {};  // Keep track of created charts
