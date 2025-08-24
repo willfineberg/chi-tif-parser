@@ -2,75 +2,95 @@ import pandas as pd
 import sys
 from pathlib import Path
 
-# Get year from command line argument
-year = sys.argv[1]
-output_dir = Path(f"C:/Users/w/clonedGitRepos/chi-tif-parser/csvs/{year}")
-output_dir.mkdir(parents=True, exist_ok=True)
-output_file = output_dir / f"{year}_validate_data_consistency.csv"
-
-# Load CSV
-file_path = r"C:\Users\w\clonedGitRepos\chi-tif-parser\csvs\chi-tif-data-master.csv"
-df = pd.read_csv(file_path)
-
-# Ensure proper types
-numeric_cols = ['tif_year', 'property_tax_extraction', 'cumulative_property_tax_extraction']
-df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric, errors='coerce')
-
-# Sort data by TIF and year
-df = df.sort_values(['tif_name', 'tif_year'])
-
-zero_after_nonzero = []
-cumulative_non_increasing = []
-
-for tif_name, group in df.groupby('tif_name'):
-    group = group.reset_index(drop=True)
+def check_zero_after_nonzero(group, field_name, tif_name):
+    """Check if a field has zero values after the first non-zero value."""
+    results = []
     
-    # --- Check property_tax_extraction zeros after first non-zero ---
-    first_nonzero_idx = group['property_tax_extraction'].ne(0).idxmax()
-    subsequent_zeros = group.loc[first_nonzero_idx + 1:, 'property_tax_extraction'] == 0
-    if subsequent_zeros.any():
-        years = group.loc[first_nonzero_idx + 1:, 'tif_year'][subsequent_zeros].tolist()
-        zero_after_nonzero.append({'tif_name': tif_name, 'years': years})
+    # Find the earliest year with ANY non-zero value (positive or negative)
+    non_zero_mask = group[field_name] != 0
+    if non_zero_mask.any():
+        first_nonzero_idx = non_zero_mask.idxmax()
+        
+        # Check for zeros in subsequent years (negative values are okay, only flag zeros)
+        subsequent_data = group.loc[first_nonzero_idx + 1:]
+        zero_mask = subsequent_data[field_name] == 0
+        
+        # For fund_balance_end, exclude zeros that are the very last data point
+        if field_name == 'fund_balance_end' and zero_mask.any():
+            # Get indices of zero values
+            zero_indices = zero_mask[zero_mask].index
+            # Filter out zeros that are the last data point in the entire group
+            zero_indices = [idx for idx in zero_indices if idx != group.index[-1]]
+            zero_mask = pd.Series(False, index=zero_mask.index)
+            for idx in zero_indices:
+                zero_mask.loc[idx] = True
+        
+        if zero_mask.any():
+            years = subsequent_data.loc[zero_mask, 'tif_year'].tolist()
+            results.append({'tif_name': tif_name, 'years': years, 'discrepancy_field': field_name})
     
-    # --- Check cumulative_property_tax_extraction non-increasing ---
-    cum_series = group['cumulative_property_tax_extraction'][first_nonzero_idx:]
-    non_increasing_years = cum_series[cum_series.diff() < 0].index
-    if len(non_increasing_years) > 0:
-        years = group.loc[non_increasing_years, 'tif_year'].tolist()
-        cumulative_non_increasing.append({'tif_name': tif_name, 'years': years})
+    return results
 
-# Output results to console
-print("TIFs with property_tax_extraction = 0 after first non-zero year:")
-for entry in zero_after_nonzero:
-    print(f"{entry['tif_name']}: Years -> {entry['years']}")
+def main():
+    # Get year from command line argument
+    if len(sys.argv) < 2:
+        print("Usage: python validate_data_consistency.py <year>")
+        sys.exit(1)
+        
+    year = sys.argv[1]
+    output_dir = Path(f"C:/Users/w/clonedGitRepos/chi-tif-parser/csvs/{year}")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir / f"{year}_validate_data_consistency.csv"
 
-print("\nTIFs with cumulative_property_tax_extraction not increasing:")
-for entry in cumulative_non_increasing:
-    print(f"{entry['tif_name']}: Years -> {entry['years']}")
+    # Load CSV
+    file_path = r"C:\Users\w\clonedGitRepos\chi-tif-parser\csvs\chi-tif-data-master.csv"
+    df = pd.read_csv(file_path)
 
-# Create CSV report
-report_data = []
+    # Ensure proper types
+    numeric_cols = ['tif_year', 'property_tax_extraction', 'fund_balance_end']
+    df[numeric_cols] = df[numeric_cols].apply(pd.to_numeric, errors='coerce')
 
-for entry in zero_after_nonzero:
-    years_str = ', '.join(map(str, entry['years']))
-    report_data.append({
-        'tif_name': entry['tif_name'],
-        'years': years_str,
-        'discrepancy_field': 'property_tax_extraction',
-        'status': ''
-    })
+    # Sort data by TIF and year
+    df = df.sort_values(['tif_name', 'tif_year'])
 
-for entry in cumulative_non_increasing:
-    years_str = ', '.join(map(str, entry['years']))
-    report_data.append({
-        'tif_name': entry['tif_name'],
-        'years': years_str,
-        'discrepancy_field': 'cumulative_property_tax_extraction',
-        'status': ''
-    })
+    # Define fields to check
+    fields_to_check = ['property_tax_extraction', 'fund_balance_end']
+    
+    all_results = []
 
-# Create DataFrame and save to CSV
-report_df = pd.DataFrame(report_data).sort_values(by=['tif_name', 'discrepancy_field'], ascending=[True, True]).reset_index(drop=True)
-report_df.to_csv(output_file, index=False)
+    for tif_name, group in df.groupby('tif_name'):
+        group = group.reset_index(drop=True)
+        
+        # Run checks for each field
+        for field in fields_to_check:
+            results = check_zero_after_nonzero(group, field, tif_name)  # Pass tif_name as parameter
+            all_results.extend(results)
 
-print(f"\nCSV report saved to: {output_file}")
+    # Output results to console
+    print("TIFs with zero values after first non-zero year:")
+    for entry in all_results:
+        print(f"{entry['tif_name']} ({entry['discrepancy_field']}): Years -> {entry['years']}")
+
+    # Create CSV report
+    report_data = []
+
+    for entry in all_results:
+        years_str = ', '.join(map(str, entry['years']))
+        report_data.append({
+            'tif_name': entry['tif_name'],
+            'years': years_str,
+            'discrepancy_field': entry['discrepancy_field'],
+            'status': '', # Placeholder for manual review status
+        })
+
+    # Create DataFrame and save to CSV
+    report_df = pd.DataFrame(report_data)
+    if not report_df.empty:
+        report_df = report_df.sort_values(by=['tif_name', 'discrepancy_field'], ascending=True).reset_index(drop=True)
+    report_df.to_csv(output_file, index=False)
+
+    print(f"\nCSV report saved to: {output_file}")
+    print(f"Total discrepancies found: {len(all_results)}")
+
+if __name__ == "__main__":
+    main()

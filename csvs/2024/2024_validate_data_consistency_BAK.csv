@@ -1,14 +1,14 @@
 tif_name,years,discrepancy_field,status
-119th/Halsted,2012,property_tax_extraction,
-134th/Avenue K,2012,property_tax_extraction,
-40th/State,"2011, 2012, 2013",property_tax_extraction,
-67th/Wentworth,2024,property_tax_extraction,
-73rd/Kedzie,"2011, 2012",property_tax_extraction,
-79th Street Corridor,2012,property_tax_extraction,
-79th/Southwest Highway,2012,property_tax_extraction,
-Archer/Western,"2014, 2015",cumulative_property_tax_extraction,
-Armitage/Pulaski,2015,cumulative_property_tax_extraction,
-Avondale,"2013, 2014, 2015",cumulative_property_tax_extraction,
+119th/Halsted,2012,property_tax_extraction,"Inaccurate, updated"
+134th/Avenue K,2012,property_tax_extraction,0 is accurate
+40th/State,"2011, 2012, 2013",property_tax_extraction,"Accurate, no data"
+67th/Wentworth,2024,property_tax_extraction,"Accurate, no data"
+73rd/Kedzie,"2011, 2012",property_tax_extraction,"Accurate, no data"
+79th Street Corridor,2012,property_tax_extraction,"Inaccurate, updated"
+79th/Southwest Highway,2012,property_tax_extraction,"Inaccurate, updated"
+Archer/Western,"2014, 2015",cumulative_property_tax_extraction,Accurate
+Armitage/Pulaski,2015,cumulative_property_tax_extraction,Accurate
+Avondale,"2013, 2014, 2015",cumulative_property_tax_extraction,Accurate
 Calumet River,"2011, 2012, 2013, 2014, 2015, 2016",property_tax_extraction,
 Chicago Lakeside Development - Phase 1,"2011, 2012, 2013, 2014, 2015, 2016, 2017",property_tax_extraction,
 Cicero/Stevenson,"2023, 2024",property_tax_extraction,

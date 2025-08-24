@@ -111,7 +111,7 @@ def create_tif_charts(file_path, current_report_year):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIF Charts Report {current_report_year}</title>
+    <title>TIF Report Charts {current_report_year}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
     <style>
         * {{
