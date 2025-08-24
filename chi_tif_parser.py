@@ -94,8 +94,10 @@ class Tools:
         # Remove any duplicates
         outList = []
         [outList.append(url) for url in pdf_links if url not in outList]
-        # ! - Added in 2024, preserved in 2025 - href exists for this PDF but the URL is invalid, and is not visible on the webpage itself
-        outList.remove(f'https://www.chicago.gov/content/dam/city/depts/dcd/tif/{yr}reports/T_067_ArcherCourtsAR{yr}.pdf')
+        # ! - Added in 2024, preserved in 2025 (23 report, 24 report) - href exists for this PDF but the URL is invalid, and is not visible on the webpage itself
+        archerCourtsUrlToRemove = f'https://www.chicago.gov/content/dam/city/depts/dcd/tif/{yr}reports/T_067_ArcherCourtsAR{yr}.pdf'
+        if archerCourtsUrlToRemove in outList and int(year) <= 2022:  
+            outList.remove(archerCourtsUrlToRemove)
         return outList
 
     def getPageNumFromText(pdf, target_text):
