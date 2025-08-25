@@ -422,66 +422,6 @@ def create_tif_charts(file_path, current_report_year):
         // Chart data
         const chartData = ''' + json.dumps({f"{tif_number}": charts_data for _, tif_number, charts_data, _ in all_tif_data}) + ''';
         
-        // Create all charts
-        function createCharts() {
-            Object.keys(chartData).forEach(tifNumber => {
-                const tifData = chartData[tifNumber];
-                
-                Object.keys(tifData).forEach(metric => {
-                    const data = tifData[metric];
-                    const chartId = `chart_${tifNumber}_${metric}`;
-                    const ctx = document.getElementById(chartId);
-                    
-                    if (ctx) {
-                        new Chart(ctx, {
-                            type: 'bar',
-                            data: {
-                                labels: data.labels,
-                                datasets: [{
-                                    label: data.title,
-                                    data: data.values,
-                                    backgroundColor: data.background_colors,
-                                    borderColor: data.border_colors,
-                                    borderWidth: 1
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                },
-                                scales: {
-                                    x: {
-                                        ticks: {
-                                            maxRotation: 45,
-                                            font: {
-                                                size: 10
-                                            }
-                                        }
-                                    },
-                                    y: {
-                                        beginAtZero: true,
-                                        ticks: {
-                                            font: {
-                                                size: 10
-                                            }
-                                        }
-                                    }
-                                },
-                                interaction: {
-                                    intersect: false,
-                                    mode: 'index'
-                                }
-                            }
-                        });
-                    }
-                });
-            });
-        }
-        
         // TOC functions
         function toggleTOC() {
             const sidebar = document.querySelector('.toc-sidebar');
