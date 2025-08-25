@@ -1,21 +1,24 @@
 
 <div style="position: relative;">
-  <img src="docs/images/mcdc.png" width="200" height=200 alt="MCDC Logo" style="position: absolute; right: 0;">
-  <img src="docs/images/CivicLabLogo.jpeg" height='200' alt="The CivicLab Logo" style="position: absolute; left: 0;">
+  <img src="archive/images/mcdc.png" width="200" height=200 alt="MCDC Logo" style="position: absolute; right: 0;">
+  <img src="archive/images/CivicLabLogo.jpeg" height='200' alt="The CivicLab Logo" style="position: absolute; left: 0;">
 </div>
 
-# [MCDC](https://sites.northwestern.edu/mcdc/) Project with [The CivicLab](https://www.civiclab.us/) for [TIF Illumination](http://tifreports.com/)
+# Continuation of the [TIF Illumination](http://tifreports.com/) [MCDC](https://sites.northwestern.edu/mcdc/) Project with [The CivicLab](https://www.civiclab.us/)
+
+___This is a 2025 fork of the original GitHub Repository created for 2024 report parsing. This repo will continue to be updated annually by Will Fineberg with new TIF Report Data from the City of Chicago.___
 
 _The [TIF Illumination Project](http://tifreports.com/) uses data mining, investigatory reporting, graphic design, and popular education methods to expose the hyper-local harms Tax Increment Financing Districts bring to our communities. We have been in the field since 2013 and have been called into community over 230 times. As far as we know, this is the only civic project in America interrogating and organizing around TIFs. See www.tifreports.com. Reach us at info@tifreports.com._
 
-_This particular project was coordinated by the Metropolitan Chicago Data-science Corps (MCDC), which is a collaboration of non-profit or community organizations and data science students. We worked with The CivicLab on the aforementioned [TIF Illumination Project](http://tifreports.com/) to reveal City of Chicago finances through Tax Increment Financing (TIF) analysis. Please view the resources below to learn more about the City of Chicago finances and how TIFs work._
+_This particular project was coordinated by the [Metropolitan Chicago Data-science Corps (MCDC)](https://sites.northwestern.edu/mcdc/), which is a collaboration of non-profit or community organizations and data science students. We worked with The CivicLab on the aforementioned [TIF Illumination Project](http://tifreports.com/) to reveal City of Chicago finances through Tax Increment Financing (TIF) analysis. Please view the resources below to learn more about the City of Chicago finances and how TIFs work._
 
-## Chicago Top TIFs Web App - Developed using [Google Earth Engine (GEE)](https://earthengine.google.com/)
+## Static HTML Product - [Chicago TIF Report Charts](https://willfineberg.github.io/chi-tif-parser/)[^3]
 
-The Chicago Top TIFs Web App contains data from 2010-2023[^1] and is published publicly at this URL: 
+The [Chicago TIF Report Charts](https://willfineberg.github.io/chi-tif-parser/) provide a quick, easy, and reliable way to view TIF data. The user can use the Table of Contents to find a specific TIF where they will find a chart for each data point over time. Each TIF has blue buttons that link directly to the PDF report for the specified year. Chart data will only go back to 2010, but the blue buttons for PDFs will be available for every PDF year found on the [TIF District Annual Report webpage](https://www.chicago.gov/city/en/depts/dcd/supp_info/tif-district-annual-reports-2004-present.html). The [Chicago TIF Report Charts](https://willfineberg.github.io/chi-tif-parser/) will be updated annually.[^1]
 
-* https://wtfineberg.users.earthengine.app/view/toptifs
-  * _Updated 08/07/2024_
+## Dynamic GIS Web App Product - [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs/)[^3]
+
+The [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs/) contains data from 2010-2024[^1] and was developed using [Google Earth Engine (GEE)](https://earthengine.google.com/). It provides a geospatial component for improved analysis of the TIF data.
 
 ### Web App Instructional Guide for Users
 
@@ -35,9 +38,11 @@ Selecting different TIFs, variables, and years will modify the two different Dat
 Developers can modify the JavaScript code by using the [Earth Engine Code Editor](https://developers.google.com/earth-engine/guides/playground) Snapshot URL[^2] below:
 
 * https://code.earthengine.google.com/4e69cac1236837eeceae30a644a74a08
-  * _Updated 08/03/2024 05:32 UTC_
+  * _Updated 08/24/2025_
 
 ## Chicago 2022 TIF Heatmap - Developed in [R](https://www.r-project.org/) using [Shiny](https://shiny.posit.co/)
+
+_Unmaintained beyond 2022 reports_
 
 For R users, code is provided to run a Shiny app locally. You will need the shape files found in the folder `chiTifBoundaries` as well as the 2022 TIF data (`2022_out.csv`) and the `CivicLabLogo.jpeg` file. The app is named `TIF2022-Shiny.R`. Be sure to save all of the files in the same directory.
 
@@ -78,5 +83,6 @@ Data for Chicago TIF Districts are released once per year. A yearly report for e
 
 Please refer back to this table for concise explanations of variables while utilizing the app.
 
-[^1]: Data is released annually each summer (for the prior year) around June 30th. Expect the GEE Top TIFs Web Map to be updated around that time.
+[^1]: Data is released annually (for the prior year) around June 30th. Expect the GEE Top TIFs Web Map to be updated around that time.
 [^2]: The GEE Editor requires you to register with a Google account. Earth Engine is free for non-commercial use.
+[^3]: Updated 2025-08-24
