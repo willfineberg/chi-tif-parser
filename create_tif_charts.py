@@ -50,12 +50,21 @@ def generate_tif_data(args):
                 background_colors.append('rgba(54, 162, 235, 0.6)')  # Blue for data
                 border_colors.append('rgba(54, 162, 235, 1)')
         
+        # Finance Costs as Tooltip with Bank Name
+        extra = {}
+        if col == "finance_costs" and "bank" in tif_df.columns:
+            bank_list = []
+            for v, b in zip(values, tif_df["bank"].fillna("").tolist()):
+                bank_list.append(b if v else "")
+            extra["bank"] = bank_list
+
         charts_data[col] = {
             'labels': years,
             'values': values,
             'background_colors': background_colors,
             'border_colors': border_colors,
-            'title': col.replace('_', ' ').title()
+            'title': col.replace('_', ' ').title(),
+            **extra
         }
     
     return tif_name, tif_number, charts_data, links
@@ -464,7 +473,7 @@ def create_tif_charts(file_path, current_report_year):
                     const idParts = canvas.id.split('_');          // ["chart", tifNumber, metric parts...]
                     const tifNumber = idParts[1];
                     const metric = idParts.slice(2).join('_');    // join remaining parts for metric name
-
+                    
                     if (!chartInstances[canvas.id]) {
                         const data = chartData[tifNumber]?.[metric];
                         
@@ -488,7 +497,26 @@ def create_tif_charts(file_path, current_report_year):
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
-                                plugins: { legend: { display: false } },
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function(context) {
+                                                let label = context.dataset.label || '';
+                                                let value = context.parsed.y;
+                                                let idx = context.dataIndex;
+                                                // Only add bank info for finance_costs
+                                                if (metric === "finance_costs" && Array.isArray(data.bank)) {
+                                                    let bank = data.bank[idx] || "";
+                                                    if (bank) {
+                                                        return `${label}: $${value.toLocaleString()} (${bank})`;
+                                                    }
+                                                }
+                                                return `${label}: $${value.toLocaleString()}`;
+                                            }
+                                        }
+                                    }
+                                },
                                 scales: {
                                     x: { ticks: { maxRotation: 45, font: { size: 10 } } },
                                     y: { beginAtZero: true, ticks: { font: { size: 10 } } }
