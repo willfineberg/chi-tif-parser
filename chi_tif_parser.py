@@ -15,6 +15,7 @@ import pandas as pd  # For data cleaning
 import traceback  # For printing stack traces upon failure
 import multiprocessing, concurrent.futures  # For threading
 import logging
+import string # for string.capwords() to correct bank names
 # For Debugging: import tabula, csv, PyPDF2, pdfplumber, locale, json, re, requests, sys, os, io, time, pandas as pd, traceback, multiprocessing, concurrent.futures
 from bs4 import BeautifulSoup  # For HTML parsing the DAR URLs
 from math import isnan  # For checking if parsed values are NaN or not
@@ -96,7 +97,7 @@ class Tools:
         [outList.append(url) for url in pdf_links if url not in outList]
         # ! - Added in 2024, preserved in 2025 (23 report, 24 report) - href exists for this PDF but the URL is invalid, and is not visible on the webpage itself
         archerCourtsUrlToRemove = f'https://www.chicago.gov/content/dam/city/depts/dcd/tif/{yr}reports/T_067_ArcherCourtsAR{yr}.pdf'
-        if archerCourtsUrlToRemove in outList and int(year) <= 2022:  
+        if archerCourtsUrlToRemove in outList and int(year) > 2022:  
             outList.remove(archerCourtsUrlToRemove)
         return outList
 
@@ -179,11 +180,14 @@ class Tools:
         # Assuming 'ID' or similar unique column exists; adjust if needed
         # If no unique ID, this will append all rows
         combined_df = pd.concat([master_df, merge_df], ignore_index=True).drop_duplicates()
+
+        # Sort the Data
+        combined_df = combined_df.sort_values(by=['tif_name', 'tif_year'], ascending=[True, True]).reset_index(drop=True)
         
+        # Confirm this matches the appended data
         new_count = len(combined_df)
         added_rows = new_count - master_df_len
         print(f"New rows added: {added_rows}")
-        # Confirm this matches the appended data
         if added_rows != merge_df_len:
             print(f"ERROR: Expected {merge_df_len} rows to append, but found {added_rows} actually appended. Data will remain unmodified")
             return None
@@ -191,14 +195,9 @@ class Tools:
         # Write updated master back to disk
         combined_df.to_csv(masterFp, index=False)
         print(f"Master CSV updated: {masterFp}")
-
-        # Sort the Data
-        # Assuming your DataFrame is called df
-        combined_df = combined_df.sort_values(by=['tif_name', 'tif_year'], ascending=[True, True]).reset_index(drop=True)
         
         return combined_df
         
-
 
 class YearParse:
     """An Object that obtains and stores one year's worth of DAR Objects"""
@@ -362,6 +361,7 @@ class YearParse:
         runtime_minutes = runtime_seconds // 60
         runtime_seconds %= 60
         print(f"Program runtime: {int(runtime_minutes)} minutes {int(runtime_seconds)} seconds")
+
 
 class DAR:
     """Parses and stores data from a single TIF DAR PDF."""
@@ -645,23 +645,38 @@ class DAR:
         df = tabula.read_pdf(
             input_path=self.pdf,
             pages=self.sec32b, 
-            area=[145, 0, 645, 600], # [topY, leftX, bottomY, rightX]
-            lattice=True
+            area=[155, 0, 660, 600], # [topY, leftX, bottomY, rightX]
+            # columns=[],
+            # # Modified in 2024
+            # stream=True,
+            lattice=True 
         )[0]
+        # Ensure columns are as expected
+        expected_cols = ['Service', 'Name', 'Amount']
+        if not all(col in df.columns for col in expected_cols):
+            print("ERROR: Unexpected columns in Section 3.2B dataframe")
         # Parse each Admin Cost and sum them; assume larger value is more accurate
-        adminCosts_service = df[df['Service'] == 'Administration']['Amount'].apply(Tools.stof).sum()
+        # adminCosts_service = df[df['Service'] == 'Administration']['Amount'].apply(Tools.stof).sum()
         adminCosts_byName = df[df['Name'].astype(str).str.contains('City Program Management Cost|City Staff Cost', case=False, na=False)]['Amount'].apply(Tools.stof).sum()
         # adminCosts = max(adminCosts_service, adminCosts_byName)
         # if adminCosts_service != adminCosts_byName:
         #     print('\nAdmin Cost Discrepancy! Larger value chosen between', adminCosts_service, 'and', adminCosts_byName)
         #     print(f"Chosen Admin Value for TIF #{self.outDict['tif_number']}: {adminCosts}\n")
-        # TODO: rely on the names, not service administration
+        # TODO: rely on the names, not service administration --- done?
         # Parse each Finance Cost Amount and sum them
-        financeCosts = df[df['Service'] == 'Financing']['Amount'].apply(Tools.stof).sum()
+        financeCosts = df[df['Service'].astype(str).str.contains('financ', case=False, na=False)]['Amount'].apply(Tools.stof).sum()
+        bankNameList = (
+            df[df['Service'].astype(str).str.contains('financ', case=False, na=False)]['Name']
+            .drop_duplicates()
+            .dropna()
+            .apply(lambda x: string.capwords(str(x)))
+            .tolist()
+        )
+        # financeCosts = df[df['Service'] == 'Financing']['Amount'].apply(Tools.stof).sum()
         # Obtain the Bank Name(s)
-        bankNameList = df[df['Service'] == 'Financing']['Name'].drop_duplicates().tolist()
-        if "Amalgamated Bank of Chicago" in bankNameList:
-                    bankNameList[bankNameList.index("Amalgamated Bank of Chicago")] = "Amalgamated Bank"
+        # bankNameList = df[df['Service'] == 'Financing']['Name'].drop_duplicates().tolist()
+        if "Amalgamated Bank Of Chicago" in bankNameList:
+            bankNameList[bankNameList.index("Amalgamated Bank Of Chicago")] = "Amalgamated Bank"
         bankNames = ', '.join(sorted(bankNameList))
         # Set the adminCosts, financeCosts, and bankNames
         self.outDict['admin_costs'] = adminCosts_byName # ? - adminCosts
@@ -669,6 +684,7 @@ class DAR:
         self.outDict['bank'] = bankNames
         # Return the DataFrame for storage
         return df
+
 
 def main():
     # Use cmd line arg for year
