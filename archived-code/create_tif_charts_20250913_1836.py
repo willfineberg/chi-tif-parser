@@ -28,57 +28,11 @@ def build_tif_reports_map():
                 tif_reports[tif_number][str(full_year)] = pdf_link
     return tif_reports
 
-def calculate_cumulative_summary(tif_df, current_year):
-    """Calculate cumulative values and track which metrics need asterisks."""
-    # Get the most recent year's data for start/end years
-    latest_row = tif_df[tif_df['tif_year'] == tif_df['tif_year'].max()].iloc[0]
-    
-    # Extract start and end years from the latest data
-    start_year = int(latest_row.get('start_year', 0)) if pd.notna(latest_row.get('start_year', 0)) else None
-    end_year = int(latest_row.get('end_year', 0)) if pd.notna(latest_row.get('end_year', 0)) else None
-    
-    # Metrics to calculate
-    metrics = [
-        'property_tax_extraction',
-        'transfers_in', 
-        'expenses',
-        'transfers_out',
-        'distribution',
-        'admin_costs',
-        'finance_costs'
-    ]
-    
-    cumulative_values = {}
-    metrics_needing_asterisks = set()
-    
-    for metric in metrics:
-        if start_year and start_year >= 2010:
-            # TIF started 2010 or later - sum all values (no asterisks needed)
-            cumulative_values[metric] = tif_df[metric].fillna(0).sum()
-        else:
-            # TIF started before 2010 - use baseline approach
-            cumulative_field = f'cumulative_{metric}'
-            
-            if cumulative_field in tif_df.columns:
-                # Use the most recent cumulative value as it represents total cumulative (no asterisk)
-                latest_cumulative = tif_df[cumulative_field].fillna(0).iloc[-1]
-                cumulative_values[metric] = latest_cumulative
-            else:
-                # No cumulative field available - sum from 2010 onwards (needs asterisk)
-                post_2010_data = tif_df[tif_df['tif_year'] >= 2010]
-                cumulative_values[metric] = post_2010_data[metric].fillna(0).sum()
-                metrics_needing_asterisks.add(metric)
-    
-    return cumulative_values, start_year, end_year, metrics_needing_asterisks
-
 def generate_tif_data(args):
     """Generate chart data for a single TIF."""
-    tif_name, tif_number, tif_df, data_columns, links, current_year = args
+    tif_name, tif_number, tif_df, data_columns, links = args
 
     years = tif_df['tif_year'].astype(str).tolist()
-    
-    # Calculate summary data
-    cumulative_summary, start_year, end_year, metrics_needing_asterisks = calculate_cumulative_summary(tif_df, current_year)
     
     # Prepare chart data for each metric
     charts_data = {}
@@ -113,7 +67,7 @@ def generate_tif_data(args):
             **extra
         }
     
-    return tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks
+    return tif_name, tif_number, charts_data, links
 
 def create_tif_charts(file_path, current_report_year):
     start_time = time.time()
@@ -143,7 +97,7 @@ def create_tif_charts(file_path, current_report_year):
     print("Building TIF report links map...")
     tif_links_map = build_tif_reports_map()
 
-    # Process all TIFs
+    # Process all TIFs (no multiprocessing needed since we're just processing data)
     all_tif_data = []
     toc_entries = []
     
@@ -152,9 +106,9 @@ def create_tif_charts(file_path, current_report_year):
         tif_number = str(int(tif_df['tif_number'].iloc[0])).zfill(3)
         links = tif_links_map.get(tif_number, {})
         
-        # Updated to pass current_report_year
-        _, _, charts_data, _, cumulative_summary, start_year, end_year, metrics_needing_asterisks = generate_tif_data((tif_name, tif_number, tif_df, data_columns, links, current_report_year))
-        all_tif_data.append((tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks))
+        # Removed queue parameter from the args tuple
+        _, _, charts_data, _ = generate_tif_data((tif_name, tif_number, tif_df, data_columns, links))
+        all_tif_data.append((tif_name, tif_number, charts_data, links))
         toc_entries.append((tif_name, tif_number))
         
         if (i + 1) % 20 == 0:
@@ -289,7 +243,7 @@ def create_tif_charts(file_path, current_report_year):
         .header {{
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            height: auto;
+            height: auto; /* Ensure natural height */
             padding: 2rem;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
@@ -320,20 +274,9 @@ def create_tif_charts(file_path, current_report_year):
             color: white;
             text-align: center;
             padding: 1.5rem;
-            margin: 0;
-        }}
-        
-        .tif-name {{
             font-size: 1.5rem;
             font-weight: 600;
             margin: 0;
-        }}
-        
-        .tif-years {{
-            font-size: 1.1rem;
-            font-weight: 400;
-            margin-top: 0.3rem;
-            opacity: 0.9;
         }}
         
         .year-links {{
@@ -361,48 +304,6 @@ def create_tif_charts(file_path, current_report_year):
             background: #0056b3;
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(0,123,255,0.4);
-        }}
-
-        .summary-section {{
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-bottom: 1px solid #e9ecef;
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }}
-        
-        .summary-title {{
-            text-align: center;
-            margin-bottom: 1rem;
-            font-weight: 600;
-            color: #495057;
-            font-size: 1rem;
-        }}
-        
-        .summary-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-        }}
-        
-        .summary-item {{
-            background: white;
-            padding: 0.8rem;
-            border-radius: 5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }}
-        
-        .summary-label {{
-            font-weight: 500;
-            color: #495057;
-        }}
-        
-        .summary-value {{
-            font-weight: 600;
-            color: #007bff;
         }}
         
         .charts-grid {{
@@ -439,13 +340,6 @@ def create_tif_charts(file_path, current_report_year):
             margin-top: 2rem;
         }}
         
-        .footnote {{
-            font-size: 0.85rem;
-            color: #6c757d;
-            font-style: italic;
-            margin-top: 1rem;
-        }}
-        
         /* Print styles */
         @media print {{
             .toc-toggle, .toc-sidebar, .toc-overlay {{ display: none !important; }}
@@ -465,9 +359,6 @@ def create_tif_charts(file_path, current_report_year):
             .charts-grid {{ 
                 grid-template-columns: 1fr;
                 padding: 1rem;
-            }}
-            .summary-grid {{
-                grid-template-columns: 1fr;
             }}
             .toc-sidebar {{ width: 100vw; left: -100vw; }}
             .toc-sidebar.open {{ left: 0; }}
@@ -503,59 +394,17 @@ def create_tif_charts(file_path, current_report_year):
     '''
 
     # Add all TIF sections
-    for tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks in all_tif_data:
+    for tif_name, tif_number, charts_data, links in all_tif_data:
         html_content += f'''
     <div class="tif-page" id="tif-{tif_number}">
-        <div class="tif-title">
-            <div class="tif-name">{tif_name}</div>'''
-        
-        # Add years info under the title
-        if start_year and end_year:
-            html_content += f'<div class="tif-years">({start_year} - {end_year})</div>'
-        elif start_year:
-            html_content += f'<div class="tif-years">(Started: {start_year})</div>'
-            
-        html_content += '</div>'
+        <h2 class="tif-title">{tif_name}</h2>
+        '''
         
         if links:
             html_content += '<div class="year-links">'
             for year, url in sorted(links.items()):
                 html_content += f'<a href="{url}" target="_blank" class="year-link">{year}</a>'
             html_content += '</div>'
-        
-        # Add summary section with non-conditional title
-        html_content += '<div class="summary-section">'
-        
-        # Single summary title for all TIFs
-        html_content += '<div class="summary-title">Cumulative Totals</div>'
-        
-        # Cumulative values grid
-        html_content += '<div class="summary-grid">'
-        
-        metric_labels = {
-            'property_tax_extraction': 'Property Tax Extraction',
-            'transfers_in': 'Transfers In',
-            'expenses': 'Expenses',
-            'transfers_out': 'Transfers Out',
-            'distribution': 'Distribution',
-            'admin_costs': 'Admin Costs',
-            'finance_costs': 'Finance Costs'
-        }
-        
-        for metric, label in metric_labels.items():
-            value = cumulative_summary.get(metric, 0)
-            
-            # Add asterisk if this metric needs it
-            display_label = f"{label}*" if metric in metrics_needing_asterisks else label
-            
-            html_content += f'''
-            <div class="summary-item">
-                <span class="summary-label">{display_label}:</span>
-                <span class="summary-value">${value:,.0f}</span>
-            </div>
-            '''
-        
-        html_content += '</div></div>'
         
         html_content += '<div class="charts-grid">'
         
@@ -571,28 +420,16 @@ def create_tif_charts(file_path, current_report_year):
         
         html_content += '</div></div>'
 
-    # Check if any TIF has metrics needing asterisks for footnote
-    any_asterisk_needed = any(len(metrics_needing_asterisks) > 0 for _, _, _, _, _, _, _, metrics_needing_asterisks in all_tif_data)
-
-    # Add JavaScript for charts and footer
-    footer_content = f'''
-    <div class="footer">
-        <p>Generated on {time.strftime("%Y-%m-%d %H:%M:%S")} • Total TIFs: {len(tif_names)}</p>
-        <p>Click year links to view detailed annual reports (opens in new tab) • Hover over charts for details</p>'''
-    
-    if any_asterisk_needed:
-        footer_content += '''
-        <div class="footnote">
-            * Cumulative values for TIFs established before 2010 are calculated from 2010 data onwards due to data availability limitations.
-        </div>'''
-    
-    footer_content += '</div>'
-    html_content += footer_content
-
+    # Add JavaScript for charts
     html_content += '''
+    <div class="footer">
+        <p>Generated on ''' + time.strftime("%Y-%m-%d %H:%M:%S") + ''' • Total TIFs: ''' + str(len(tif_names)) + '''</p>
+        <p>Click year links to view detailed annual reports (opens in new tab) • Hover over charts for details</p>
+    </div>
+    
     <script>
         // Chart data
-        const chartData = ''' + json.dumps({f"{tif_number}": charts_data for _, tif_number, charts_data, _, _, _, _, _ in all_tif_data}) + ''';
+        const chartData = ''' + json.dumps({f"{tif_number}": charts_data for _, tif_number, charts_data, _ in all_tif_data}) + ''';
         
         // TOC functions
         function toggleTOC() {
