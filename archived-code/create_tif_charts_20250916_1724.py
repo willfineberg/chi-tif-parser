@@ -21,9 +21,9 @@ def build_tif_reports_map():
             if match:
                 tif_number, yr = match.groups()
                 yr_int = int(yr)
-                if yr_int >= 90:        # 1990â€"1999
+                if yr_int >= 90:        # 1990–1999
                     full_year = 1900 + yr_int
-                else:                   # 2000â€"2089
+                else:                   # 2000–2089
                     full_year = 2000 + yr_int
                 tif_reports[tif_number][str(full_year)] = pdf_link
     return tif_reports
@@ -71,51 +71,6 @@ def calculate_cumulative_summary(tif_df, current_year):
     
     return cumulative_values, start_year, end_year, metrics_needing_asterisks
 
-def calculate_cumulative_by_year(tif_df, target_year):
-    """Calculate cumulative values up to a specific year."""
-    # Get the most recent year's data for start/end years
-    latest_row = tif_df[tif_df['tif_year'] == tif_df['tif_year'].max()].iloc[0]
-    start_year = int(latest_row.get('start_year', 0)) if pd.notna(latest_row.get('start_year', 0)) else None
-    
-    # Filter data up to target year
-    filtered_df = tif_df[tif_df['tif_year'] <= target_year]
-    
-    if filtered_df.empty:
-        return {metric: 0 for metric in ['property_tax_extraction', 'transfers_in', 'expenses', 'transfers_out', 'distribution', 'admin_costs', 'finance_costs']}
-    
-    metrics = [
-        'property_tax_extraction',
-        'transfers_in', 
-        'expenses',
-        'transfers_out',
-        'distribution',
-        'admin_costs',
-        'finance_costs'
-    ]
-    
-    cumulative_values = {}
-    
-    for metric in metrics:
-        if start_year and start_year >= 2010:
-            # TIF started 2010 or later - sum all values up to target year
-            value = filtered_df[metric].fillna(0).sum()
-            cumulative_values[metric] = float(value)  # Convert to native Python float
-        else:
-            # TIF started before 2010 - use baseline approach
-            cumulative_field = f'cumulative_{metric}'
-            
-            if cumulative_field in filtered_df.columns:
-                # Use the latest cumulative value up to target year
-                latest_cumulative = filtered_df[cumulative_field].fillna(0).iloc[-1]
-                cumulative_values[metric] = float(latest_cumulative)  # Convert to native Python float
-            else:
-                # No cumulative field available - sum from 2010 onwards up to target year
-                post_2010_data = filtered_df[filtered_df['tif_year'] >= 2010]
-                value = post_2010_data[metric].fillna(0).sum()
-                cumulative_values[metric] = float(value)  # Convert to native Python float
-    
-    return cumulative_values
-
 def generate_tif_data(args):
     """Generate chart data for a single TIF."""
     tif_name, tif_number, tif_df, data_columns, links, current_year = args
@@ -124,12 +79,6 @@ def generate_tif_data(args):
     
     # Calculate summary data
     cumulative_summary, start_year, end_year, metrics_needing_asterisks = calculate_cumulative_summary(tif_df, current_year)
-    
-    # Calculate cumulative data for all available years for the dropdown
-    available_years = sorted([int(year) for year in tif_df['tif_year'].unique()])  # Convert to int
-    cumulative_by_year = {}
-    for year in available_years:
-        cumulative_by_year[str(year)] = calculate_cumulative_by_year(tif_df, year)  # Use string keys for JSON
     
     # Prepare chart data for each metric
     charts_data = {}
@@ -164,7 +113,7 @@ def generate_tif_data(args):
             **extra
         }
     
-    return tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks, cumulative_by_year
+    return tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks
 
 def create_tif_charts(file_path, current_report_year):
     start_time = time.time()
@@ -190,22 +139,6 @@ def create_tif_charts(file_path, current_report_year):
     tif_names = sorted(df['tif_name'].unique())
     print(f"Processing {len(tif_names)} TIFs in alphabetical order.")
 
-    # Calculate active TIFs and oldest start year
-    active_tifs = 0
-    oldest_start_year = float('inf')
-    
-    for tif_name in tif_names:
-        tif_df = df[df['tif_name'] == tif_name]
-        latest_row = tif_df[tif_df['tif_year'] == tif_df['tif_year'].max()].iloc[0]
-        
-        # Calculate active TIFs (those with data in current report year)
-        active_tifs = len(df[df['tif_year'] == current_report_year]['tif_name'].unique())
-        
-        # Track oldest start year
-        start_year = int(latest_row.get('start_year', 0)) if pd.notna(latest_row.get('start_year', 0)) else None
-        if start_year and start_year < oldest_start_year:
-            oldest_start_year = start_year
-
     # Build TIF report links map
     print("Building TIF report links map...")
     tif_links_map = build_tif_reports_map()
@@ -220,8 +153,8 @@ def create_tif_charts(file_path, current_report_year):
         links = tif_links_map.get(tif_number, {})
         
         # Updated to pass current_report_year
-        _, _, charts_data, _, cumulative_summary, start_year, end_year, metrics_needing_asterisks, cumulative_by_year = generate_tif_data((tif_name, tif_number, tif_df, data_columns, links, current_report_year))
-        all_tif_data.append((tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks, cumulative_by_year))
+        _, _, charts_data, _, cumulative_summary, start_year, end_year, metrics_needing_asterisks = generate_tif_data((tif_name, tif_number, tif_df, data_columns, links, current_report_year))
+        all_tif_data.append((tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks))
         toc_entries.append((tif_name, tif_number))
         
         if (i + 1) % 20 == 0:
@@ -236,10 +169,6 @@ def create_tif_charts(file_path, current_report_year):
     <title>TIF Report Charts {current_report_year}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
     <style>
-        html {{
-            scroll-behavior: auto !important;
-        }}
-
         * {{
             margin: 0;
             padding: 0;
@@ -364,7 +293,6 @@ def create_tif_charts(file_path, current_report_year):
             padding: 2rem;
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: relative;
         }}
         
         .header h1 {{
@@ -375,45 +303,6 @@ def create_tif_charts(file_path, current_report_year):
         .header p {{
             font-size: 1.1rem;
             opacity: 0.9;
-        }}
-        
-        .header-logo {{
-            position: absolute;
-            top: 50%;
-            right: 2rem;
-            transform: translateY(-50%);
-            height: 80px;
-            width: auto;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }}
-
-        .header-logo:hover {{
-            transform: translateY(-50%) scale(1.1);
-        }}
-        
-        .attribution-banner {{
-            background: linear-gradient(135deg, #4facfe 0%, #667eea 100%);
-            color: white;
-            padding: 1.5rem 2rem;
-            text-align: center;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }}
-        
-        .attribution-banner a {{
-            color: white;
-            text-decoration: underline;
-            font-weight: 500;
-        }}
-        
-        .attribution-banner a:hover {{
-            text-decoration: none;
-            opacity: 0.8;
-        }}
-        
-        .attribution-line {{
-            margin: 0.5rem 0;
         }}
         
         .tif-page {{
@@ -427,7 +316,7 @@ def create_tif_charts(file_path, current_report_year):
         }}
         
         .tif-title {{
-            background: linear-gradient(135deg, #764ba2 0%, #8e44ad 100%);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             text-align: center;
             padding: 1.5rem;
@@ -458,20 +347,20 @@ def create_tif_charts(file_path, current_report_year):
             display: inline-block;
             margin: 0.25rem 0.5rem;
             padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #764ba2 0%, #8e44ad 100%);
+            background: #007bff;
             color: white !important;
             text-decoration: none;
             border-radius: 25px;
             font-weight: 500;
             font-size: 0.9rem;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(118, 75, 162, 0.3);
+            box-shadow: 0 2px 5px rgba(0,123,255,0.3);
         }}
-
+        
         .year-link:hover {{
-            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            background: #0056b3;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
         }}
 
         .summary-section {{
@@ -482,26 +371,12 @@ def create_tif_charts(file_path, current_report_year):
             line-height: 1.4;
         }}
         
-        .summary-header {{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+        .summary-title {{
+            text-align: center;
             margin-bottom: 1rem;
             font-weight: 600;
             color: #495057;
             font-size: 1rem;
-        }}
-
-        .summary-header select {{
-            padding: 0.3rem 0.6rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            background: white;
-            cursor: pointer;
-            color: #495057;
         }}
         
         .summary-grid {{
@@ -586,16 +461,6 @@ def create_tif_charts(file_path, current_report_year):
         /* Mobile responsive */
         @media (max-width: 768px) {{
             .header h1 {{ font-size: 2rem; }}
-            .header-logo {{
-                position: relative;
-                display: block;
-                margin: 1rem auto 0;
-                right: auto;
-                top: auto;
-                transform: none;
-                height: 60px;
-                width: auto;
-            }}
             .tif-page {{ margin: 1rem; }}
             .charts-grid {{ 
                 grid-template-columns: 1fr;
@@ -606,10 +471,6 @@ def create_tif_charts(file_path, current_report_year):
             }}
             .toc-sidebar {{ width: 100vw; left: -100vw; }}
             .toc-sidebar.open {{ left: 0; }}
-            .attribution-banner {{
-                font-size: 0.85rem;
-                padding: 1rem;
-            }}
         }}
     </style>
 </head>
@@ -635,27 +496,14 @@ def create_tif_charts(file_path, current_report_year):
     </div>
     
     <div class="header">
-        <a href="https://tifreports.com/" target="_blank">
-            <img src="https://github.com/willfineberg/chi-tif-parser/blob/main/images/TIF_Logo.jpg?raw=true" alt="TIF Logo" class="header-logo">
-        </a>
         <h1>Chicago Tax Increment Financing (TIF) Report Charts</h1>
-        <p>{active_tifs} Active TIFs in {current_report_year} • {len(tif_names)} total TIFs since {oldest_start_year if oldest_start_year != float('inf') else 'N/A'}</p>
-        <!-- <p style="font-size: 1.0rem; opacity: 0.8; margin-top: 0.5rem;">Blue year buttons link directly to PDF reports</p> -->
-    </div>
-    
-    <div class="attribution-banner">
-        <div class="attribution-line">
-            <a href="https://tifreports.com/" target="_blank">The TIF Illumination Project</a> is a people-powered investigation of the hyper-local impacts of Tax Increment Financing Districts. The Lead Organizer is <a href="http://www.tresser.com" target="_blank">Tom Tresser</a>. For more information, please contact <a href="mailto:tom@tresser.com">tom@tresser.com</a>.
-        </div>
-        <div class="attribution-line">
-            Chicago TIF Report Charts and associated data are <a href="https://github.com/willfineberg/chi-tif-parser/" target="_blank">parsed and maintained</a> by <a href="https://www.linkedin.com/in/will-fineberg/" target="_blank">Will Fineberg</a>.
-        </div>
+        <p>Year {current_report_year} • {len(tif_names)} TIF Districts</p>
+        <p style="font-size: 1.0rem; opacity: 0.8; margin-top: 0.5rem;">Blue year buttons link directly to PDF reports</p>
     </div>
     '''
 
     # Add all TIF sections
-    for tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks, cumulative_by_year in all_tif_data:
-        available_years = sorted([int(k) for k in cumulative_by_year.keys()])  # Convert keys to int for sorting
+    for tif_name, tif_number, charts_data, links, cumulative_summary, start_year, end_year, metrics_needing_asterisks in all_tif_data:
         html_content += f'''
     <div class="tif-page" id="tif-{tif_number}">
         <div class="tif-title">
@@ -675,25 +523,14 @@ def create_tif_charts(file_path, current_report_year):
                 html_content += f'<a href="{url}" target="_blank" class="year-link">{year}</a>'
             html_content += '</div>'
         
-        # Add summary section with year selector
+        # Add summary section with non-conditional title
         html_content += '<div class="summary-section">'
         
-        # Header with inline dropdown
-        html_content += f'''
-        <div class="summary-header">
-            <span>Cumulative Totals as of</span>
-            <select id="yearSelect-{tif_number}" onchange="updateSummary('{tif_number}')" autocomplete="off">'''
-        
-        for year in available_years:
-            selected = 'selected' if year == max(available_years) else ''
-            html_content += f'<option value="{year}" {selected}>{year}</option>'
-        
-        html_content += '''
-            </select>
-        </div>'''
+        # Single summary title for all TIFs
+        html_content += '<div class="summary-title">Cumulative Totals</div>'
         
         # Cumulative values grid
-        html_content += f'<div class="summary-grid" id="summaryGrid-{tif_number}">'
+        html_content += '<div class="summary-grid">'
         
         metric_labels = {
             'property_tax_extraction': 'Property Tax Extraction',
@@ -714,7 +551,7 @@ def create_tif_charts(file_path, current_report_year):
             html_content += f'''
             <div class="summary-item">
                 <span class="summary-label">{display_label}:</span>
-                <span class="summary-value" id="{metric}-{tif_number}">${value:,.0f}</span>
+                <span class="summary-value">${value:,.0f}</span>
             </div>
             '''
         
@@ -735,13 +572,13 @@ def create_tif_charts(file_path, current_report_year):
         html_content += '</div></div>'
 
     # Check if any TIF has metrics needing asterisks for footnote
-    any_asterisk_needed = any(len(metrics_needing_asterisks) > 0 for _, _, _, _, _, _, _, metrics_needing_asterisks, _ in all_tif_data)
+    any_asterisk_needed = any(len(metrics_needing_asterisks) > 0 for _, _, _, _, _, _, _, metrics_needing_asterisks in all_tif_data)
 
     # Add JavaScript for charts and footer
     footer_content = f'''
     <div class="footer">
-        <p>Generated on {time.strftime("%Y-%m-%d %H:%M:%S")} â€¢ Total TIFs: {len(tif_names)}</p>
-        <p>Click year links to view detailed annual reports (opens in new tab) â€¢ Hover over charts for details</p>'''
+        <p>Generated on {time.strftime("%Y-%m-%d %H:%M:%S")} • Total TIFs: {len(tif_names)}</p>
+        <p>Click year links to view detailed annual reports (opens in new tab) • Hover over charts for details</p>'''
     
     if any_asterisk_needed:
         footer_content += '''
@@ -754,15 +591,8 @@ def create_tif_charts(file_path, current_report_year):
 
     html_content += '''
     <script>
-        if (history.scrollRestoration) {
-            history.scrollRestoration = 'manual';
-        }
-        window.scrollTo(0, 0);
         // Chart data
-        const chartData = ''' + json.dumps({f"{tif_number}": charts_data for _, tif_number, charts_data, _, _, _, _, _, _ in all_tif_data}) + ''';
-        
-        // Cumulative data by year for each TIF
-        const cumulativeData = ''' + json.dumps({f"{tif_number}": cumulative_by_year for _, tif_number, _, _, _, _, _, _, cumulative_by_year in all_tif_data}) + ''';
+        const chartData = ''' + json.dumps({f"{tif_number}": charts_data for _, tif_number, charts_data, _, _, _, _, _ in all_tif_data}) + ''';
         
         // TOC functions
         function toggleTOC() {
@@ -794,50 +624,6 @@ def create_tif_charts(file_path, current_report_year):
                     item.classList.add('hidden');
                 }
             });
-        }
-
-        // Function to update summary based on selected year
-        function updateSummary(tifNumber) {
-            const yearSelect = document.getElementById(`yearSelect-${tifNumber}`);
-            const selectedYear = parseInt(yearSelect.value);
-            const data = cumulativeData[tifNumber][selectedYear];
-            
-            // Reset dropdowns on page load
-            window.addEventListener('load', function() {
-                document.querySelectorAll('select[id^="yearSelect-"]').forEach(function(select) {
-                    // Find the maximum year option
-                    let maxYear = 0;
-                    for (let i = 0; i < select.options.length; i++) {
-                        const year = parseInt(select.options[i].value);
-                        if (year > maxYear) {
-                            maxYear = year;
-                        }
-                    }
-                    // Force set to max year
-                    select.value = maxYear.toString();
-                    
-                    // Update the summary display
-                    const tifNumber = select.id.replace('yearSelect-', '');
-                    updateSummary(tifNumber);
-                });
-            });
-
-            const metricLabels = {
-                'property_tax_extraction': 'Property Tax Extraction',
-                'transfers_in': 'Transfers In',
-                'expenses': 'Expenses',
-                'transfers_out': 'Transfers Out',
-                'distribution': 'Distribution',
-                'admin_costs': 'Admin Costs',
-                'finance_costs': 'Finance Costs'
-            };
-            
-            for (const [metric, label] of Object.entries(metricLabels)) {
-                const element = document.getElementById(`${metric}-${tifNumber}`);
-                if (element && data[metric] !== undefined) {
-                    element.textContent = `$${data[metric].toLocaleString()}`;
-                }
-            }
         }
         
         // Initialize charts as the user scrolls
@@ -886,10 +672,10 @@ def create_tif_charts(file_path, current_report_year):
                                                 if (metric === "finance_costs" && Array.isArray(data.bank)) {
                                                     let bank = data.bank[idx] || "";
                                                     if (bank) {
-                                                        return `${label}: ${value.toLocaleString()} (${bank})`;
+                                                        return `${label}: $${value.toLocaleString()} (${bank})`;
                                                     }
                                                 }
-                                                return `${label}: ${value.toLocaleString()}`;
+                                                return `${label}: $${value.toLocaleString()}`;
                                             }
                                         }
                                     }

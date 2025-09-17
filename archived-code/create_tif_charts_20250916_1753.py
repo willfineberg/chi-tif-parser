@@ -198,8 +198,10 @@ def create_tif_charts(file_path, current_report_year):
         tif_df = df[df['tif_name'] == tif_name]
         latest_row = tif_df[tif_df['tif_year'] == tif_df['tif_year'].max()].iloc[0]
         
-        # Calculate active TIFs (those with data in current report year)
-        active_tifs = len(df[df['tif_year'] == current_report_year]['tif_name'].unique())
+        # Check if TIF is active in current report year
+        end_year = int(latest_row.get('end_year', 0)) if pd.notna(latest_row.get('end_year', 0)) else None
+        if end_year and end_year >= current_report_year:
+            active_tifs += 1
         
         # Track oldest start year
         start_year = int(latest_row.get('start_year', 0)) if pd.notna(latest_row.get('start_year', 0)) else None
@@ -236,10 +238,6 @@ def create_tif_charts(file_path, current_report_year):
     <title>TIF Report Charts {current_report_year}</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.js"></script>
     <style>
-        html {{
-            scroll-behavior: auto !important;
-        }}
-
         * {{
             margin: 0;
             padding: 0;
@@ -379,21 +377,20 @@ def create_tif_charts(file_path, current_report_year):
         
         .header-logo {{
             position: absolute;
-            top: 50%;
+            top: 2rem;
             right: 2rem;
-            transform: translateY(-50%);
-            height: 80px;
+            height: 60px;
             width: auto;
             cursor: pointer;
             transition: transform 0.3s ease;
         }}
-
+        
         .header-logo:hover {{
-            transform: translateY(-50%) scale(1.1);
+            transform: scale(1.1);
         }}
         
         .attribution-banner {{
-            background: linear-gradient(135deg, #4facfe 0%, #667eea 100%);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             padding: 1.5rem 2rem;
             text-align: center;
@@ -427,7 +424,7 @@ def create_tif_charts(file_path, current_report_year):
         }}
         
         .tif-title {{
-            background: linear-gradient(135deg, #764ba2 0%, #8e44ad 100%);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             text-align: center;
             padding: 1.5rem;
@@ -458,20 +455,20 @@ def create_tif_charts(file_path, current_report_year):
             display: inline-block;
             margin: 0.25rem 0.5rem;
             padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #764ba2 0%, #8e44ad 100%);
+            background: #007bff;
             color: white !important;
             text-decoration: none;
             border-radius: 25px;
             font-weight: 500;
             font-size: 0.9rem;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 5px rgba(118, 75, 162, 0.3);
+            box-shadow: 0 2px 5px rgba(0,123,255,0.3);
         }}
-
+        
         .year-link:hover {{
-            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            background: #0056b3;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
+            box-shadow: 0 4px 15px rgba(0,123,255,0.4);
         }}
 
         .summary-section {{
@@ -482,26 +479,26 @@ def create_tif_charts(file_path, current_report_year):
             line-height: 1.4;
         }}
         
-        .summary-header {{
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
+        .summary-title {{
+            text-align: center;
             margin-bottom: 1rem;
             font-weight: 600;
             color: #495057;
             font-size: 1rem;
         }}
-
-        .summary-header select {{
-            padding: 0.3rem 0.6rem;
+        
+        .year-selector {{
+            text-align: center;
+            margin-bottom: 1rem;
+        }}
+        
+        .year-selector select {{
+            padding: 0.5rem 1rem;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.95rem;
-            font-weight: 600;
+            border-radius: 5px;
+            font-size: 0.9rem;
             background: white;
             cursor: pointer;
-            color: #495057;
         }}
         
         .summary-grid {{
@@ -586,15 +583,13 @@ def create_tif_charts(file_path, current_report_year):
         /* Mobile responsive */
         @media (max-width: 768px) {{
             .header h1 {{ font-size: 2rem; }}
-            .header-logo {{
+            .header-logo {{ 
                 position: relative;
                 display: block;
                 margin: 1rem auto 0;
                 right: auto;
                 top: auto;
-                transform: none;
-                height: 60px;
-                width: auto;
+                height: 50px;
             }}
             .tif-page {{ margin: 1rem; }}
             .charts-grid {{ 
@@ -615,7 +610,7 @@ def create_tif_charts(file_path, current_report_year):
 </head>
 <body>
     <!-- Table of Contents -->
-    <button class="toc-toggle" onclick="toggleTOC()">☰</button>
+    <button class="toc-toggle" onclick="toggleTOC()">â˜°</button>
     <div class="toc-overlay" onclick="closeTOC()"></div>
     <div class="toc-sidebar">
         <div class="toc-header">
@@ -636,11 +631,11 @@ def create_tif_charts(file_path, current_report_year):
     
     <div class="header">
         <a href="https://tifreports.com/" target="_blank">
-            <img src="https://github.com/willfineberg/chi-tif-parser/blob/main/images/TIF_Logo.jpg?raw=true" alt="TIF Logo" class="header-logo">
+            <img src="C:/Users/w/clonedGitRepos/chi-tif-parser/images/TIF_Logo.jpg" alt="TIF Logo" class="header-logo">
         </a>
         <h1>Chicago Tax Increment Financing (TIF) Report Charts</h1>
         <p>{active_tifs} Active TIFs in {current_report_year} • {len(tif_names)} total TIFs since {oldest_start_year if oldest_start_year != float('inf') else 'N/A'}</p>
-        <!-- <p style="font-size: 1.0rem; opacity: 0.8; margin-top: 0.5rem;">Blue year buttons link directly to PDF reports</p> -->
+        <p style="font-size: 1.0rem; opacity: 0.8; margin-top: 0.5rem;">Blue year buttons link directly to PDF reports</p>
     </div>
     
     <div class="attribution-banner">
@@ -677,12 +672,13 @@ def create_tif_charts(file_path, current_report_year):
         
         # Add summary section with year selector
         html_content += '<div class="summary-section">'
+        html_content += '<div class="summary-title">Cumulative Totals</div>'
         
-        # Header with inline dropdown
+        # Year selector dropdown
         html_content += f'''
-        <div class="summary-header">
-            <span>Cumulative Totals as of</span>
-            <select id="yearSelect-{tif_number}" onchange="updateSummary('{tif_number}')" autocomplete="off">'''
+        <div class="year-selector">
+            <label for="yearSelect-{tif_number}">Select Year: </label>
+            <select id="yearSelect-{tif_number}" onchange="updateSummary('{tif_number}')">'''
         
         for year in available_years:
             selected = 'selected' if year == max(available_years) else ''
@@ -754,10 +750,6 @@ def create_tif_charts(file_path, current_report_year):
 
     html_content += '''
     <script>
-        if (history.scrollRestoration) {
-            history.scrollRestoration = 'manual';
-        }
-        window.scrollTo(0, 0);
         // Chart data
         const chartData = ''' + json.dumps({f"{tif_number}": charts_data for _, tif_number, charts_data, _, _, _, _, _, _ in all_tif_data}) + ''';
         
@@ -795,33 +787,13 @@ def create_tif_charts(file_path, current_report_year):
                 }
             });
         }
-
+        
         // Function to update summary based on selected year
         function updateSummary(tifNumber) {
             const yearSelect = document.getElementById(`yearSelect-${tifNumber}`);
             const selectedYear = parseInt(yearSelect.value);
             const data = cumulativeData[tifNumber][selectedYear];
             
-            // Reset dropdowns on page load
-            window.addEventListener('load', function() {
-                document.querySelectorAll('select[id^="yearSelect-"]').forEach(function(select) {
-                    // Find the maximum year option
-                    let maxYear = 0;
-                    for (let i = 0; i < select.options.length; i++) {
-                        const year = parseInt(select.options[i].value);
-                        if (year > maxYear) {
-                            maxYear = year;
-                        }
-                    }
-                    // Force set to max year
-                    select.value = maxYear.toString();
-                    
-                    // Update the summary display
-                    const tifNumber = select.id.replace('yearSelect-', '');
-                    updateSummary(tifNumber);
-                });
-            });
-
             const metricLabels = {
                 'property_tax_extraction': 'Property Tax Extraction',
                 'transfers_in': 'Transfers In',
@@ -835,7 +807,7 @@ def create_tif_charts(file_path, current_report_year):
             for (const [metric, label] of Object.entries(metricLabels)) {
                 const element = document.getElementById(`${metric}-${tifNumber}`);
                 if (element && data[metric] !== undefined) {
-                    element.textContent = `$${data[metric].toLocaleString()}`;
+                    element.textContent = `${data[metric].toLocaleString()}`;
                 }
             }
         }
