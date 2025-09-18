@@ -190,9 +190,9 @@ def create_tif_charts(file_path, current_report_year):
     tif_names = sorted(df['tif_name'].unique())
     print(f"Processing {len(tif_names)} TIFs in alphabetical order.")
 
-    # Calculate active TIFs and oldest start year
+    # Calculate active TIFs and oldest start year (no longer using oldest start year)
     active_tifs = 0
-    oldest_start_year = float('inf')
+    # oldest_start_year = float('inf')
     
     for tif_name in tif_names:
         tif_df = df[df['tif_name'] == tif_name]
@@ -203,8 +203,8 @@ def create_tif_charts(file_path, current_report_year):
         
         # Track oldest start year
         start_year = int(latest_row.get('start_year', 0)) if pd.notna(latest_row.get('start_year', 0)) else None
-        if start_year and start_year < oldest_start_year:
-            oldest_start_year = start_year
+        # if start_year and start_year < oldest_start_year:
+            # oldest_start_year = start_year
 
     # Build TIF report links map
     print("Building TIF report links map...")
@@ -251,6 +251,7 @@ def create_tif_charts(file_path, current_report_year):
             line-height: 1.6;
             color: #333;
             background-color: #f5f5f5;
+            max-height: 500vh; /* Limits total scroll height */
         }}
         
         /* Table of Contents Sidebar */
@@ -258,7 +259,7 @@ def create_tif_charts(file_path, current_report_year):
             position: fixed;
             top: 20px;
             left: 20px;
-            z-index: 1000;
+            z-index: 1001;
             background: #007bff;
             color: white;
             border: none;
@@ -269,6 +270,12 @@ def create_tif_charts(file_path, current_report_year):
             cursor: pointer;
             box-shadow: 0 4px 20px rgba(0,123,255,0.3);
             transition: all 0.3s ease;
+        }}
+        
+        .toc-sidebar.open + .toc-toggle {{
+            left: 370px;
+            background: #004085;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.3);
         }}
         
         .toc-toggle:hover {{
@@ -355,6 +362,35 @@ def create_tif_charts(file_path, current_report_year):
         .toc-overlay.show {{
             opacity: 1;
             visibility: visible;
+        }}
+
+        .jump-controls {{
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 70vh;
+        }}
+        
+        .jump-controls button {{
+            background: rgba(0, 123, 255, 0.8);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            width: 35px;
+            height: 30px;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            transition: all 0.2s ease;
+        }}
+        
+        .jump-controls button:hover {{
+            background: rgba(0, 123, 255, 1);
+            transform: scale(1.05);
         }}
         
         .header {{
@@ -557,16 +593,16 @@ def create_tif_charts(file_path, current_report_year):
         }}
         
         .footer {{
+            background: linear-gradient(135deg, #4facfe 0%, #667eea 100%);
             text-align: center;
             padding: 2rem;
-            color: #666;
-            background: white;
+            color: white;
             margin-top: 2rem;
         }}
         
         .footnote {{
             font-size: 0.85rem;
-            color: #6c757d;
+            color: white;
             font-style: italic;
             margin-top: 1rem;
         }}
@@ -614,9 +650,10 @@ def create_tif_charts(file_path, current_report_year):
     </style>
 </head>
 <body>
+    <div id="top"></div>
     <!-- Table of Contents -->
     <button class="toc-toggle" onclick="toggleTOC()">☰</button>
-    <div class="toc-overlay" onclick="closeTOC()"></div>
+    <div class="toc-overlay" onclick="closeTOC(); event.stopPropagation();"></div>
     <div class="toc-sidebar">
         <div class="toc-header">
             TIF Directory ({len(tif_names)} Districts)
@@ -628,10 +665,16 @@ def create_tif_charts(file_path, current_report_year):
 
     # Add TOC entries - simple anchor links
     for tif_name, tif_number in toc_entries:
-        html_content += f'<a href="#tif-{tif_number}" class="toc-item">{tif_name}</a>'
+        html_content += f'<a href="#tif-{tif_number}" class="toc-item" onclick="setTimeout(closeTOC, 100)">{tif_name}</a>'
 
     html_content += f'''
         </div>
+    </div>
+
+    <!-- Jump Controls -->
+    <div class="jump-controls">
+        <button onclick="jumpTo('top')" title="Jump to Top">↑</button>
+        <button onclick="jumpTo('bottom')" title="Jump to Bottom">↓</button>
     </div>
     
     <div class="header">
@@ -639,7 +682,7 @@ def create_tif_charts(file_path, current_report_year):
             <img src="https://github.com/willfineberg/chi-tif-parser/blob/main/images/TIF_Logo.jpg?raw=true" alt="TIF Logo" class="header-logo">
         </a>
         <h1>Chicago Tax Increment Financing (TIF) Report Charts</h1>
-        <p>{active_tifs} Active TIFs in {current_report_year} • {len(tif_names)} total TIFs since {oldest_start_year if oldest_start_year != float('inf') else 'N/A'}</p>
+        <p>{active_tifs} Active TIFs in {current_report_year} • {len(tif_names)} total TIFs parsed<sup class="footnote-symbol" title="Chicago has created a total of 186 TIFs since the program began. Visit tifreports.com to see the full history." onclick="jumpTo('bottom')" style="cursor: pointer; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">†</sup></p>
         <!-- <p style="font-size: 1.0rem; opacity: 0.8; margin-top: 0.5rem;">Blue year buttons link directly to PDF reports</p> -->
     </div>
     
@@ -709,7 +752,10 @@ def create_tif_charts(file_path, current_report_year):
             value = cumulative_summary.get(metric, 0)
             
             # Add asterisk if this metric needs it
-            display_label = f"{label}*" if metric in metrics_needing_asterisks else label
+            if metric in metrics_needing_asterisks:
+                display_label = f'{label}<span class="footnote-symbol" title="Cumulative values for TIFs established before 2010 are calculated from 2010 data onwards due to data availability limitations." onclick="jumpTo(\'bottom\')" style="cursor: pointer; color: #007bff;">*</span>'
+            else:
+                display_label = label
             
             html_content += f'''
             <div class="summary-item">
@@ -740,14 +786,19 @@ def create_tif_charts(file_path, current_report_year):
     # Add JavaScript for charts and footer
     footer_content = f'''
     <div class="footer">
-        <p>Generated on {time.strftime("%Y-%m-%d %H:%M:%S")} â€¢ Total TIFs: {len(tif_names)}</p>
-        <p>Click year links to view detailed annual reports (opens in new tab) â€¢ Hover over charts for details</p>'''
+        <p>Generated on {time.strftime("%Y-%m-%d %H:%M:%S")} • Total TIFs Parsed: {len(tif_names)}</p>
+        <p>Click year links to view detailed annual reports (opens in new tab) • Hover over charts for details</p>'''
     
     if any_asterisk_needed:
         footer_content += '''
         <div class="footnote">
             * Cumulative values for TIFs established before 2010 are calculated from 2010 data onwards due to data availability limitations.
         </div>'''
+    
+    footer_content += '''
+    <div class="footnote">
+        † Chicago has created a total of 186 TIFs since the program began. Click <a href="https://tifreports.com/" target="_blank" style="color: white; text-decoration: underline;">here</a> to see the full history.
+    </div>'''
     
     footer_content += '</div>'
     html_content += footer_content
@@ -768,17 +819,34 @@ def create_tif_charts(file_path, current_report_year):
         function toggleTOC() {
             const sidebar = document.querySelector('.toc-sidebar');
             const overlay = document.querySelector('.toc-overlay');
+            const toggle = document.querySelector('.toc-toggle');
             
             sidebar.classList.toggle('open');
             overlay.classList.toggle('show');
+            
+            if (sidebar.classList.contains('open')) {
+                toggle.style.left = '370px';
+                toggle.style.background = '#004085';
+                toggle.style.boxShadow = 'inset 0 2px 5px rgba(0,0,0,0.3)';
+            } else {
+                toggle.style.left = '20px';
+                toggle.style.background = '#007bff';
+                toggle.style.boxShadow = '0 4px 20px rgba(0,123,255,0.3)';
+            }
         }
         
         function closeTOC() {
             const sidebar = document.querySelector('.toc-sidebar');
             const overlay = document.querySelector('.toc-overlay');
+            const toggle = document.querySelector('.toc-toggle');
             
             sidebar.classList.remove('open');
             overlay.classList.remove('show');
+            
+            // Reset button state
+            toggle.style.left = '20px';
+            toggle.style.background = '#007bff';
+            toggle.style.boxShadow = '0 4px 20px rgba(0,123,255,0.3)';
         }
         
         function filterTOC() {
@@ -794,6 +862,33 @@ def create_tif_charts(file_path, current_report_year):
                     item.classList.add('hidden');
                 }
             });
+        }
+
+        // Function to jump to top or bottom
+        function jumpTo(direction) {
+            if (direction === 'top') {
+                // Jump to top anchor
+                window.location.href = '#top';
+            } else if (direction === 'bottom') {
+                // First jump to anchor
+                window.location.href = '#page-bottom';
+                
+                // Then force scroll to absolute bottom after a tiny delay
+                setTimeout(() => {
+                    window.scrollTo(0, document.body.scrollHeight);
+                }, 50);
+                }
+        }
+
+        // Jump to bottom function
+        function jumpToActualBottom() {
+            // First jump to anchor
+            window.location.href = '#page-bottom';
+            
+            // Then force scroll to absolute bottom after a tiny delay
+            setTimeout(() => {
+                window.scrollTo(0, document.body.scrollHeight);
+            }, 50);
         }
 
         // Function to update summary based on selected year
@@ -914,6 +1009,7 @@ def create_tif_charts(file_path, current_report_year):
 
 
     </script>
+    <div id="page-bottom"></div>
 </body>
 </html>'''
 
