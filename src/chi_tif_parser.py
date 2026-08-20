@@ -287,11 +287,27 @@ class YearParse:
         # Set the locale for each process
         locale.setlocale(locale.LC_NUMERIC, 'en_US.UTF-8')
 
+
     def run(self):
+        # ! FOR ALL OPTIONS
         startTime = time.time()
         print(self.urlList)
 
-        # ! - OPTION #1: Without Threading or Multiprocessing (Slow)
+        # ! - OPTION #1: Without Threading or Multiprocessing (Slow) - FOR DEBUGGING ONLY
+        # isFail = True  # don't save, Option #1 is for debugging only. final runs should use Option #3 with multiprocessing.
+        # for url in self.urlList:
+        #     try:
+        #         dar = DAR(self.year, url, self.termTable)
+        #         self.darList.append(dar)
+        #         self.dictList.append(dar.outDict)
+        #         print(json.dumps(dar.outDict, indent=4))
+        #     except Exception as e:
+        #         print(f"\n--- FAILED ON: {url} ---")
+        #         traceback.print_exc()  # full stack trace, no multiprocessing noise
+        #         print(f"--- Continuing to next URL ---\n")
+        #         # don't re-raise; keep going so you see ALL failures in one run
+        
+        # * DEPRECATED OPTION #1       
         # isFail = False
         # try:
         #     for url in self.urlList:
@@ -351,8 +367,9 @@ class YearParse:
             pool.join()
             # Perform any necessary cleanup or finalization steps
             isFail = True
-            
-        # # After one year is parsed, store output in a CSV
+
+        # ! FOR ALL OPTIONS
+        # After one year is parsed, store output in a CSV
         if not isFail:
             self.buildCsvFromDicts(os.path.join(self.outDir, f'{self.year}_out.csv')) # TODO: command line arg for output directory?
         # Print the runtime in minutes:seconds format
@@ -435,74 +452,106 @@ class DAR:
         self.outDict['start_year'] = self.startYear
         self.outDict['end_year'] = self.endYear
 
+
     def setIdNameYear_sec31(self):
         """Obtains the name and year of a TIF from a PDF."""
-        
-        # Set up file logging that works with multiprocessing
-        log_file = "tabula_debug.log"
-        logging.basicConfig(filename=log_file, level=logging.INFO, 
-                        format='%(asctime)s - %(processName)s - %(message)s',
-                        filemode='a')
-        
-        filename = self.pdfUrl.split("/")[-1]
-        
-        try:
-            logging.info(f"STARTING: {filename} | Path: {self.pdf}")
-            
-            # Your existing code...
-            self.outDict['tif_year'] = self.year
-            filename_parts = self.pdfUrl.split("/")[-1].split('_')
-            tifNumber = int(filename_parts[1])
-            self.outDict['tif_number'] = tifNumber
-            
-            df = tabula.read_pdf(
-                input_path=self.pdf,
-                pages=self.sec31,
-                area=[50, 0, 97, 500],
-                pandas_options={'header': None},
-                silent=True
-            )[0]
-            
-            tifName = str(df.iloc[2,0])
-            self.outDict['tif_name'] = tifName
-            
-            logging.info(f"SUCCESS: {filename}")
-            
-        except Exception as e:
-            logging.error(f"FAILED: {filename} | Error: {str(e)}")
-            # Copy the failing PDF to a known location
-            try:
-                import shutil
-                failed_pdf_path = f"failed_pdf_{filename}"
-                shutil.copy2(self.pdf, failed_pdf_path)
-                logging.error(f"COPIED FAILED PDF TO: {failed_pdf_path}")
-            except:
-                pass
-            raise
+        self.outDict['tif_year'] = self.year
+        filename_parts = self.pdfUrl.split("/")[-1].split('_')
+        tifNumber = int(filename_parts[1])
+        self.outDict['tif_number'] = tifNumber
 
+        # Use pdfplumber to find the TIF name by anchoring on known label text
+        # This replaces the fragile Tabula area crop approach
+        self.pdf.seek(0)
+        with pdfplumber.open(self.pdf) as pdf:
+            page = pdf.pages[self.sec31 - 1]  # sec31 is 1-indexed
+            words = page.extract_words()
+            # Find the line "Name of Redevelopment Project Area:" then grab the next line below it
+            anchor_y = None
+            for word in words:
+                if 'Redevelopment' in word['text']:
+                    anchor_y = word['bottom']
+                    break
+            if anchor_y is None:
+                raise ValueError(f"Could not find 'Redevelopment' anchor on sec31 page for {self.pdfUrl}")
+            # Collect all words on the next line (first line whose top is below anchor_y)
+            next_line_words = [w for w in words if w['top'] > anchor_y + 2]
+            if not next_line_words:
+                raise ValueError(f"Could not find TIF name line below anchor for {self.pdfUrl}")
+            # Group by the first distinct line (words with similar top values)
+            first_line_top = next_line_words[0]['top']
+            tif_name_words = [w['text'] for w in next_line_words if abs(w['top'] - first_line_top) < 3]
+            tifName = ' '.join(tif_name_words)
+            self.outDict['tif_name'] = tifName
+
+    # ! 2nd ARCHIVED VERSION OF setIdNameYear_sec31() - kept for reference - WF 8/19/2026
     # def setIdNameYear_sec31(self):
     #     """Obtains the name and year of a TIF from a PDF."""
         
-    #     # * Set the TIF year
-    #     self.outDict['tif_year'] = self.year
-    #     # * Set the TIF number
-    #     filename = self.pdfUrl.split("/")[-1].split('_')
-    #     tifNumber = int(filename[1])
-    #     self.outDict['tif_number'] = tifNumber
-    #     # * Set the TIF name
-    #     # tifName = filename[2][:-8] 
-    #     # Makes a Dataframe out of the Section 3.1 Header (usually Page 6)
-    #     df = tabula.read_pdf(
-    #         input_path=self.pdf,
-    #         pages=self.sec31, 
-    #         area=[50, 0, 97, 500], # [topY, leftX, bottomY, rightX]
-    #         pandas_options={'header': None},
-    #         silent=True  # Suppress stderr output
-    #     )[0]
-    #     # Obtains the name and year by table location
-    #     tifName = str(df.iloc[2,0])
-    #     self.outDict['tif_name'] = tifName
-    #     # tifYear = str(df.iloc[0,0]).split()[-1]
+    #     # Set up file logging that works with multiprocessing
+    #     log_file = "tabula_debug.log"
+    #     logging.basicConfig(filename=log_file, level=logging.INFO, 
+    #                     format='%(asctime)s - %(processName)s - %(message)s',
+    #                     filemode='a')
+        
+    #     filename = self.pdfUrl.split("/")[-1]
+        
+    #     try:
+    #         logging.info(f"STARTING: {filename} | Path: {self.pdf}")
+            
+    #         # Your existing code...
+    #         self.outDict['tif_year'] = self.year
+    #         filename_parts = self.pdfUrl.split("/")[-1].split('_')
+    #         tifNumber = int(filename_parts[1])
+    #         self.outDict['tif_number'] = tifNumber
+            
+    #         df = tabula.read_pdf(
+    #             input_path=self.pdf,
+    #             pages=self.sec31,
+    #             area=[50, 0, 97, 500],
+    #             pandas_options={'header': None},
+    #             silent=True
+    #         )[0]
+            
+    #         tifName = str(df.iloc[2,0])
+    #         self.outDict['tif_name'] = tifName
+            
+    #         logging.info(f"SUCCESS: {filename}")
+            
+    #     except Exception as e:
+    #         logging.error(f"FAILED: {filename} | Error: {str(e)}")
+    #         # Copy the failing PDF to a known location
+    #         try:
+    #             import shutil
+    #             failed_pdf_path = f"failed_pdf_{filename}"
+    #             shutil.copy2(self.pdf, failed_pdf_path)
+    #             logging.error(f"COPIED FAILED PDF TO: {failed_pdf_path}")
+    #         except:
+    #             pass
+    #         raise
+
+
+        # ! ARCHIVED VERSION OF setIdNameYear_sec31() - kept for reference
+        #     # * Set the TIF year
+        #     self.outDict['tif_year'] = self.year
+        #     # * Set the TIF number
+        #     filename = self.pdfUrl.split("/")[-1].split('_')
+        #     tifNumber = int(filename[1])
+        #     self.outDict['tif_number'] = tifNumber
+        #     # * Set the TIF name
+        #     # tifName = filename[2][:-8] 
+        #     # Makes a Dataframe out of the Section 3.1 Header (usually Page 6)
+        #     df = tabula.read_pdf(
+        #         input_path=self.pdf,
+        #         pages=self.sec31, 
+        #         area=[50, 0, 97, 500], # [topY, leftX, bottomY, rightX]
+        #         pandas_options={'header': None},
+        #         silent=True  # Suppress stderr output
+        #     )[0]
+        #     # Obtains the name and year by table location
+        #     tifName = str(df.iloc[2,0])
+        #     self.outDict['tif_name'] = tifName
+        #     # tifYear = str(df.iloc[0,0]).split()[-1]
        
     def parseData_sec31(self):
         """Converts TIF Section 3.1 into a CSV and parses the values; returns ID number or None"""
@@ -531,8 +580,9 @@ class DAR:
             pages=self.sec31, 
             area=[top-25, 0, 600, bottom+3], # [topY, leftX, bottomY, rightX]
             # ! area above should work for 2017 and beyond. if not, fix Tools.getTextCords() calls
-            # * MODIFY THIS - use PDF X-Change viewer to see coordinates on a test DAR in command line, adjust as needed
-            columns=[0, x1+192, x1+267, x1+339],
+            # * MODIFY THIS - use PDF X-Change viewer to see coordinates on a test DAR in command line, adjust as needed (test.py used on 20260819 for this)
+            # columns=[0, x1+192, x1+267, x1+339],
+            columns=[0, x1+197, x1+274, x1+351],  # 20260819 for 2025 reports
             stream=True,
             pandas_options={'header': None},
         )[0]
@@ -689,7 +739,7 @@ class DAR:
 def main():
     # Use cmd line arg for year
     if len(sys.argv) < 2:
-        print('BAD USAGE\nUsage: py tifParse.py [year]')
+        print('BAD USAGE\nUsage: py chi_tif_parser.py [year]')
         return
     year = sys.argv[1]
     # * MODIFY THIS: Filepath to write finalDict data to for each url
@@ -710,6 +760,7 @@ def main():
     yp.run()
 
     # * Wait for Input before merging into master (added in 2025)
+    # TODO - Add a command line argument to skip the merge prompt and automatically merge into master, this is sloppy -WF 8/19/26
     # Helper Function
     def get_merge_master_input():
         mergeMasterInput = input(f"Would you like to merge this data to the master? (y/n)\nHardcoded Master File Path: {masterFp}\n")
@@ -721,7 +772,7 @@ def main():
             print(f"'{mergeMasterInput}' is invalid input. Please enter 'y' or 'n'.")
             return get_merge_master_input()  # Recursive call
         
-    masterFp = r"C:\Users\w\clonedGitRepos\chi-tif-parser\csvs\chi-tif-data-master.csv"
+    masterFp = r"C:\Users\w\clonedGitRepos\chi-tif-parser\csvs\chi_tif_data_master.csv"
     choice = get_merge_master_input()
     if choice == 'y':
         # Do merge

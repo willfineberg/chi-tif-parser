@@ -1705,3 +1705,29 @@ Error: Error: End-of-File, expected line
 2025-09-03 20:50:35,672 - SpawnPoolWorker-6 - SUCCESS: T_065_WoodlawnAR24.pdf
 2025-09-03 20:50:36,410 - SpawnPoolWorker-2 - SUCCESS: T_110_WilsonYardAR24.pdf
 2025-09-03 20:50:36,576 - SpawnPoolWorker-15 - SUCCESS: T_048_WesternOgdenAR24.pdf
+2026-08-19 17:23:43,384 - SpawnPoolWorker-1 - STARTING: T_072_24thMichiganAR25.pdf | Path: <_io.BytesIO object at 0x0000027BA4D83450>
+2026-08-19 17:23:43,909 - SpawnPoolWorker-1 - FAILED: T_072_24thMichiganAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:27:02,211 - MainProcess - STARTING: T_072_24thMichiganAR25.pdf | Path: <_io.BytesIO object at 0x000002723B3AE860>
+2026-08-19 17:27:02,718 - MainProcess - FAILED: T_072_24thMichiganAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:39:43,157 - MainProcess - STARTING: T_072_24thMichiganAR25.pdf | Path: <_io.BytesIO object at 0x000001E8E0E23810>
+2026-08-19 17:39:43,678 - MainProcess - FAILED: T_072_24thMichiganAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:40:47,855 - MainProcess - STARTING: T_072_24thMichiganAR25.pdf | Path: <_io.BytesIO object at 0x000001D8CE8F2040>
+2026-08-19 17:40:48,342 - MainProcess - FAILED: T_072_24thMichiganAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:40:54,009 - MainProcess - STARTING: T_141_26thKingAR25.pdf | Path: <_io.BytesIO object at 0x000001D8D1B20C70>
+2026-08-19 17:40:54,476 - MainProcess - FAILED: T_141_26thKingAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:41:01,965 - MainProcess - STARTING: T_001_35thHalstedAR25.pdf | Path: <_io.BytesIO object at 0x000001D8D223FF40>
+2026-08-19 17:41:02,451 - MainProcess - FAILED: T_001_35thHalstedAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:41:08,507 - MainProcess - STARTING: T_131_35thStateAR25.pdf | Path: <_io.BytesIO object at 0x000001D8D1B20D10>
+2026-08-19 17:41:08,986 - MainProcess - FAILED: T_131_35thStateAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:41:16,076 - MainProcess - STARTING: T_055_43rdCottageGroveAR25.pdf | Path: <_io.BytesIO object at 0x000001D8D1A18CC0>
+2026-08-19 17:41:16,563 - MainProcess - FAILED: T_055_43rdCottageGroveAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:41:23,906 - MainProcess - STARTING: T_117_47thAshlandAR25.pdf | Path: <_io.BytesIO object at 0x000001D8D0F5DF40>
+2026-08-19 17:41:24,391 - MainProcess - FAILED: T_117_47thAshlandAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:41:32,034 - MainProcess - STARTING: T_121_47thHalstedAR25.pdf | Path: <_io.BytesIO object at 0x000001D8CE7FFB80>
+2026-08-19 17:41:32,519 - MainProcess - FAILED: T_121_47thHalstedAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:41:40,235 - MainProcess - STARTING: T_118_47thKingAR25.pdf | Path: <_io.BytesIO object at 0x000001D8CE851F40>
+2026-08-19 17:41:40,711 - MainProcess - FAILED: T_118_47thKingAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:41:51,662 - MainProcess - STARTING: T_136_47thStateAR25.pdf | Path: <_io.BytesIO object at 0x000001D8D2218360>
+2026-08-19 17:41:52,163 - MainProcess - FAILED: T_136_47thStateAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1
+2026-08-19 17:41:57,928 - MainProcess - STARTING: T_175_51stLakeParkAR25.pdf | Path: <_io.BytesIO object at 0x000001D8D1B20D60>
+2026-08-19 17:41:58,410 - MainProcess - FAILED: T_175_51stLakeParkAR25.pdf | Error: index 2 is out of bounds for axis 0 with size 1

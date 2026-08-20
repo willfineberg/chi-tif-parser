@@ -34,10 +34,10 @@ def urlList(url, year):
 # ---------------------------
 # CONFIG
 # ---------------------------
-url = 'https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--2024-.html'
-year = 2024
-excel_path = r"C:\Users\w\clonedGitRepos\chi-tif-parser\csvs\Chicago_2024_TIF_Illumination.xlsx"
-sheet_name = "Chicago_2024_TIF_Illumination"
+year = 2025
+url = f'https://www.chicago.gov/city/en/depts/dcd/supp_info/district-annual-reports--{year}-.html'
+excel_path = f"C:\\Users\\w\\clonedGitRepos\\chi-tif-parser\\csvs\\TIF_Illumination\\Chicago_{year}_TIF_Illumination.xlsx"
+sheet_name = f"Chicago_{year}_TIF_Illumination"
 
 # ---------------------------
 # LOAD URLS
