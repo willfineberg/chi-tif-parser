@@ -47,4 +47,14 @@ SEQUENTIAL STEPS (Using VS Code)
 
 13. Use VS Code UI to push to Github.
 
+14. Once the deployment updates, ensure the new app looks good and functions properly.
+
 -- GEE APP UPDATES -- 
+
+15. Follow steps marked ANNUAL UPDATE in the users/wtfineberg/mcdc/TopTIFs file in the code.earthengine.google.com GEE Code Editor.
+
+16. Re-publish app once code is updated.
+
+-- INFORM TOM -- 
+ 
+17. Email Tom with the updated TIF Illumination sheet.
