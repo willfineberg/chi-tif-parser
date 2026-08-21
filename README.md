@@ -1,8 +1,9 @@
-# Continuation of the 2023 [MCDC](https://sites.northwestern.edu/mcdc) Project with [The CivicLab](https://www.civiclab.us) for [TIF Illumination](http://tifreports.com)
+# Chicago TIF Report Illumination
+## A continuation of the 2023 [MCDC](https://sites.northwestern.edu/mcdc) Project with [The CivicLab](https://www.civiclab.us) for [TIF Illumination](http://tifreports.com)
 
 ---
 
-#### ___This is a 2025 fork of the original GitHub Repository from the 2023 MCDC Project. I will continue to annually update this repo with new City of Chicago TIF Report Data.___
+#### ___This is a 2025 fork of the original GitHub Repository from the 2023 MCDC Project. Data will be updated annually using code in `src` to illuminate new City of Chicago TIF Report Data.___
 
 #### ___Data is released annually (for the prior year) around June 30th. Expect annual updates to occur shortly after the PDF Reports are released. Consider [chicago2022TIF](https://github.com/philipayates/chicago2022TIF) deprecated.___
 
@@ -10,7 +11,9 @@
 
 _The [TIF Illumination Project](http://tifreports.com) uses data mining, investigatory reporting, graphic design, and popular education methods to expose the hyper-local harms Tax Increment Financing Districts bring to our communities. They have been in the field since 2013 and have been called into community over 230 times. As far as we know, this is the only civic project in America interrogating and organizing around TIFs. See www.tifreports.com. Reach us at info@tifreports.com._
 
-_This particular project was coordinated by the [Metropolitan Chicago Data-science Corps (MCDC)](https://sites.northwestern.edu/mcdc), which is a collaboration of non-profit or community organizations and data science students. We worked with The CivicLab on the aforementioned [TIF Illumination Project](http://tifreports.com) to reveal City of Chicago finances through Tax Increment Financing (TIF) analysis. Please view the resources below to learn more about City of Chicago finances and how TIFs work._
+_This particular project was coordinated by the [Metropolitan Chicago Data-science Corps (MCDC)](https://sites.northwestern.edu/mcdc), which is a collaboration of non-profit or community organizations and data science students. We worked with The CivicLab on the aforementioned [TIF Illumination Project](http://tifreports.com) to reveal City of Chicago finances through Tax Increment Financing (TIF) analysis._
+
+**Please view the resources below to visualize Chicago TIF finances and learn more about how TIFs work.**
 
 ---
 
@@ -35,7 +38,7 @@ Selecting different TIFs, variables, and years will modify the two different Dat
 * Top-Right UI: This panel is populated with all data points for the current **_TIF Selection_** within the currently __*Selected Year*__.
 * Bottom-Left UI: This panel is populated with a Bar Chart that visualizes all values of the currently Selected Variable for the TIF that was clicked.
 
-### For Developers
+### For GEE Developers
 
 Developers can access and modify the JavaScript GEE code by using the provided [Snapshot URL](https://code.earthengine.google.com/667dcf601304187cc7cd95b02913b5e0). 
 
