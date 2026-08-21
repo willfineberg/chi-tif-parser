@@ -16,11 +16,11 @@ _This particular project was coordinated by the [Metropolitan Chicago Data-scien
 
 ## Static HTML Product - [Chicago TIF Report Charts](https://willfineberg.github.io/chi-tif-parser)[^update]
 
-The [Chicago TIF Report Charts](https://willfineberg.github.io/chi-tif-parser) provide a quick way to look up data on a specific TIF, including convenient access to __ALL__ available PDF reports. The user can use the Table of Contents (top-left hamburger menu) to locate a specific TIF. Each TIFs page contains a chart for each of the parsed data points over time. Each TIF has blue buttons that link directly to the PDF report for the specified year. Chart data will only go back to 2010, but the blue buttons for PDFs will be available for every PDF year found on the [TIF District Annual Report webpage](https://www.chicago.gov/city/en/depts/dcd/supp_info/tif-district-annual-reports-2004-present.html). 
+The [Chicago TIF Report Charts](https://willfineberg.github.io/chi-tif-parser) provide a quick way to look up data on a specific TIF, including convenient access to __ALL__ available PDF reports. The user can use the Table of Contents (top-left hamburger menu) to locate a specific TIF. Each TIFs page contains a chart for each of the parsed data points over time. Each TIF has blue buttons that link directly to the PDF report for the specified year. Chart data will only go back to 2010, but the year buttons that link to PDFs will be available for every year found on the [TIF District Annual Report Webpage](https://www.chicago.gov/city/en/depts/dcd/supp_info/tif-district-annual-reports-2004-present.html). 
 
 ## Dynamic GIS Web App Product - [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs)[^update]
 
-The [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs) contains data from 2010-2024 and was developed using [Google Earth Engine (GEE)](https://earthengine.google.com/). It provides a geospatial view of TIF district locations combined with data analysis capabilities.
+The [Chicago Top TIFs Web App](https://wtfineberg.users.earthengine.app/view/toptifs) contains data from 2010 to present and was developed using [Google Earth Engine (GEE)](https://earthengine.google.com/). It provides a geospatial view of TIF district locations combined with data analysis capabilities.
 
 ### Web App Instructional Guide for Users
 
@@ -37,7 +37,7 @@ Selecting different TIFs, variables, and years will modify the two different Dat
 
 ### For Developers
 
-Developers can access and modify the JavaScript GEE code by using the provided [Snapshot URL](https://code.earthengine.google.com/3f813db5b6cf35a9974a8766aaf3b898). 
+Developers can access and modify the JavaScript GEE code by using the provided [Snapshot URL](https://code.earthengine.google.com/667dcf601304187cc7cd95b02913b5e0). 
 
 The [GEE Code Editor](https://developers.google.com/earth-engine/guides/playground) requires you to register with a Google account. Earth Engine is free for non-commercial use.
 
@@ -84,4 +84,4 @@ Data for Chicago TIF Districts are released once per year. A yearly report for e
 
 Please refer back to this table for concise explanations of variables while utilizing the app.
 
-[^update]: Updated on 2025-08-24 with 2024 TIF reports
+[^update]: Updated on 2026-08-20 with 2025 TIF reports

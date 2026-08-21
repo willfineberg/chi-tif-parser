@@ -37,7 +37,7 @@ names to all use '-' or all use '_' and not both randomly.
 
 I think that's it?
 
-Oh, and archive GEE code into this repo during each annual update for good measure.
+Oh, and archive GEE code into this repo during each annual update for good measure. 
 
 ******************************************************************************************
 ******************************************************************************************
@@ -89,6 +89,8 @@ SEQUENTIAL STEPS (Using VS Code)
 15. Follow steps marked ANNUAL UPDATE in the users/wtfineberg/mcdc/TopTIFs file in the code.earthengine.google.com GEE Code Editor. (ARCHIVE THIS CODE!!!)
 
 16. Re-publish app once code is updated.
+
+17. Update snapshot URL in ../README.md.
 
 -- INFORM TOM -- 
  
